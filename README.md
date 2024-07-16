@@ -1,4 +1,4 @@
-# ft_trascendence
+# ft_transcendence
 
 - [ ] Major module: Use a Framework as backend.
 - [ ] Major module: Implement Two-Factor Authentication (2FA) and JWT.
