@@ -3,7 +3,7 @@
 - [ ] Major module: Use a Framework as backend.
 - [ ] Major module: Implement Two-Factor Authentication (2FA) and JWT.
 - [ ] Major module: Standard user management, authentication, users across tournaments.
-- [ ] Major module: Replacing Basic Pong with Server-Side Pong and Implementing an API. // acho que vale a pena.
+- [ ] Major module: Replacing Basic Pong with Server-Side Pong and Implementing an API.
 - [ ] Major module: Multiplayers (more than 2 in the same game).
 - [ ] Major module: Remote players
 
