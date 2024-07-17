@@ -4,7 +4,7 @@ services:
             context: .
             dockerfile: ./.docker/client/Dockerfile
         ports:
-            - 5173:5173
+            - 5173:${APP_PORT}
         volumes:
             - .:/usr/src/app # TODO: if we are not supposed to do bind mounts, what should we use?
         stdin_open: true
