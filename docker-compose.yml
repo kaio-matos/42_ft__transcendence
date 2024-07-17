@@ -1,12 +1,22 @@
 services:
     api:
-        container_name: api
         build:
             context: .
             dockerfile: ./.docker/api/Dockerfile
         ports:
-            - 8000:8000
+            - 8000:${APP_PORT}
         volumes:
             - .:/usr/src/app # TODO: if we are not supposed to do bind mounts, what should we use?
         stdin_open: true
         tty: true
+        depends_on:
+            - db
+    db:
+        image: postgres
+        restart: always
+        ports:
+            - "5433:${DATABASE_PORT}"
+        environment:
+            - POSTGRES_DB=${DATABASE_NAME}
+            - POSTGRES_PASSWORD=${DATABASE_PASS}
+            - POSTGRES_USER=${DATABASE_USER}

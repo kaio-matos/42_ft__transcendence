@@ -1,4 +1,4 @@
-FROM python:3.4
+FROM python
 
 WORKDIR /usr/src/app
 COPY requirements.txt ./
