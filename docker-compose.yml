@@ -1,10 +1,23 @@
 services:
+    client:
+        build:
+            context: .
+            dockerfile: ./.docker/client/Dockerfile
+        ports:
+            - 5173:5173
+        volumes:
+            - .:/usr/src/app # TODO: if we are not supposed to do bind mounts, what should we use?
+        stdin_open: true
+        tty: true
+        depends_on:
+            - api
+
     api:
         build:
             context: .
             dockerfile: ./.docker/api/Dockerfile
         ports:
-            - 8000:${APP_PORT}
+            - 8000:${API_PORT}
         volumes:
             - .:/usr/src/app # TODO: if we are not supposed to do bind mounts, what should we use?
         stdin_open: true
