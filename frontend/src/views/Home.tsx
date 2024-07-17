@@ -1,7 +1,7 @@
 import { Button } from '@/components/Button'
 import type { FunctionalComponent } from 'vue'
 
-export const Home: FunctionalComponent = (props) => {
+export default () => {
     return (
         <section>
             <Button>Hello World</Button>
