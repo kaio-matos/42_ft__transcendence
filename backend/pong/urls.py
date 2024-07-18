@@ -1,11 +1,10 @@
-from django.urls import path
-
+from ft_transcendence.http.methods import GET, POST
 from pong.controllers import PlayerController
 
 from . import views
 
 urlpatterns = [
-    path("player", PlayerController.index),
-    path("player/create", PlayerController.create),
-    path("", views.index, name="index"),
+    GET("player", PlayerController.index),
+    POST("player/create", PlayerController.create),
+    GET("", views.index),
 ]
