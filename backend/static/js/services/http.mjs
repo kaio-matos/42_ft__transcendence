@@ -16,8 +16,13 @@ export async function http(path, options) {
     headers: h,
   });
 
-  const data = response.json();
-  return data;
+  try {
+    const data = await response.json();
+    return data;
+  } catch (e) {
+    console.error(e);
+    return { data: { message: "Error parsing JSON" } };
+  }
 }
 
 /**
@@ -33,11 +38,13 @@ export async function GET(path, options) {
 
 /**
  * @param {string} path
+ * @param {object} payload
  * @param {Exclude<Parameters<typeof fetch>[0], URL>} options
  */
-export async function POST(path, options) {
+export async function POST(path, payload, options) {
   return http(path, {
     ...options,
+    body: JSON.stringify(payload),
     method: "POST",
   });
 }

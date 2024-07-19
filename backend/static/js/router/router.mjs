@@ -1,12 +1,12 @@
 export class Route {
-  /** @type string */
+  /** @type {string} */
   path;
-  /** @type () => string */
+  /** @type {import("../components/component.mjs").FunctionalComponent} */
   page;
 
   /**
    * @param {string} path
-   * @param {() => string} page
+   * @param {import("../components/component.mjs").FunctionalComponent} page
    */
   constructor(path, page) {
     this.path = path;
@@ -14,12 +14,17 @@ export class Route {
   }
 }
 
-class Router {
+export class Router {
   root_id = "app";
-  routes = [
-    new Route("/", () => "Home Page"),
-    new Route("/about", () => "About Page"),
-  ];
+  /** @type {Route[]} */
+  routes;
+
+  /**
+   * @param {Route[]} routes
+   */
+  constructor(routes) {
+    this.routes = routes;
+  }
 
   get current() {
     const pathname = window.location.pathname;
@@ -38,9 +43,8 @@ class Router {
 
   render() {
     if (this.root && this.current) {
-      this.root.innerHTML = this.current?.page();
+      this.root.innerHTML = "";
+      this.root.appendChild(this.current.page().element);
     }
   }
 }
-
-export const router = new Router();
