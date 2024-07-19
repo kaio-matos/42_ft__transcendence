@@ -1,8 +1,14 @@
+/**
+ * @param {string} path
+ * @param {Exclude<Parameters<typeof fetch>[0], URL>} options
+ */
 export async function http(path, options) {
   const h = new Headers();
 
-  for (const key in options) {
-    h.append(key, options[key]);
+  if (options.headers) {
+    for (const key in options.headers) {
+      h.append(key, options.headers[key]);
+    }
   }
 
   const response = await fetch(path, {
@@ -14,6 +20,10 @@ export async function http(path, options) {
   return data;
 }
 
+/**
+ * @param {string} path
+ * @param {Exclude<Parameters<typeof fetch>[0], URL>} options
+ */
 export async function GET(path, options) {
   return http(path, {
     ...options,
@@ -21,6 +31,10 @@ export async function GET(path, options) {
   });
 }
 
+/**
+ * @param {string} path
+ * @param {Exclude<Parameters<typeof fetch>[0], URL>} options
+ */
 export async function POST(path, options) {
   return http(path, {
     ...options,
@@ -28,6 +42,10 @@ export async function POST(path, options) {
   });
 }
 
+/**
+ * @param {string} path
+ * @param {Exclude<Parameters<typeof fetch>[0], URL>} options
+ */
 export async function PUT(path, options) {
   return http(path, {
     ...options,
@@ -35,6 +53,10 @@ export async function PUT(path, options) {
   });
 }
 
+/**
+ * @param {string} path
+ * @param {Exclude<Parameters<typeof fetch>[0], URL>} options
+ */
 export async function DELETE(path, options) {
   return http(path, {
     ...options,
