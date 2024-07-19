@@ -1,7 +1,5 @@
-import { Router } from "./router/router.mjs";
-import { PlayerService } from "./services/player.mjs";
+import { router } from "./router/router.mjs";
 
-console.log("Hello World");
-
-const players = await PlayerService.getPlayers();
-console.log(players);
+document.addEventListener("DOMContentLoaded", (event) => {
+  router.render();
+});
