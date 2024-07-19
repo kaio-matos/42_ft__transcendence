@@ -15,9 +15,19 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.generic import TemplateView
+from django.conf import settings
+from django.contrib.staticfiles import views
 
 urlpatterns = [
-    path("pong/", include("pong.urls")),
+    path("api/pong/", include("pong.urls")),
     path("admin/", admin.site.urls),
+    re_path(r"^.*$", TemplateView.as_view(template_name="index.html"), name="index"),
 ]
+
+# If we are developing we want the static files change to be updated as soon as possible
+if settings.DEBUG:
+    urlpatterns += [
+        re_path(r"^static/(?P<path>.*)$", views.serve),
+    ]
