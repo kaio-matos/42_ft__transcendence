@@ -20,6 +20,14 @@ export class Component {
   }
 
   /**
+   * Remove children from this component
+   */
+  clear() {
+    this.element.innerHTML = "";
+    return this;
+  }
+
+  /**
    * @param {(Component | Parameters<HTMLElement['appendChild']>[0])[]} children
    */
   children(children) {
@@ -47,6 +55,23 @@ export class Component {
       this.element.classList.add(...classes);
     } else {
       this.element.classList.add(classes);
+    }
+    return this;
+  }
+
+  /**
+   * @param {string | string[]} classes
+   */
+  removeClass(classes) {
+    if (!classes) return this;
+
+    if (Array.isArray(classes)) {
+      classes = classes.filter((c) => c);
+      if (classes.length == 0) return this;
+
+      this.element.classList.remove(...classes);
+    } else {
+      this.element.classList.remove(classes);
     }
     return this;
   }

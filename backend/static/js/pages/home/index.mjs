@@ -17,6 +17,13 @@ export const Home = () => {
     .class(["d-flex", "flex-column", "gap-3"])
     .addEventListener("submit", async (event) => {
       event.preventDefault();
+      inputName.clearErrors();
+
+      if (!name) {
+        inputName.addErrors("Please fill out the name field");
+        return;
+      }
+
       const player = await PlayerService.createPlayer({ name: name });
     })
     .children([() => inputName, () => new Button("Register")]);
