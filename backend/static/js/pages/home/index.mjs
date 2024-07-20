@@ -2,12 +2,17 @@ import { Component } from "../../components/component.mjs";
 import { Button } from "../../components/Button.mjs";
 import { Input } from "../../components/Input.mjs";
 import { PlayerService } from "../../services/player.mjs";
+import { t } from "../../language.mjs";
 
 /** @type {import("../../components/component.mjs").FunctionalComponent} */
 export const Home = () => {
   let name = "";
 
-  const inputName = new Input("Name", "", name);
+  const inputName = new Input(
+    t().home_form_registration_input_name_label,
+    "",
+    name,
+  );
 
   inputName.input.addEventListener("change", (e) => {
     name = e.target.value;
@@ -20,13 +25,16 @@ export const Home = () => {
       inputName.clearErrors();
 
       if (!name) {
-        inputName.addErrors("Please fill out the name field");
+        inputName.addErrors(t().error_home_form_registration_missing_name);
         return;
       }
 
       const player = await PlayerService.createPlayer({ name: name });
     })
-    .children([() => inputName, () => new Button("Register")]);
+    .children([
+      () => inputName,
+      () => new Button(t().home_form_registration_button),
+    ]);
 
   const page = new Component("div")
     .class(["container-fluid", "p-5"])
