@@ -1,4 +1,5 @@
 import { Component } from "../../components/component.mjs";
+import { CanvasBall } from "../../components/PongCanvas/canvas-components/CanvasBall.mjs";
 import { CanvasPaddle } from "../../components/PongCanvas/canvas-components/CanvasPaddle.mjs";
 import { PongCanvas } from "../../components/PongCanvas/PongCanvas.mjs";
 import { Player } from "../../game/player.mjs";
@@ -6,6 +7,10 @@ import { Player } from "../../game/player.mjs";
 /** @type {import("../../components/component.mjs").FunctionalComponent} */
 export const Game = () => {
   const canvas = new PongCanvas();
+
+  const ball = new CanvasBall()
+    .pos(canvas.VCW(50), canvas.VCH(50))
+    .translate(-50, -50);
 
   const player1 = new Player({
     position: 50,
@@ -29,7 +34,10 @@ export const Game = () => {
     },
   });
 
-  canvas.addCanvasElement(player1.paddle).addCanvasElement(player2.paddle);
+  canvas
+    .addCanvasElement(player1.paddle)
+    .addCanvasElement(player2.paddle)
+    .addCanvasElement(ball);
 
   const page = new Component("div")
     .class(["container-fluid", "p-5"])
