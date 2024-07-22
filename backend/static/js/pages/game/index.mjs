@@ -42,7 +42,7 @@ export const Game = () => {
     player2.paddle.setY(canvas.VCH(player2.position));
 
     canvas.render();
-  }, 100);
+  }, 16);
 
   return page;
 };
