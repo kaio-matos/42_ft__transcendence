@@ -26,15 +26,15 @@ export class Errors extends Component {
     } else {
       this.errors.push(error);
     }
-    this.updateUI();
+    this.#updateUI();
   }
 
   clearErrors() {
     this.errors = [];
-    this.updateUI();
+    this.#updateUI();
   }
 
-  updateUI() {
+  #updateUI() {
     this.clear();
 
     if (this.errors) {

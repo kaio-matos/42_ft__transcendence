@@ -1,5 +1,5 @@
 import { Component } from "../../components/component.mjs";
-import { PongCanvas } from "../../components/PongCanvas.mjs";
+import { PongCanvas } from "../../components/PongCanvas/PongCanvas.mjs";
 
 /** @type {import("../../components/component.mjs").FunctionalComponent} */
 export const Game = () => {
