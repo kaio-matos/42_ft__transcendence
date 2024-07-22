@@ -33,11 +33,8 @@ export class CanvasElement {
    * @param {number} y - number between -100 and 100 to offset
    */
   translate(x, y) {
-    if (x < 0) this.__x -= (Math.abs(x) / 100) * this.__width;
-    else this.__x += (x / 100) * this.__width;
-
-    if (y < 0) this.__y -= (Math.abs(y) / 100) * this.__height;
-    else this.__y += (y / 100) * this.__height;
+    this.__x += (x / 100) * this.__width;
+    this.__y += (y / 100) * this.__height;
 
     return this;
   }
