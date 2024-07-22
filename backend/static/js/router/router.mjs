@@ -1,3 +1,5 @@
+import { Component } from "../components/component.mjs";
+
 export class Route {
   /** @type {string} */
   path;
@@ -18,19 +20,29 @@ export class Router {
   root_id = "app";
   /** @type {Route[]} */
   routes;
+  /** @type {import("../components/component.mjs").FunctionalComponent} */
+  NotFoundPage;
 
   /**
    * @param {Route[]} routes
+   * @param {{ NotFoundPage: import("../components/component.mjs").FunctionalComponent }} fallback
    */
-  constructor(routes) {
+  constructor(routes, fallback) {
     this.routes = routes;
+    this.NotFoundPage = fallback.NotFoundPage;
   }
 
   get current() {
     const pathname = window.location.pathname;
-    const current = this.routes.find((route) => route.path.includes(pathname));
+    const removeSlashes = (str) => str.replace("/", "");
 
-    return current;
+    const matchedRoutes = this.routes.find((route) => {
+      const pathnameWithoutSlashes = removeSlashes(pathname);
+      const routePathWithoutSlashes = removeSlashes(route.path);
+      return pathnameWithoutSlashes == routePathWithoutSlashes;
+    });
+
+    return matchedRoutes;
   }
 
   get root() {
@@ -42,9 +54,13 @@ export class Router {
   next() {}
 
   render() {
-    if (this.root && this.current) {
+    if (!this.root) return;
+    if (!this.current) {
       this.root.innerHTML = "";
-      this.root.appendChild(this.current.page().element);
+      this.root.appendChild(this.NotFoundPage().element);
+      return;
     }
+    this.root.innerHTML = "";
+    this.root.appendChild(this.current.page().element);
   }
 }
