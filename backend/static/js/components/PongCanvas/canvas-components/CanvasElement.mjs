@@ -23,13 +23,27 @@ export class CanvasElement {
   }
 
   /**
+   * @param {number} x
+   */
+  setX(x) {
+    this.#x = x;
+  }
+
+  /**
+   * @param {number} y
+   */
+  setY(y) {
+    this.#y = y;
+  }
+
+  /**
    * @param {number} w
    * @param {number} h
-   * @returns {this}
    */
   size(w, h) {
     this.__width = w;
     this.__height = h;
+    return this;
   }
 
   /**

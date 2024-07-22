@@ -1,4 +1,3 @@
-import { CanvasPaddle } from "./canvas-components/CanvasPaddle.mjs";
 import { Component } from "../component.mjs";
 import { CanvasElement } from "./canvas-components/CanvasElement.mjs";
 
@@ -21,22 +20,38 @@ export class PongCanvas extends Component {
   }
 
   /**
-   * VCW = View Canvas Width
-   * Transforms `n` to a VCW unit, it should work like a `vw` unit but based on the canvas width
-   * @param {import("./types.mjs").VCW} n - number between 0 and 100
+   * Transforms VCW to pixels
+   * @param {import("./types.mjs").VCW} n
    */
   VCW(n) {
     return (n / 100) * this.width;
   }
 
   /**
-   * VCH = View Canvas Height
-   * Transforms `n` to a VCH unit, it should work like a `vh` unit but based on the canvas height
+   * Transforms VCH to pixels
    *
-   * @param {import("./types.mjs").VCH} n - number between 0 and 100
+   * @param {import("./types.mjs").VCH} n
    */
   VCH(n) {
     return (n / 100) * this.height;
+  }
+
+  /**
+   * Transforms pixels to VCW
+   * @param {number} n
+   * @returns {import("./types.mjs").VCW}
+   */
+  PixelsToVCW(n) {
+    return (n * 100) / this.width;
+  }
+
+  /**
+   * Transforms pixels to VCH
+   * @param {number} n
+   * @returns {import("./types.mjs").VCH}
+   */
+  PixelsToVCH(n) {
+    return (n * 100) / this.height;
   }
 
   /**
