@@ -18,7 +18,12 @@ export class CanvasPaddle extends CanvasElement {
   render(ctx) {
     let previousFillStyle = ctx.fillStyle;
     ctx.fillStyle = this.__color;
-    ctx.fillRect(this.__x, this.__y, this.__width, this.__height);
+    ctx.fillRect(
+      this.__translated_x,
+      this.__translated_y,
+      this.__width,
+      this.__height,
+    );
     ctx.fillStyle = previousFillStyle;
     return this;
   }

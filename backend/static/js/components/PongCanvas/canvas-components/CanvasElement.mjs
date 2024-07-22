@@ -15,25 +15,11 @@ export class CanvasElement {
   #y;
 
   // These getters are being affected by what was configured in the translate function
-  get __x() {
+  get __translated_x() {
     return this.#x + (this.__translate_w / 100) * this.__width;
   }
-  get __y() {
+  get __translated_y() {
     return this.#y + (this.__translate_h / 100) * this.__height;
-  }
-
-  /**
-   * @param {number} x
-   */
-  setX(x) {
-    this.#x = x;
-  }
-
-  /**
-   * @param {number} y
-   */
-  setY(y) {
-    this.#y = y;
   }
 
   /**
@@ -51,7 +37,23 @@ export class CanvasElement {
    * @param {import("../types.mjs").VCH} y
    */
   pos(x, y) {
+    this.setX(x);
+    this.setY(y);
+    return this;
+  }
+
+  /**
+   * @param {number} x
+   */
+  setX(x) {
     this.#x = x;
+    return this;
+  }
+
+  /**
+   * @param {number} y
+   */
+  setY(y) {
     this.#y = y;
     return this;
   }
