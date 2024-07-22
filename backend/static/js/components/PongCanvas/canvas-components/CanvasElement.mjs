@@ -3,10 +3,24 @@ export class CanvasElement {
   __width;
   /** @type {number} */
   __height;
+
+  /** @type {number} */
+  __translate_w;
+  /** @type {number} */
+  __translate_h;
+
   /** @type {import("../types.mjs").VCW} */
-  __x;
+  #x;
   /** @type {import("../types.mjs").VCH} */
-  __y;
+  #y;
+
+  // These getters are being affected by what was configured in the translate function
+  get __x() {
+    return this.#x + (this.__translate_w / 100) * this.__width;
+  }
+  get __y() {
+    return this.#y + (this.__translate_h / 100) * this.__height;
+  }
 
   /**
    * @param {number} w
@@ -23,18 +37,22 @@ export class CanvasElement {
    * @param {import("../types.mjs").VCH} y
    */
   pos(x, y) {
-    this.__x = x;
-    this.__y = y;
+    this.#x = x;
+    this.#y = y;
     return this;
   }
 
   /**
-   * @param {number} x - number between -100 and 100 to offset
-   * @param {number} y - number between -100 and 100 to offset
+   * This function will move the element accordingly to it's own width and height
+   *
+   * After calling it the change will be maintained until removed manually by calling `translate(0, 0)`
+   *
+   * @param {number} translate_w - number between -100 and 100 to offset
+   * @param {number} translate_h - number between -100 and 100 to offset
    */
-  translate(x, y) {
-    this.__x += (x / 100) * this.__width;
-    this.__y += (y / 100) * this.__height;
+  translate(translate_w, translate_h) {
+    this.__translate_w = translate_w;
+    this.__translate_h = translate_h;
 
     return this;
   }
