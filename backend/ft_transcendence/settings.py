@@ -75,6 +75,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "ft_transcendence.wsgi.application"
 ASGI_APPLICATION = "ft_transcendence.asgi.application"
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"  # TODO: Integrate with redis
+    }
+}
+
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases

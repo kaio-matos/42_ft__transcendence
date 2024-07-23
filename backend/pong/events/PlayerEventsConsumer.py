@@ -1,15 +1,18 @@
-import json
-from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 
-class PlayerEventsConsumer(AsyncWebsocketConsumer):
+class PlayerEventsConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         await self.accept()
 
     async def disconnect(self, code):
-        pass
+        await self.channel_layer.group_discard(self.group_id, self.channel_name)
 
-    async def receive(self, text_data=None, bytes_data=None):
-        text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
-        await self.send(text_data=json.dumps({"message": message}))
+    async def receive_json(self, content, **kwargs):
+        if content["command"] == "JOIN_TOURNAMENT":
+            self.group_id = content["payload"]["tournament_id"]
+            await self.channel_layer.group_add(self.group_id, self.channel_name)
+            await self.send_response("onTournamentJoin", {"player": "Player X"})
+
+    async def send_response(self, event: str, data: dict):
+        await self.send_json({"event": event, "data": data})

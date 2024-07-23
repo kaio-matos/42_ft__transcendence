@@ -14,7 +14,7 @@ export class Errors extends Component {
     }
     this.class(["text-danger-emphasis", ""]);
 
-    this.updateUI();
+    this.#updateUI();
   }
 
   /**

@@ -3,6 +3,10 @@ from django.http import HttpRequest, HttpResponse
 from ft_transcendence.http import http
 from pong.models import Player, Tournament
 
+from channels.layers import get_channel_layer
+
+channel_layer = get_channel_layer()
+
 
 def index(request: HttpRequest) -> HttpResponse:
     tournaments = Tournament.objects.all()
