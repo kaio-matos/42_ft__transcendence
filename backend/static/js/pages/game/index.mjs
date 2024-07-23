@@ -3,9 +3,12 @@ import { CanvasBall } from "../../components/PongCanvas/canvas-components/Canvas
 import { CanvasPaddle } from "../../components/PongCanvas/canvas-components/CanvasPaddle.mjs";
 import { PongCanvas } from "../../components/PongCanvas/PongCanvas.mjs";
 import { Player } from "../../game/player.mjs";
+import { TournamentService } from "../../services/tournament.mjs";
 
 /** @type {import("../../components/component.mjs").FunctionalComponent} */
 export const Game = () => {
+  TournamentService.createTournament();
+
   const canvas = new PongCanvas();
 
   const ball = new CanvasBall()
