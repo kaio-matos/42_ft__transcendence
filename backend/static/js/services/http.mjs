@@ -1,3 +1,7 @@
+const csrf_token = document.querySelector(
+  'input[name="csrfmiddlewaretoken"]',
+).value;
+
 /**
  * @param {string} path
  * @param {Exclude<Parameters<typeof fetch>[0], URL>} options
@@ -11,9 +15,12 @@ export async function http(path, options) {
     }
   }
 
+  h.append("X-CSRFToken", csrf_token);
+
   const response = await fetch(path, {
     ...options,
     headers: h,
+    credentials: "same-origin",
   });
 
   try {
