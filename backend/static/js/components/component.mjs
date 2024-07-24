@@ -5,11 +5,16 @@ export class Component {
   element;
 
   /**
-   * @param {Parameters<typeof document.createElement>[0]} tag
+   * @param {HTMLElement | Parameters<typeof document.createElement>[0]} ElementOrTag
    * @param {object} options
    */
-  constructor(tag, options) {
-    this.element = document.createElement(tag);
+  constructor(ElementOrTag, options) {
+    if (typeof ElementOrTag === "object") {
+      this.element = ElementOrTag;
+      return;
+    }
+
+    this.element = document.createElement(ElementOrTag);
 
     if (!options) return;
     for (const key in options) {
@@ -17,6 +22,10 @@ export class Component {
         this.element[key] = options[key];
       }
     }
+  }
+
+  get parent() {
+    return new Component(this.element.parentElement);
   }
 
   /**
@@ -33,7 +42,7 @@ export class Component {
   children(children) {
     for (const child of children) {
       let component;
-      if (child instanceof Function) {
+      if (typeof child === "function") {
         component = child();
       } else {
         component = child;
