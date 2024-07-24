@@ -13,6 +13,11 @@ Clean the database
 docker compose exec api python manage.py flush
 ```
 
+Undo all migrations
+```bash
+docker compose exec api python manage.py migrate pong zero
+```
+
 Interact with the application
 ```bash
 docker compose exec api python manage.py shell
