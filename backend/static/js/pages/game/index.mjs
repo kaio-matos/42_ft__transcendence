@@ -39,9 +39,7 @@ export const Game = () => {
     .addCanvasElement(player2.paddle)
     .addCanvasElement(ball);
 
-  const page = new Component("div")
-    .class(["container-fluid", "p-5"])
-    .children([canvas]);
+  const page = new Component("div").class("container p-5").children([canvas]);
 
   canvas.render();
 

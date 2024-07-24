@@ -10,7 +10,6 @@ export const Registration = ({ onRegistration }) => {
 
   const inputName = new Input(
     t().home_form_registration_input_name_label,
-    "",
     name,
   );
 
@@ -19,7 +18,7 @@ export const Registration = ({ onRegistration }) => {
   });
 
   const form = new Component("form")
-    .class(["d-flex", "flex-column", "gap-3"])
+    .class("container d-flex flex-column gap-3 mx-auto")
     .addEventListener("submit", async (event) => {
       event.preventDefault();
       inputName.clearErrors();

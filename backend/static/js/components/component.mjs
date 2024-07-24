@@ -37,11 +37,12 @@ export class Component {
   }
 
   /**
-   * @param {(FunctionalComponent | Component | Parameters<HTMLElement['appendChild']>[0])[]} children
+   * @param {(FunctionalComponent | Component | Parameters<HTMLElement['appendChild']>[0] | undefined)[]} children
    */
   children(children) {
     for (const child of children) {
       let component;
+      if (!child) continue;
       if (typeof child === "function") {
         component = child();
       } else {

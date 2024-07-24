@@ -13,16 +13,18 @@ export class Input extends Component {
 
   /**
    * @param {string} label
-   * @param {string} placeholder
    * @param {string} value
    */
-  constructor(label = "", placeholder = "", value = "") {
+  constructor(label = "", value = "") {
     super("div");
 
     this.input = new Component("input", {
-      placeholder,
       value,
-    }).class("form-control");
+    })
+      .attributes({
+        placeholder: label,
+      })
+      .class("form-control");
     this.label = new Component("label", {
       textContent: label,
     });

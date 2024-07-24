@@ -18,13 +18,8 @@ export class Loading extends Component {
     });
 
     promise.then((result) => {
-      const parent = this.parent;
-      const child = parent.element.querySelector(
-        `div[data-loading-id="${id}"]`,
-      );
-      parent.element.removeChild(child);
-      this.element = component(result).element;
-      parent.element.appendChild(this.element);
+      this.clear();
+      this.children([component(result)]);
     });
   }
 }
