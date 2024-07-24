@@ -8,6 +8,11 @@ Migrate the database
 docker compose exec api python manage.py migrate
 ```
 
+Clean the database
+```bash
+docker compose exec api python manage.py flush
+```
+
 Interact with the application
 ```bash
 docker compose exec api python manage.py shell
