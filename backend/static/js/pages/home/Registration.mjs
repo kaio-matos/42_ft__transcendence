@@ -32,14 +32,11 @@ export const Registration = ({ onRegistration }) => {
       const player = await PlayerService.createPlayer({ name: name });
       onRegistration(player);
     })
-    .children([
-      () => inputName,
-      () => new Button(t().home_form_registration_button),
-    ]);
+    .children([inputName, new Button(t().home_form_registration_button)]);
 
   const page = new Component("div")
     .class(["container-fluid", "p-5"])
-    .children([() => form]);
+    .children([form]);
 
   return page;
 };

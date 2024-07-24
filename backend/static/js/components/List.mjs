@@ -20,10 +20,7 @@ export class List extends Component {
       items.forEach((item) => this.addItem(item));
     }
 
-    this.children([
-      () => new Component("p", { textContent: title }),
-      () => this.ul,
-    ]);
+    this.children([new Component("p", { textContent: title }), this.ul]);
   }
 
   /**
@@ -36,13 +33,13 @@ export class List extends Component {
         .attributes({
           "data-name": item,
         })
-        .children([() => this.itemRenderer(item)]);
+        .children([this.itemRenderer(item)]);
     } else {
       li = new Component("li", {
         textContent: item,
       }).attributes({ "data-name": item });
     }
-    this.ul.children([() => li]);
+    this.ul.children([li]);
   }
 
   /**

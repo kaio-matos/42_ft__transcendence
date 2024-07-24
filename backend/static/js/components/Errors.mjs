@@ -39,9 +39,7 @@ export class Errors extends Component {
 
     if (this.errors) {
       this.children(
-        this.errors.map(
-          (error) => () => new Component("p", { textContent: error }),
-        ),
+        this.errors.map((error) => new Component("p", { textContent: error })),
       );
     }
   }

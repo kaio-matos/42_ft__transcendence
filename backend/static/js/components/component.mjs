@@ -28,11 +28,16 @@ export class Component {
   }
 
   /**
-   * @param {(Component | Parameters<HTMLElement['appendChild']>[0])[]} children
+   * @param {(FunctionalComponent | Component | Parameters<HTMLElement['appendChild']>[0])[]} children
    */
   children(children) {
     for (const child of children) {
-      const component = child();
+      let component;
+      if (child instanceof Function) {
+        component = child();
+      } else {
+        component = child;
+      }
       if (component instanceof Component) {
         this.element.appendChild(component.element);
       } else {

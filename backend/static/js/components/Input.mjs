@@ -28,7 +28,7 @@ export class Input extends Component {
     });
     this.errors = new Errors();
 
-    this.children([() => this.input, () => this.label, () => this.errors]);
+    this.children([this.input, this.label, this.errors]);
     this.class("form-floating");
   }
 

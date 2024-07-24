@@ -41,7 +41,7 @@ export const Game = () => {
 
   const page = new Component("div")
     .class(["container-fluid", "p-5"])
-    .children([() => canvas]);
+    .children([canvas]);
 
   canvas.render();
 

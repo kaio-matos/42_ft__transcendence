@@ -15,7 +15,7 @@ export const Dashboard = () => {
           })
 
           .class("d-flex justify-content-between mb-1")
-          .children([() => new Button("Challenge")]),
+          .children([new Button("Challenge")]),
       ),
   ]);
 
