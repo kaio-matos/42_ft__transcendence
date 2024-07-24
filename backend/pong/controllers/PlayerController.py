@@ -7,6 +7,7 @@ from pong.models import Player
 def index(request: HttpRequest) -> HttpResponse:
     players = Player.objects.all()
     players = [player.toDict() for player in players]
+    print(players)
 
     return http.OK(players)
 
