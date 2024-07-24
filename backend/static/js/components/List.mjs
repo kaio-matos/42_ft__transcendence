@@ -32,14 +32,15 @@ export class List extends Component {
   addItem(item) {
     let li;
     if (this.itemRenderer) {
-      li = new Component("li", {
-        "data-name": item,
-      }).children([() => this.itemRenderer(item)]);
+      li = new Component("li")
+        .attributes({
+          "data-name": item,
+        })
+        .children([() => this.itemRenderer(item)]);
     } else {
       li = new Component("li", {
         textContent: item,
-        "data-name": item,
-      });
+      }).attributes({ "data-name": item });
     }
     this.ul.children([() => li]);
   }
