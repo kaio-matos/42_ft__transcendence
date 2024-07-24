@@ -34,9 +34,9 @@ export class Component {
     for (const child of children) {
       const component = child();
       if (component instanceof Component) {
-        this.element.appendChild(child().element);
+        this.element.appendChild(component.element);
       } else {
-        this.element.appendChild(child());
+        this.element.appendChild(component);
       }
     }
     return this;
@@ -54,7 +54,7 @@ export class Component {
 
       this.element.classList.add(...classes);
     } else {
-      this.element.classList.add(classes);
+      this.element.classList.add(...classes.split(" "));
     }
     return this;
   }
