@@ -11,6 +11,7 @@ services:
         tty: true
         depends_on:
             - db
+            - redis
     db:
         image: postgres
         restart: always
@@ -20,3 +21,9 @@ services:
             - POSTGRES_DB=${DATABASE_NAME}
             - POSTGRES_PASSWORD=${DATABASE_PASS}
             - POSTGRES_USER=${DATABASE_USER}
+    redis:
+        image: redis
+        restart: always
+        ports:
+            - "${REDIS_PORT}:6379"
+

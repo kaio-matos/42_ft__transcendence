@@ -1,5 +1,6 @@
 django==4.0.0
 channels==3.0.4
 psycopg2==2.9.3
+channels-redis
 python-dotenv
 django-stubs
