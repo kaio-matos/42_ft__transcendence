@@ -127,3 +127,35 @@ export class Component {
     return this;
   }
 }
+
+/**
+ * @param {ShadowRoot} shadow
+ */
+export function attachBootstrap(shadow) {
+  const link = document.createElement("link");
+  link.setAttribute("rel", "stylesheet");
+  link.setAttribute(
+    "integrity",
+    "sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH",
+  );
+  link.setAttribute(
+    "href",
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
+  );
+  link.setAttribute("crossorigin", "anonymous");
+
+  const script = document.createElement("script");
+  script.setAttribute("rel", "stylesheet");
+  script.setAttribute(
+    "integrity",
+    "sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz",
+  );
+  script.setAttribute(
+    "src",
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js",
+  );
+  script.setAttribute("crossorigin", "anonymous");
+
+  shadow.appendChild(link);
+  shadow.appendChild(script);
+}

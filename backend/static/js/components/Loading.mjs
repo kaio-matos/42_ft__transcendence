@@ -1,25 +1,38 @@
-import { Component } from "./component.mjs";
+import { attachBootstrap, Component } from "./component.mjs";
 
-export class Loading extends Component {
-  /** @type {Component} */
-  ul;
+export class Loading extends HTMLElement {
+  static observedAttributes = ["loading"];
 
-  /**
-   * @param {Promise} promise
-   * @param {(result) => Component} component
-   */
-  constructor(promise, component) {
-    super("div", {
+  constructor() {
+    super();
+    this.container = new Component("div", {
       textContent: "Loading...", // TODO: do a better loading feedback
     });
-    const id = (Math.random() * 100).toFixed(0);
-    this.attributes({
-      "data-loading-id": id,
-    });
+  }
 
-    promise.then((result) => {
-      this.clear();
-      this.children([component(result)]);
-    });
+  /**
+   * @param {boolean} value
+   */
+  setLoading(value) {
+    this.setAttribute("loading", value ? "true" : "false");
+  }
+
+  connectedCallback() {
+    const shadow = this.attachShadow({ mode: "open" });
+    attachBootstrap(shadow);
+
+    shadow.appendChild(this.container.element);
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "loading") {
+      if (newValue === "true") {
+        this.container.clear();
+        this.container.element.textContent = "Loading...";
+      } else {
+        this.container.clear();
+        this.container.children([document.createElement("slot")]);
+      }
+    }
   }
 }

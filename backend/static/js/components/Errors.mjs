@@ -1,20 +1,23 @@
-import { Component } from "./component.mjs";
+import { attachBootstrap, Component } from "./component.mjs";
 
-export class Errors extends Component {
+export class Errors extends HTMLElement {
+  /** @type {Component} */
+  container;
   /** @type {string[]} */
   errors = [];
 
-  /**
-   * @param {string[]} errors
-   */
-  constructor(errors) {
-    super("div");
-    if (errors) {
-      this.errors = errors;
-    }
-    this.class(["text-danger-emphasis", ""]);
+  constructor() {
+    super();
+    this.container = new Component("div");
+  }
 
-    this.#updateUI();
+  connectedCallback() {
+    const shadow = this.attachShadow({ mode: "open" });
+    attachBootstrap(shadow);
+
+    this.container.class(["text-danger-emphasis", ""]);
+
+    shadow.appendChild(this.container.element);
   }
 
   /**
@@ -35,10 +38,9 @@ export class Errors extends Component {
   }
 
   #updateUI() {
-    this.clear();
-
+    this.container.clear();
     if (this.errors) {
-      this.children(
+      this.container.children(
         this.errors.map((error) => new Component("p", { textContent: error })),
       );
     }

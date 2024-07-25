@@ -1,7 +1,7 @@
-import { Component } from "./component.mjs";
+import { attachBootstrap, Component } from "./component.mjs";
 import { Errors } from "./Errors.mjs";
 
-export class Input extends Component {
+export class Input extends HTMLElement {
   /** @type {Component} */
   input;
 
@@ -11,16 +11,12 @@ export class Input extends Component {
   /** @type {Errors} */
   errors;
 
-  /**
-   * @param {string} label
-   * @param {string} value
-   */
-  constructor(label = "", value = "") {
-    super("div");
+  constructor() {
+    super();
 
-    this.input = new Component("input", {
-      value,
-    })
+    const label = this.getAttribute("label");
+
+    this.input = new Component("input")
       .attributes({
         placeholder: label,
       })
@@ -28,24 +24,33 @@ export class Input extends Component {
     this.label = new Component("label", {
       textContent: label,
     });
-    this.errors = new Errors();
+    this.errors = new Component("t-errors");
+  }
 
-    this.children([this.input, this.label, this.errors]);
-    this.class("form-floating");
+  connectedCallback() {
+    const shadow = this.attachShadow({ mode: "open" });
+    attachBootstrap(shadow);
+
+    const container = new Component("div");
+
+    container.children([this.input, this.label, this.errors]);
+    container.class("form-floating");
+
+    shadow.appendChild(container.element);
   }
 
   /**
    * @param {string | string[]} error
    */
   addErrors(errors) {
-    this.errors.addErrors(errors);
+    this.errors.element.addErrors(errors);
     this.input.removeClass("is-valid");
     this.input.class("is-invalid");
     return this;
   }
 
   clearErrors() {
-    this.errors.clearErrors();
+    this.errors.element.clearErrors();
     this.input.removeClass("is-invalid");
     this.input.class("is-valid");
     return this;

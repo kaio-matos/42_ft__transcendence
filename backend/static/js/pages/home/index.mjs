@@ -16,15 +16,14 @@ export const Home = () => {
   } else {
     page.clear();
     page.children([
-      () =>
-        Registration({
-          // After the registration this function will be called and we will show the user the dashboard
-          onRegistration(registeredPlayer) {
-            player = registeredPlayer;
-            page.clear();
-            page.children([Dashboard]);
-          },
-        }),
+      Registration({
+        // After the registration this function will be called and we will show the user the dashboard
+        onRegistration(registeredPlayer) {
+          player = registeredPlayer;
+          page.clear();
+          page.children([Dashboard]);
+        },
+      }),
     ]);
   }
 
