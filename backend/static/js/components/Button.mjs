@@ -19,6 +19,6 @@ export class Button extends HTMLElement {
     shadow.appendChild(this.button.element);
 
     this.onclick = () =>
-      this.closest("FORM").dispatchEvent(new Event("submit"));
+      this.closest("FORM")?.dispatchEvent(new Event("submit"));
   }
 }
