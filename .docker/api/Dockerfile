@@ -7,4 +7,7 @@ COPY . .
 WORKDIR /usr/src/app/backend
 
 EXPOSE 8000
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+RUN chmod +x ../.docker/api/entrypoint.sh
+
+ENTRYPOINT [ "bash", "../.docker/api/entrypoint.sh" ]
