@@ -8,5 +8,5 @@ export const PlayerCommunication = {
     JOIN_TOURNAMENT: "JOIN_TOURNAMENT",
   }),
 
-  Communication: new ServerCommunication("events/player/"),
+  Communication: new ServerCommunication("ws/events/player/"),
 };

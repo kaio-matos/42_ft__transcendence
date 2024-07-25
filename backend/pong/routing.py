@@ -4,5 +4,5 @@ from pong.events.PlayerEventsConsumer import PlayerEventsConsumer
 
 
 websocket_urlpatterns = [
-    re_path(r"events/player/", PlayerEventsConsumer.as_asgi()),
+    re_path(r"ws/events/player/", PlayerEventsConsumer.as_asgi()),
 ]
