@@ -8,5 +8,6 @@ export const PlayerCommunication = {
     JOIN_TOURNAMENT: "JOIN_TOURNAMENT",
   }),
 
-  Communication: new ServerCommunication("ws/events/player/"),
+  Communication: new ServerCommunication("ws/player/"),
 };
+PlayerCommunication.Communication.connect();

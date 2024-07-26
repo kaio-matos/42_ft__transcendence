@@ -1,14 +1,41 @@
 export class ServerCommunication {
-  /** @type {WebSocket} */
+  /** @type {string} */
+  path;
+  /** @type {WebSocket | undefined} */
   socket;
   /** @type {Map<string, Set<(data: Record<string, any>) => void>} */
   events = new Map();
 
   /**
    * @param {string} path
+   * @param {boolean} immediate
    */
-  constructor(path) {
-    this.socket = new WebSocket(path);
+  constructor(path, immediate = false) {
+    this.path = path;
+    if (immediate) {
+      this.connect();
+    }
+  }
+
+  isConnecting() {
+    return this.socket?.readyState === WebSocket.CONNECTING;
+  }
+
+  isOpen() {
+    return this.socket?.readyState === WebSocket.OPEN;
+  }
+
+  isClosing() {
+    return this.socket?.readyState === WebSocket.CLOSING;
+  }
+
+  isClosed() {
+    if (!this.socket) return true;
+    return this.socket.readyState === WebSocket.CLOSED;
+  }
+
+  connect() {
+    this.socket = new WebSocket(this.path);
 
     this.socket.onmessage = (event) => {
       let response;
@@ -24,6 +51,8 @@ export class ServerCommunication {
     };
 
     this.socket.onclose = (event) => {}; // TODO
+
+    return this;
   }
 
   /**
