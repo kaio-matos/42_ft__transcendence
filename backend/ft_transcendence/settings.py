@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     "pong.apps.PongConfig",
 ]
 
+AUTH_USER_MODEL = 'pong.player'
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -139,3 +141,4 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+
