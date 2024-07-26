@@ -76,10 +76,12 @@ WSGI_APPLICATION = "ft_transcendence.wsgi.application"
 ASGI_APPLICATION = "ft_transcendence.asgi.application"
 
 CHANNEL_LAYERS = {
-    "BACKEND": "channels_redis.core.RedisChannelLayer",
-    "CONFIG": {
-        "hosts": [("redis", 6379)],
-    },
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.getenv("REDIS_HOST"), os.getenv("REDIS_PORT"))],
+        },
+    }
 }
 
 
