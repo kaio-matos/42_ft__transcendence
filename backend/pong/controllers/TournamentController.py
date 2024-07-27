@@ -43,7 +43,9 @@ def create(request: HttpRequest) -> HttpResponse:
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             player.public_id,
-            ws.WSResponse("JOIN_TOURNAMENT", {"tournament": tournament.toDict()}),
+            ws.WSResponse(
+                ws.WSEvents.JOIN_TOURNAMENT, {"tournament": tournament.toDict()}
+            ),
         )
 
         return http.Created(tournament.toDict())
