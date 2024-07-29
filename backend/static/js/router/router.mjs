@@ -1,14 +1,17 @@
 import { Component } from "../components/component.mjs";
 
+/** @typedef {Record<string, string | undefined} Params */
+/** @typedef {(props: { params: Params }) => Component} Page */
+
 export class Route {
   /** @type {string} */
   path;
-  /** @type {import("../components/component.mjs").FunctionalComponent} */
+  /** @type {Page} */
   page;
 
   /**
    * @param {string} path
-   * @param {import("../components/component.mjs").FunctionalComponent} page
+   * @param {Page} page
    */
   constructor(path, page) {
     this.path = path;
@@ -50,17 +53,39 @@ export class Router {
   }
 
   previous() {}
-  navigate() {}
+
+  /**
+   * @param {string} path
+   */
+  navigate(path) {
+    window.history.pushState({}, "unused", path);
+    this.render();
+  }
   next() {}
 
   render() {
     if (!this.root) return;
+    const params = this.#getUrlParams(window.location.search);
     if (!this.current) {
       this.root.innerHTML = "";
-      this.root.appendChild(this.NotFoundPage().element);
+      this.root.appendChild(this.NotFoundPage({ params }).element);
       return;
     }
     this.root.innerHTML = "";
-    this.root.appendChild(this.current.page().element);
+    this.root.appendChild(this.current.page({ params }).element);
+  }
+
+  /**
+   * @param {string} string
+   * @returns {Params}
+   */
+  #getUrlParams(string) {
+    const params = {};
+
+    for (const [key, value] of new URLSearchParams(string).entries()) {
+      params[key] = value;
+    }
+
+    return params;
   }
 }
