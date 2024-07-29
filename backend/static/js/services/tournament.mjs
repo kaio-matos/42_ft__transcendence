@@ -15,6 +15,15 @@ export const TournamentService = {
   },
 
   /**
+   * @param {{ tournament_id: string }} param0
+   * @returns {Promise<Tournament>}
+   */
+  async getTournament({ tournament_id }) {
+    const data = await GET("/api/pong/tournament/" + tournament_id);
+    return data.data;
+  },
+
+  /**
    *
    * @returns {Promise<Tournament>}
    */

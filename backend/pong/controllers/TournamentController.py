@@ -1,5 +1,6 @@
 import typing
 from channels.generic.websocket import json
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.http import HttpRequest, HttpResponse
 from ft_transcendence.http import http
@@ -11,10 +12,23 @@ from asgiref.sync import async_to_sync
 
 
 def index(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return http.Unauthorized({"message": _("You are not authenticated")})
     tournaments = Tournament.objects.all()
     tournaments = [tournament.toDict() for tournament in tournaments]
 
     return http.OK(tournaments)
+
+
+def get(request: HttpRequest, public_id: str) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return http.Unauthorized({"message": _("You are not authenticated")})
+
+    tournament = Tournament.objects.filter(public_id=public_id).first()
+    if tournament is None:
+        return http.NotFound({"message": _("Tournament not found")})
+
+    return http.OK(tournament.toDict())
 
 
 def create(request: HttpRequest) -> HttpResponse:
