@@ -69,6 +69,7 @@ def MethodNotAllowed(options={"status": 405}) -> HttpResponse:
     """
     return JSONResponse({"message": "Method not allowed"}, options)
 
+
 def UnprocessableEntity(obj: dict | list, options={"status": 422}) -> HttpResponse:
     """
     https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/422

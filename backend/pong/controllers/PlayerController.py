@@ -30,30 +30,25 @@ def login(request: HttpRequest) -> HttpResponse:
 
 
 def create(request: HttpRequest) -> HttpResponse:
+    data = json.loads(request.body)
+    name = data.get("name")
+    email = data.get("email")
+    password = data.get("password")
+
+    if not name or not email or not password:
+        raise ValidationError(_("Email,Nome e senha são necessários!"))
     try:
-        data = json.loads(request.body)
-        name = data.get("name")
-        email = data.get("email")
-        password = data.get("password")
+        validators.validate_email(email)
+    except ValidationError:
+        raise ValidationError({"email": _("Email inválido!")})
 
-        if not name or not email or not password:
-            raise ValueError({"_errors": _("Email,Nome e senha são necessários!")})
-        try:
-            validators.validate_email(email)
-        except ValidationError:
-            raise ValueError({"email": _("Email inválido!")})
+    if Player.objects.filter(email=email).exists():
+        raise ValidationError({"email": _("Email já existente!")})
 
-        if Player.objects.filter(email=email).exists():
-            raise ValueError({"email": _("Email já existente!")})
+    if Player.objects.filter(name=name).exists():
+        raise ValidationError({"name": _("Nome de usuário já existente!")})
 
-        if Player.objects.filter(name=name).exists():
-            raise ValueError({"name": _("Nome de usuário já existente!")})
+    user = Player.objects.create_user(name=name, email=email, password=password)
+    user.save()
 
-        user = Player.objects.create_user(name=name, email=email, password=password)
-        user.save()
-
-        return http.Created(user.toDict())
-    except ValueError as e:
-        return http.UnprocessableEntity({"error": e.args[0]})
-    except json.JSONDecodeError:
-        return http.UnprocessableEntity({"error": "JSON inválido"})
+    return http.Created(user.toDict())
