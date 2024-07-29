@@ -1,8 +1,8 @@
-import { Component } from "../component.mjs";
+import { attachBootstrap, Component } from "../component.mjs";
 import { CanvasElement } from "./canvas-components/CanvasElement.mjs";
 
-export class PongCanvas extends Component {
-  /** @type {HTMLCanvasElement} */
+export class PongCanvas extends HTMLElement {
+  /** @type {Component} */
   #canvas;
   /** @type {CanvasRenderingContext2D} */
   #ctx;
@@ -12,11 +12,18 @@ export class PongCanvas extends Component {
   elements = [];
 
   constructor() {
-    super("canvas");
+    super();
     // TODO: Create dynamically sized canvas for better small screen support
-    this.attributes({ width: this.width, height: this.height });
-    this.#canvas = this.element;
-    this.#ctx = this.#canvas.getContext("2d");
+    this.#canvas = new Component("canvas");
+    this.#canvas.attributes({ width: this.width, height: this.height });
+    this.#ctx = this.#canvas.element.getContext("2d");
+  }
+
+  connectedCallback() {
+    const shadow = this.attachShadow({ mode: "open" });
+    attachBootstrap(shadow);
+
+    shadow.appendChild(this.#canvas.element);
   }
 
   /**
