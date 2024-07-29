@@ -1,6 +1,6 @@
 import { Component } from "../../components/component.mjs";
 
-/** @type {import("../../components/component.mjs").FunctionalComponent} */
+/** @type {import("../../router/router.mjs").Page} */
 export const NotFound = () => {
   const page = new Component("div", {
     textContent: "Page not found | 404",

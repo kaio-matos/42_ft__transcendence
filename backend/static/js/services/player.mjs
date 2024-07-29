@@ -14,11 +14,20 @@ export const PlayerService = {
   },
 
   /**
-   * @param {{ name: string }} player
+   * @param {{ name: string, email: string, password: string }} player
    * @returns {Promise<Player>}
    */
   async createPlayer(player) {
     const data = await POST("/api/pong/player/create", player);
+    return data.data;
+  },
+
+  /**
+   * @param {{ email: string, password: string }} player
+   * @returns {Promise<Player>}
+   */
+  async login(player) {
+    const data = await POST("/api/pong/player/login", player);
     return data.data;
   },
 
