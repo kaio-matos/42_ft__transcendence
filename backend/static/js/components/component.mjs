@@ -121,9 +121,11 @@ export class Component {
   }
 
   /**
-   * @param {Parameters<HTMLElement['removeEventListener']>[0]} event */
-  removeEventListener(event) {
-    this.element.removeEventListener(event);
+   * @param {Parameters<HTMLElement['removeEventListener']>[0]} event
+   * @param {Parameters<HTMLElement['removeEventListener']>[1]} callback
+   */
+  removeEventListener(event, callback) {
+    this.element.removeEventListener(event, callback);
     return this;
   }
 }
