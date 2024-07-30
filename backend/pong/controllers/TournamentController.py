@@ -7,9 +7,6 @@ from ft_transcendence.http import http
 from ft_transcendence.http import ws
 from pong.models import Player, Tournament
 
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-
 
 def index(request: HttpRequest) -> HttpResponse:
     if not request.user.is_authenticated:
@@ -40,46 +37,20 @@ def create(request: HttpRequest) -> HttpResponse:
     player = typing.cast(Player, request.user)
 
     if not challenged_player_id:
-        raise ValidationError({"challenged_player_id": _("Player does not exist")})
+        return http.NotFound({"message": "Player does not exist"})
 
     challenged_player = Player.objects.filter(public_id=challenged_player_id).first()
 
     if not challenged_player:
-        raise ValidationError({"challenged_player_id": _("Player does not exist")})
+        return http.NotFound({"message": "Player does not exist"})
 
     tournament = Tournament(name="Pong Tournament")
     tournament.save()
     tournament.players.add(player)
     tournament.players.add(challenged_player)
-    channel_layer = get_channel_layer()
-    if player.websocket_channel_names[0] is None:
-        raise ValueError(player.name + " is not online")
-    if challenged_player.websocket_channel_names[0] is None:
-        raise ValueError(challenged_player.name + " is not online")
 
-    async_to_sync(
-        channel_layer.group_add(
-            str(tournament.public_id), player.websocket_channel_names[0]
-        )
+    tournament.broadcast(
+        ws.WSResponse(ws.WSEvents.TOURNAMENT_BEGIN, {"tournament": tournament.toDict()})
     )
-    async_to_sync(
-        channel_layer.group_add(
-            str(tournament.public_id), challenged_player.websocket_channel_names[0]
-        )
-    )
-
-    async_to_sync(channel_layer.group_send)(
-        challenged_player_id,
-        ws.WSResponse(
-            ws.WSEvents.TOURNAMENT_BEGIN, {"tournament": tournament.toDict()}
-        ),
-    )
-
-    # async_to_sync(channel_layer.group_send)(
-    #     str(tournament.public_id),
-    #     ws.WSResponse(
-    #         ws.WSEvents.TOURNAMENT_BEGIN, {"tournament": tournament.toDict()}
-    #     ),
-    # )
 
     return http.Created(tournament.toDict())

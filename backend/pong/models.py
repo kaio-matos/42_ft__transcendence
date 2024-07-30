@@ -1,4 +1,6 @@
 import uuid
+from asgiref.sync import async_to_sync
+from channels.consumer import get_channel_layer
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from django.core import serializers
@@ -49,9 +51,6 @@ class Player(AbstractBaseUser, PermissionsMixin):
     public_id = models.UUIDField(
         unique=True, db_index=True, default=uuid.uuid4, editable=False
     )
-    websocket_channel_names = ArrayField(
-        models.CharField(max_length=30), blank=True, null=True
-    )
 
     objects = CustomUserManager()
 
@@ -76,6 +75,13 @@ class Tournament(models.Model):
     )
     name = models.CharField(max_length=200)
     players = models.ManyToManyField(Player)
+
+    def broadcast(self, ws_response: dict):
+        channel_layer = get_channel_layer()
+        players = self.players.all()
+
+        for player in players:
+            async_to_sync(channel_layer.group_send)(str(player.public_id), ws_response)
 
     def toDict(self) -> dict:
         r = {}

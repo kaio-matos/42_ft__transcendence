@@ -17,11 +17,10 @@ class PlayerCommunicationConsumer(AsyncJsonWebsocketConsumer):
         self.player_id = str(user.public_id)
         await self.accept()
         await self.channel_layer.group_add(self.player_id, self.channel_name)
-        # TODO: Handle multiple channels at the same time (the same user opening the same application in multiple browsers)
-        user.websocket_channel_names = [self.channel_name]
         await sync_to_async(user.save)()
 
     async def disconnect(self, code):
+        user = typing.cast(Player, self.scope["user"])
         if self.player_id:
             await self.channel_layer.group_discard(self.player_id, self.channel_name)
 
