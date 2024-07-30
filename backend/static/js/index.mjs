@@ -1,3 +1,4 @@
+import "./override.mjs";
 import { Game } from "./pages/game/index.mjs";
 import { Home } from "./pages/home/index.mjs";
 import { NotFound } from "./pages/not-found/index.mjs";
@@ -11,6 +12,13 @@ export const router = new Router(
   { NotFoundPage: NotFound },
 );
 
-document.addEventListener("DOMContentLoaded", (event) => {
+function render() {
   router.render();
+}
+
+document.addEventListener("DOMContentLoaded", render);
+window.addEventListener("pushstate", render);
+window.addEventListener("popstate", render);
+window.addEventListener("beforeunload", render, {
+  passive: true,
 });
