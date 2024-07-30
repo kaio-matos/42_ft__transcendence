@@ -1,5 +1,9 @@
+import { PlayerCommunication } from "../../communication/player.mjs";
 import { Component } from "../../components/component.mjs";
+import { Player } from "../../game/player.mjs";
+import { router } from "../../index.mjs";
 import { PlayerService } from "../../services/player.mjs";
+import { TournamentService } from "../../services/tournament.mjs";
 
 /** @type {import("../../components/component.mjs").FunctionalComponent} */
 export const Dashboard = () => {
@@ -24,6 +28,14 @@ export const Dashboard = () => {
       </t-loading>
     </div>
   `;
+
+  // TODO: Remove this listener after page change
+  PlayerCommunication.Communication.addEventListener(
+    PlayerCommunication.Events.TOURNAMENT_BEGIN,
+    ({ tournament }) => {
+      router.navigate("/game?tournament=" + tournament.id);
+    },
+  );
 
   PlayerService.getChatWith().then((conversation) => {
     page.element.querySelector("#loading-chat").setLoading(false);
@@ -55,8 +67,12 @@ export const Dashboard = () => {
               }),
               new Component("t-button", {
                 textContent: "Challenge",
-              }).addEventListener("click", () => {
-                console.log("Challenge Player ", player);
+              }).addEventListener("click", async () => {
+                // TODO: Handle loading
+                console.log("Challenging Player ", player);
+                await TournamentService.createTournament({
+                  challenged_player_id: player.id,
+                });
               }),
             ]),
           ]).element,

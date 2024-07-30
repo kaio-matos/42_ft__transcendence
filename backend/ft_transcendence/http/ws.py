@@ -4,7 +4,7 @@ from enum import Enum
 # Events are responses from the backend to the frontend
 # - example: After a player create a tournament we should notify all players invited to the tournament to join the tournament
 class WSEvents(Enum):
-    JOIN_TOURNAMENT = "JOIN_TOURNAMENT"
+    TOURNAMENT_BEGIN = "onTournamentBegin"
 
 
 # Commands are requests from the frontend to the backend
@@ -17,4 +17,4 @@ def WSResponse(event: WSEvents, data: dict) -> dict:
     """
     Generic response for web sockets connections
     """
-    return {"event": event.value, "data": data}
+    return {"type": "send_event", "event": {"event": event.value, "data": data}}

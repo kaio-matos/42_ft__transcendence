@@ -12,7 +12,6 @@ from django.contrib import auth
 def index(request: HttpRequest) -> HttpResponse:
     players = Player.objects.all()
     players = [player.toDict() for player in players]
-    print(players)
 
     return http.OK(players)
 
@@ -25,7 +24,6 @@ def login(request: HttpRequest) -> HttpResponse:
     if player is not None:
         auth.login(request, player)
         return http.OK({"player": typing.cast(Player, player).toDict()})
-    print(player)
     return http.Unauthorized({"error": {"_errors": "Invalid email or password"}})
 
 

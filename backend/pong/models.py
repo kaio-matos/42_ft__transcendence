@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core import serializers
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 
 class CustomUserManager(BaseUserManager):
@@ -47,6 +48,9 @@ class Player(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
     public_id = models.UUIDField(
         unique=True, db_index=True, default=uuid.uuid4, editable=False
+    )
+    websocket_channel_names = ArrayField(
+        models.CharField(max_length=30), blank=True, null=True
     )
 
     objects = CustomUserManager()

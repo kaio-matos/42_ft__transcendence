@@ -1,3 +1,4 @@
+import { PlayerCommunication } from "../../communication/player.mjs";
 import { Component } from "../../components/component.mjs";
 import { router } from "../../index.mjs";
 import { PlayerService } from "../../services/player.mjs";
@@ -41,6 +42,7 @@ export const Login = () => {
       password: password,
     });
     session.player = player;
+    PlayerCommunication.Communication.connect();
     router.navigate("/");
   });
 

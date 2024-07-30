@@ -1,7 +1,13 @@
 import { Component } from "../components/component.mjs";
+import { router } from "../index.mjs";
 
 /** @typedef {Record<string, string | undefined} Params */
 /** @typedef {(props: { params: Params }) => Component} Page */
+
+// TODO: Fix navigation
+window.navigation.addEventListener("navigate", (event) => {
+  router.render();
+});
 
 export class Route {
   /** @type {string} */
@@ -59,7 +65,6 @@ export class Router {
    */
   navigate(path) {
     window.history.pushState({}, "unused", path);
-    this.render();
   }
   next() {}
 

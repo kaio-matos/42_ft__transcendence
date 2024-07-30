@@ -24,11 +24,11 @@ export const TournamentService = {
   },
 
   /**
-   *
+   * @param {{ challenged_player_id: string }} payload
    * @returns {Promise<Tournament>}
    */
-  async createTournament(player) {
-    const data = await POST("/api/pong/tournament/create", player);
+  async createTournament(payload) {
+    const data = await POST("/api/pong/tournament/create", payload);
     return data.data;
   },
 };

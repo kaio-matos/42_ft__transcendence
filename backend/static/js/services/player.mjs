@@ -1,7 +1,7 @@
 import { GET, POST } from "./http.mjs";
 
 /**
- * @typedef {{ name: string, email: string }} Player
+ * @typedef {{ id: string, name: string, email: string }} Player
  */
 
 export const PlayerService = {

@@ -1,4 +1,8 @@
+import typing
+from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+
+from pong.models import Player
 
 
 class PlayerCommunicationConsumer(AsyncJsonWebsocketConsumer):
@@ -9,20 +13,23 @@ class PlayerCommunicationConsumer(AsyncJsonWebsocketConsumer):
         user = self.scope["user"]
         if not user.is_authenticated:
             return
-        self.player_id = user.public_id
+        user = typing.cast(Player, user)
+        self.player_id = str(user.public_id)
         await self.accept()
         await self.channel_layer.group_add(self.player_id, self.channel_name)
+        # TODO: Handle multiple channels at the same time (the same user opening the same application in multiple browsers)
+        user.websocket_channel_names = [self.channel_name]
+        await sync_to_async(user.save)()
 
     async def disconnect(self, code):
         if self.player_id:
             await self.channel_layer.group_discard(self.player_id, self.channel_name)
-        if self.tournament_group_id:
-            await self.channel_layer.group_discard(
-                self.tournament_group_id, self.channel_name
-            )
 
     async def receive_json(self, content, **kwargs):
         if content["command"] == "COMMAND":
             pass
+
+    async def send_event(self, event):
+        await self.send_json(event["event"])
 
     pass

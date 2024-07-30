@@ -52,9 +52,34 @@ def create(request: HttpRequest) -> HttpResponse:
     tournament.players.add(player)
     tournament.players.add(challenged_player)
     channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        player.public_id,
-        ws.WSResponse(ws.WSEvents.JOIN_TOURNAMENT, {"tournament": tournament.toDict()}),
+    if player.websocket_channel_names[0] is None:
+        raise ValueError(player.name + " is not online")
+    if challenged_player.websocket_channel_names[0] is None:
+        raise ValueError(challenged_player.name + " is not online")
+
+    async_to_sync(
+        channel_layer.group_add(
+            str(tournament.public_id), player.websocket_channel_names[0]
+        )
     )
+    async_to_sync(
+        channel_layer.group_add(
+            str(tournament.public_id), challenged_player.websocket_channel_names[0]
+        )
+    )
+
+    async_to_sync(channel_layer.group_send)(
+        challenged_player_id,
+        ws.WSResponse(
+            ws.WSEvents.TOURNAMENT_BEGIN, {"tournament": tournament.toDict()}
+        ),
+    )
+
+    # async_to_sync(channel_layer.group_send)(
+    #     str(tournament.public_id),
+    #     ws.WSResponse(
+    #         ws.WSEvents.TOURNAMENT_BEGIN, {"tournament": tournament.toDict()}
+    #     ),
+    # )
 
     return http.Created(tournament.toDict())
