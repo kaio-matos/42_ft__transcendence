@@ -6,15 +6,19 @@ import { session } from "../../state/session.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Login = () => {
-  const page = new Component("div");
+  const page = new Component("div").class("container mx-auto");
 
   page.element.innerHTML = `
-    <form id="login-form" class="container d-flex flex-column gap-3 mx-auto">
+    <form id="login-form" class="d-flex flex-column gap-3">
       <t-input id="input-email" label="Email"></t-input>
       <t-input id="input-password" label="Password"></t-input>
 
       <t-button>Login</t-button>
     </form>
+    <p class="mt-5 d-flex gap-2">
+      Does not have an account?
+      <t-button to="/">Register now</t-button>
+    </p>
   `;
 
   let email = "";

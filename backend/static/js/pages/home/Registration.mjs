@@ -13,6 +13,12 @@ export const Registration = ({ onRegistration }) => {
       <t-input id="input-password" label="Password"></t-input>
       <t-button>Register</t-button>
     </form>
+
+    <p class="mt-5 d-flex gap-2">
+      Already has an account?
+      <t-button to="/login">Login now</t-button>
+    </p>
+
   `;
 
   let name = "";
@@ -22,20 +28,17 @@ export const Registration = ({ onRegistration }) => {
   const t_input_name = form.querySelector("#input-name");
   const t_input_email = form.querySelector("#input-email");
   const t_input_password = form.querySelector("#input-password");
-  ;
-
-
   t_input_name.input.addEventListener("change", (e) => {
     name = e.target.value;
   });
 
   t_input_email.input.addEventListener("change", (e) => {
     email = e.target.value;
-  })
+  });
 
   t_input_password.input.addEventListener("change", (e) => {
     password = e.target.value;
-  })
+  });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -46,7 +49,11 @@ export const Registration = ({ onRegistration }) => {
       return;
     }
 
-    const player = await PlayerService.createPlayer({ name: name, email: email, password: password });
+    const player = await PlayerService.createPlayer({
+      name: name,
+      email: email,
+      password: password,
+    });
     onRegistration(player);
   });
 
