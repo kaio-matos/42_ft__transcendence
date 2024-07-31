@@ -9,7 +9,7 @@ export const TournamentService = {
    * @returns {Promise<Tournament[]>}
    */
   async getTournaments() {
-    const data = await GET("/api/pong/tournament");
+    const { data } = await GET("/api/pong/tournament");
     return data.data;
   },
 
@@ -18,7 +18,7 @@ export const TournamentService = {
    * @returns {Promise<Tournament>}
    */
   async getTournament({ tournament_id }) {
-    const data = await GET("/api/pong/tournament/" + tournament_id);
+    const { data } = await GET("/api/pong/tournament/" + tournament_id);
     return data.data;
   },
 
@@ -27,7 +27,7 @@ export const TournamentService = {
    * @returns {Promise<Tournament>}
    */
   async createTournament(payload) {
-    const data = await POST("/api/pong/tournament/create", payload);
+    const { data } = await POST("/api/pong/tournament/create", payload);
     return data.data;
   },
 };

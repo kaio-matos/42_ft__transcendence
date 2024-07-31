@@ -9,7 +9,7 @@ export const PlayerService = {
    * @returns {Promise<Player[]>}
    */
   async getPlayers() {
-    const data = await GET("/api/pong/player");
+    const { data } = await GET("/api/pong/player");
     return data.data;
   },
 
@@ -18,7 +18,7 @@ export const PlayerService = {
    * @returns {Promise<Player>}
    */
   async createPlayer(player) {
-    const data = await POST("/api/pong/player/create", player);
+    const { data } = await POST("/api/pong/player/create", player);
     return data.data;
   },
 
@@ -27,7 +27,7 @@ export const PlayerService = {
    * @returns {Promise<Player>}
    */
   async login(player) {
-    const data = await POST("/api/pong/player/login", player);
+    const { data } = await POST("/api/pong/player/login", player);
     return data.data;
   },
 
