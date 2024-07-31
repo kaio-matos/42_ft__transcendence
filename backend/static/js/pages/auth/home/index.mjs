@@ -1,11 +1,11 @@
-import { PlayerCommunication } from "../../communication/player.mjs";
-import { Component } from "../../components/component.mjs";
-import { router } from "../../index.mjs";
-import { PlayerService } from "../../services/player.mjs";
-import { TournamentService } from "../../services/tournament.mjs";
+import { PlayerCommunication } from "../../../communication/player.mjs";
+import { Component } from "../../../components/component.mjs";
+import { router } from "../../../index.mjs";
+import { PlayerService } from "../../../services/player.mjs";
+import { TournamentService } from "../../../services/tournament.mjs";
 
-/** @type {import("../../components/component.mjs").FunctionalComponent} */
-export const Dashboard = () => {
+/** @type {import("../../router/router.mjs").Page} */
+export const Home = () => {
   const page = new Component("div").class("container mx-auto row");
 
   page.element.innerHTML = `
@@ -32,7 +32,7 @@ export const Dashboard = () => {
   PlayerCommunication.Communication.addEventListener(
     PlayerCommunication.Events.TOURNAMENT_BEGIN,
     ({ tournament }) => {
-      router.navigate("/game?tournament=" + tournament.id);
+      router.navigate("auth/game?tournament=" + tournament.id);
     },
   );
 

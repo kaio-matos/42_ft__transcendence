@@ -1,10 +1,7 @@
 import { PlayerCommunication } from "../../communication/player.mjs";
 import { Component } from "../../components/component.mjs";
 import { router } from "../../index.mjs";
-import {
-  RequestFailedError,
-  UnprocessableEntityError,
-} from "../../services/errors.mjs";
+import { RequestFailedError } from "../../services/errors.mjs";
 import { PlayerService } from "../../services/player.mjs";
 import { session } from "../../state/session.mjs";
 
@@ -22,7 +19,7 @@ export const Login = () => {
     </form>
     <p class="mt-5 d-flex gap-2">
       Does not have an account?
-      <t-button to="/">Register now</t-button>
+      <t-button to="/register">Register now</t-button>
     </p>
   `;
 
@@ -57,7 +54,7 @@ export const Login = () => {
       });
       session.player = player;
       PlayerCommunication.Communication.connect();
-      router.navigate("/");
+      router.navigate("/auth");
     } catch (error) {
       if (error instanceof RequestFailedError) {
         t_input_email.addErrors(error.data?.error?.email);

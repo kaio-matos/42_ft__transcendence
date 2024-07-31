@@ -6,6 +6,6 @@ export const PlayerCommunication = {
   }),
   Commands: Object.freeze({}),
 
-  Communication: new ServerCommunication("ws/player/"),
+  Communication: new ServerCommunication("/ws/player/"),
 };
 PlayerCommunication.Communication.connect();

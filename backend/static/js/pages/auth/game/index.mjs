@@ -1,16 +1,16 @@
-import { TournamentCommunication } from "../../communication/tournament.mjs";
-import { Component } from "../../components/component.mjs";
-import { CanvasBall } from "../../components/PongCanvas/canvas-components/CanvasBall.mjs";
-import { CanvasPaddle } from "../../components/PongCanvas/canvas-components/CanvasPaddle.mjs";
-import { PongCanvas } from "../../components/PongCanvas/PongCanvas.mjs";
-import { NotFound } from "../not-found/index.mjs";
+import { TournamentCommunication } from "../../../communication/tournament.mjs";
+import { Component } from "../../../components/component.mjs";
+import { CanvasBall } from "../../../components/PongCanvas/canvas-components/CanvasBall.mjs";
+import { CanvasPaddle } from "../../../components/PongCanvas/canvas-components/CanvasPaddle.mjs";
+import { PongCanvas } from "../../../components/PongCanvas/PongCanvas.mjs";
+import { NotFound } from "../../not-found/index.mjs";
 
 /**
  * @typedef {{
- *   tournament: import("../../services/tournament.mjs").Tournament,
+ *   tournament: import("../../../services/tournament.mjs").Tournament,
  *   screen: { width: number, height: number },
  *   game: {
- *      players: { placement: number, position: { x: number, y: number }, data: import("../../services/player.mjs").Player }[],
+ *      players: { placement: number, position: { x: number, y: number }, data: import("../../../services/player.mjs").Player }[],
  *      ball: { position:  { x: number, y: number} },
  *   },
  * }} Game
@@ -49,7 +49,7 @@ function onKeysPressed(options) {
   onKeyPress();
 }
 
-/** @type {import("../../router/router.mjs").Page} */
+/** @type {import("../../../router/router.mjs").Page} */
 export const Game = ({ params }) => {
   const tournament_id = params.tournament;
 
@@ -68,7 +68,7 @@ export const Game = ({ params }) => {
   const canvas = page.element.querySelector("#pong-canvas");
 
   TournamentCommunication.Communication.setPath(
-    "ws/tournament/" + tournament_id,
+    "/ws/tournament/" + tournament_id,
   );
   TournamentCommunication.Communication.connect(() => {
     TournamentCommunication.Communication.send(

@@ -31,13 +31,13 @@ export class Router {
    * @param {{ NotFoundPage: import("../components/component.mjs").FunctionalComponent }} fallback
    */
   constructor(routes, fallback) {
-    this.routes = routes;
+    this.routes = [...routes, new Route("/not-found", fallback.NotFoundPage)];
     this.NotFoundPage = fallback.NotFoundPage;
   }
 
   get current() {
     const pathname = window.location.pathname;
-    const removeSlashes = (str) => str.replace("/", "");
+    const removeSlashes = (str) => str.replace(/\//g, "");
 
     const matchedRoutes = this.routes.find((route) => {
       const pathnameWithoutSlashes = removeSlashes(pathname);

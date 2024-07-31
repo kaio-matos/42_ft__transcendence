@@ -1,10 +1,10 @@
 import { Component } from "../../components/component.mjs";
 import { PlayerService } from "../../services/player.mjs";
-import { t } from "../../language.mjs";
 import { UnprocessableEntityError } from "../../services/errors.mjs";
+import { router } from "../../index.mjs";
 
-/** @type {import("../../components/component.mjs").FunctionalComponent} */
-export const Registration = ({ onRegistration }) => {
+/** @type {import("../../router/router.mjs").Page} */
+export const Registration = () => {
   const page = new Component("div").class("container p-5");
 
   page.element.innerHTML = `
@@ -54,12 +54,12 @@ export const Registration = ({ onRegistration }) => {
 
     try {
       t_button_register.setLoading(true);
-      const player = await PlayerService.createPlayer({
+      await PlayerService.createPlayer({
         name: name,
         email: email,
         password: password,
       });
-      onRegistration(player);
+      router.navigate("/login");
     } catch (error) {
       if (error instanceof UnprocessableEntityError) {
         t_input_name.addErrors(error.data?.error?.name);
