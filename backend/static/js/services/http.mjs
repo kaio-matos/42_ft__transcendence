@@ -1,7 +1,4 @@
-import {
-  RequestFailedError,
-  UnprocessableContentError as UnprocessableEntityError,
-} from "./errors.mjs";
+import { RequestFailedError, UnprocessableEntityError } from "./errors.mjs";
 
 export const HTTPStatus = Object.freeze({
   OK: 200,

@@ -1,7 +1,7 @@
 import { Component } from "../../components/component.mjs";
 import { PlayerService } from "../../services/player.mjs";
 import { t } from "../../language.mjs";
-import { UnprocessableContentError } from "../../services/errors.mjs";
+import { UnprocessableEntityError } from "../../services/errors.mjs";
 
 /** @type {import("../../components/component.mjs").FunctionalComponent} */
 export const Registration = ({ onRegistration }) => {
@@ -61,7 +61,7 @@ export const Registration = ({ onRegistration }) => {
       });
       onRegistration(player);
     } catch (error) {
-      if (error instanceof UnprocessableContentError) {
+      if (error instanceof UnprocessableEntityError) {
         t_input_name.addErrors(error.data?.error?.name);
         t_input_email.addErrors(error.data?.error?.email);
         t_input_password.addErrors(error.data?.error?.password);

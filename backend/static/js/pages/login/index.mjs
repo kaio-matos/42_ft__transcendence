@@ -1,7 +1,10 @@
 import { PlayerCommunication } from "../../communication/player.mjs";
 import { Component } from "../../components/component.mjs";
 import { router } from "../../index.mjs";
-import { RequestFailedError } from "../../services/errors.mjs";
+import {
+  RequestFailedError,
+  UnprocessableEntityError,
+} from "../../services/errors.mjs";
 import { PlayerService } from "../../services/player.mjs";
 import { session } from "../../state/session.mjs";
 
@@ -56,7 +59,7 @@ export const Login = () => {
       PlayerCommunication.Communication.connect();
       router.navigate("/");
     } catch (error) {
-      if (error instanceof UnprocessableContentError) {
+      if (error instanceof UnprocessableEntityError) {
         t_input_email.addErrors(error.data?.error?.email);
         t_input_password.addErrors(error.data?.error?.password);
         t_errors.addErrors(error.data?.error?._errors);
