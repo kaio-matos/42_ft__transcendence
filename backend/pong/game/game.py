@@ -43,12 +43,17 @@ class GameScreen:
 
 
 class GamePlayer:
-    def __init__(self, placement: GamePlayerPlacement, position: Position):
+    def __init__(self, placement: GamePlayerPlacement, position: Position, data: dict):
         self.placement = placement
         self.position = position
+        self.data = data
 
     def toDict(self) -> dict:
-        return {"placement": self.placement, "position": self.position.toDict()}
+        return {
+            "placement": self.placement.value,
+            "position": self.position.toDict(),
+            "data": self.data,
+        }
 
 
 class Game:
@@ -64,28 +69,31 @@ class Game:
 
     def reset(self):
         n = 1
-        for key in self.game_players:
+        for player in self.players:
+            id = player["id"]
             if n == 1:
-                self.game_players[key].placement = GamePlayerPlacement.FIRST
-                self.game_players[key].position = Position(0, 50)  # Left Wall Player
+                self.game_players[id] = GamePlayer(
+                    GamePlayerPlacement.FIRST, Position(0, 50), player
+                )  # Left Wall Player
             if n == 2:
-                self.game_players[key].placement = GamePlayerPlacement.SECOND
-                self.game_players[key].position = Position(100, 50)  # Right Wall Player
+                self.game_players[id] = GamePlayer(
+                    GamePlayerPlacement.SECOND, Position(100, 50), player
+                )  # Right Wall Player
             if n == 3:
-                self.game_players[key].placement = GamePlayerPlacement.THIRD
-                self.game_players[key].position = Position(50, 0)  # Top Wall Player
+                self.game_players[id] = GamePlayer(
+                    GamePlayerPlacement.THIRD, Position(50, 0), player
+                )  # Top Wall Player
             if n == 4:
-                self.game_players[key].placement = GamePlayerPlacement.FOURTH
-                self.game_players[key].position = Position(
-                    50, 100
+                self.game_players[id] = GamePlayer(
+                    GamePlayerPlacement.FOURTH, Position(50, 100), player
                 )  # Bottom Wall Player
             n += 1
 
     def handleKeyPress(self, player: Player, direction: GameDirection):
-        position = self.game_players[player.id].position
+        position = self.game_players[str(player.public_id)].position
         position.y += self.paddle_velocity
         # TODO: calculate new player position...
-        self.game_players[player.id].position = position
+        self.game_players[str(player.public_id)].position = position
 
     def toDict(self) -> dict:
         return {

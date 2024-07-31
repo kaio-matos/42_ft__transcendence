@@ -1,8 +1,7 @@
-import { Player } from "../game/player.mjs";
 import { GET, POST } from "./http.mjs";
 
 /**
- * @typedef {{ id: string, name: string, players: Player[] }} Tournament
+ * @typedef {{ id: string, name: string, players: import("./player.mjs").Player[] }} Tournament
  */
 
 export const TournamentService = {

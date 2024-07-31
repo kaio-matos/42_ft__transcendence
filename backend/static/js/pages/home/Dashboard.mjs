@@ -1,6 +1,5 @@
 import { PlayerCommunication } from "../../communication/player.mjs";
 import { Component } from "../../components/component.mjs";
-import { Player } from "../../game/player.mjs";
 import { router } from "../../index.mjs";
 import { PlayerService } from "../../services/player.mjs";
 import { TournamentService } from "../../services/tournament.mjs";

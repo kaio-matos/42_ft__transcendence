@@ -4,9 +4,7 @@ export const PlayerCommunication = {
   Events: Object.freeze({
     TOURNAMENT_BEGIN: "onTournamentBegin",
   }),
-  Commands: Object.freeze({
-    JOIN_TOURNAMENT: "JOIN_TOURNAMENT",
-  }),
+  Commands: Object.freeze({}),
 
   Communication: new ServerCommunication("ws/player/"),
 };

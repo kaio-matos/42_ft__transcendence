@@ -10,11 +10,19 @@ export class ServerCommunication {
    * @param {string} path
    * @param {boolean} immediate
    */
-  constructor(path, immediate = false) {
+  constructor(path = "", immediate = false) {
     this.path = path;
     if (immediate) {
       this.connect();
     }
+  }
+
+  /**
+   * @param {string} path
+   */
+  setPath(path) {
+    this.path = path;
+    return this;
   }
 
   isConnecting() {
@@ -34,8 +42,13 @@ export class ServerCommunication {
     return this.socket.readyState === WebSocket.CLOSED;
   }
 
-  connect() {
+  /**
+   * @param {() => void} onConnect
+   */
+  connect(onConnect) {
     this.socket = new WebSocket(this.path);
+
+    this.socket.onopen = onConnect;
 
     this.socket.onmessage = (event) => {
       let response;

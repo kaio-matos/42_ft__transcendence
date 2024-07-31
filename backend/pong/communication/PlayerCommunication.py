@@ -1,34 +1,29 @@
 import typing
-from asgiref.sync import sync_to_async
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from channels.generic.websocket import JsonWebsocketConsumer
+from channels.http import async_to_sync
 
-from pong.models import Player
+from ft_transcendence.http import ws
+from pong.game.game import Game, GameDirection, GameScreen
+from pong.models import Player, Tournament
 
 
-class PlayerCommunicationConsumer(AsyncJsonWebsocketConsumer):
+class PlayerCommunicationConsumer(JsonWebsocketConsumer):
     player_id = None
-    tournament_group_id = None
 
-    async def connect(self):
-        user = self.scope["user"]
-        if not user.is_authenticated:
+    def connect(self):
+        player = self.scope["user"]
+        if not player.is_authenticated:
             return
-        user = typing.cast(Player, user)
-        self.player_id = str(user.public_id)
-        await self.accept()
-        await self.channel_layer.group_add(self.player_id, self.channel_name)
-        await sync_to_async(user.save)()
+        player = typing.cast(Player, player)
+        self.player_id = str(player.public_id)
+        self.accept()
+        async_to_sync(self.channel_layer.group_add)(self.player_id, self.channel_name)
 
-    async def disconnect(self, code):
-        user = typing.cast(Player, self.scope["user"])
+    def disconnect(self, code):
         if self.player_id:
-            await self.channel_layer.group_discard(self.player_id, self.channel_name)
+            async_to_sync(self.channel_layer.group_discard)(
+                self.player_id, self.channel_name
+            )
 
-    async def receive_json(self, content, **kwargs):
-        if content["command"] == "COMMAND":
-            pass
-
-    async def send_event(self, event):
-        await self.send_json(event["event"])
-
-    pass
+    def send_event(self, event):
+        self.send_json(event["event"])

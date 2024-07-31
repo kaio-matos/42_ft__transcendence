@@ -5,12 +5,16 @@ from enum import Enum
 # - example: After a player create a tournament we should notify all players invited to the tournament to join the tournament
 class WSEvents(Enum):
     TOURNAMENT_BEGIN = "onTournamentBegin"
+    TOURNAMENT_START = "onTournamentStart"
+    TOURNAMENT_UPDATE = "onTournamentUpdate"
+    TOURNAMENT_FINISH = "onTournamentFinish"
 
 
 # Commands are requests from the frontend to the backend
 # - example: During the tournament players will send data about their movements with specific commands
 class WSCommands(Enum):
-    pass
+    JOIN_TOURNAMENT = "JOIN_TOURNAMENT"
+    KEY_PRESS = "KEY_PRESS"
 
 
 def WSResponse(event: WSEvents, data: dict) -> dict:
