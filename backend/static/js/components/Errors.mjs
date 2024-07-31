@@ -8,7 +8,7 @@ export class Errors extends HTMLElement {
 
   constructor() {
     super();
-    this.container = new Component("div");
+    this.container = new Component("div").class("d-flex flex-column");
   }
 
   connectedCallback() {
@@ -21,9 +21,10 @@ export class Errors extends HTMLElement {
   }
 
   /**
-   * @param {string | string[]} error
+   * @param {undefined | string | string[]} error
    */
   addErrors(error) {
+    if (!error) return;
     if (Array.isArray(error)) {
       this.errors = [...this.errors, ...error];
     } else {
@@ -41,7 +42,9 @@ export class Errors extends HTMLElement {
     this.container.clear();
     if (this.errors) {
       this.container.children(
-        this.errors.map((error) => new Component("p", { textContent: error })),
+        this.errors.map(
+          (error) => new Component("span", { textContent: error }),
+        ),
       );
     }
   }
