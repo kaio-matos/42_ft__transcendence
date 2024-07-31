@@ -1,3 +1,8 @@
+import {
+  RequestFailedError,
+  UnprocessableContentError as UnprocessableEntityError,
+} from "./errors.mjs";
+
 export const HTTPStatus = Object.freeze({
   OK: 200,
   CREATED: 201,
@@ -7,28 +12,9 @@ export const HTTPStatus = Object.freeze({
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   METHOD_NOT_ALLOWED: 405,
-  UNPROCESSABLE_CONTENT: 422,
+  UNPROCESSABLE_ENTITY: 422,
   TOO_MANY_REQUESTS: 429,
 });
-
-export class RequestFailedError extends Error {
-  /** @type {number} */
-  status;
-  /** @type {Response} */
-  response;
-  /** @type {Record<string, any>} */
-  error;
-
-  /**
-   * @param {Response} response
-   */
-  constructor(response) {
-    super();
-    this.response = response;
-    this.status = response.status;
-    this.error = response.json();
-  }
-}
 
 /**
  * @param {string} path
@@ -50,7 +36,11 @@ export async function http(path, options) {
   });
 
   if (response.status >= HTTPStatus.BAD_REQUEST) {
-    throw new RequestFailedError(response);
+    const { data } = await response.json();
+    if (response.status === HTTPStatus.UNPROCESSABLE_ENTITY) {
+      throw new UnprocessableEntityError(response, data);
+    }
+    throw new RequestFailedError(response, data);
   }
 
   try {
