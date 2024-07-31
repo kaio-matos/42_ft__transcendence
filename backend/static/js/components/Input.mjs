@@ -16,9 +16,22 @@ export class Input extends HTMLElement {
 
     const label = this.getAttribute("label");
 
+    const attributes = (() => {
+      const res = {};
+
+      for (let i = 0; i < this.attributes.length; i++) {
+        if (this.attributes[i].nodeName === "id") continue;
+
+        res[this.attributes[i].nodeName] = this.attributes[i].nodeValue;
+      }
+
+      return res;
+    })();
+
     this.input = new Component("input")
       .attributes({
         placeholder: label,
+        ...attributes,
       })
       .class("form-control");
     this.label = new Component("label", {
