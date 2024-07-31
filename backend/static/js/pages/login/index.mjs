@@ -14,7 +14,7 @@ export const Login = () => {
 
   page.element.innerHTML = `
     <form id="login-form" class="d-flex flex-column gap-3">
-      <t-input id="input-email" label="Email"></t-input>
+      <t-input id="input-email" label="Email" type="email"></t-input>
       <t-input id="input-password" label="Password" type="password"></t-input>
 
       <t-errors id="errors"></t-errors>
@@ -59,11 +59,9 @@ export const Login = () => {
       PlayerCommunication.Communication.connect();
       router.navigate("/");
     } catch (error) {
-      if (error instanceof UnprocessableEntityError) {
+      if (error instanceof RequestFailedError) {
         t_input_email.addErrors(error.data?.error?.email);
         t_input_password.addErrors(error.data?.error?.password);
-        t_errors.addErrors(error.data?.error?._errors);
-      } else if (error instanceof RequestFailedError) {
         t_errors.addErrors(error.data?.error?._errors);
       }
     } finally {
