@@ -2,7 +2,7 @@ import { router } from "../index.mjs";
 import { attachBootstrap, Component } from "./component.mjs";
 
 export class Button extends HTMLElement {
-  static observedAttributes = ["to"];
+  static observedAttributes = ["to", "loading"];
 
   /** @type {Component} */
   button;
@@ -11,6 +11,13 @@ export class Button extends HTMLElement {
   constructor() {
     super();
     this.button = new Component("button");
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setLoading(value) {
+    this.setAttribute("loading", value ? "true" : "false");
   }
 
   connectedCallback() {
@@ -49,6 +56,14 @@ export class Button extends HTMLElement {
         "click",
         this.listeners.get("click_navigate"),
       );
+    } else if (name === "loading") {
+      if (newValue === "true") {
+        this.button.clear();
+        this.button.element.textContent = "Loading...";
+      } else {
+        this.button.clear();
+        this.button.children([document.createElement("slot")]);
+      }
     }
   }
 }
