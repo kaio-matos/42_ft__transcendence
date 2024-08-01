@@ -10,7 +10,7 @@ from pong.models import Player, Tournament
 
 def index(request: HttpRequest) -> HttpResponse:
     if not request.user.is_authenticated:
-        return http.Unauthorized({"message": _("You are not authenticated")})
+        return http.Unauthorized({"message": _("Você não está autenticado")})
     tournaments = Tournament.objects.all()
     tournaments = [tournament.toDict() for tournament in tournaments]
 
@@ -19,32 +19,32 @@ def index(request: HttpRequest) -> HttpResponse:
 
 def get(request: HttpRequest, public_id: str) -> HttpResponse:
     if not request.user.is_authenticated:
-        return http.Unauthorized({"message": _("You are not authenticated")})
+        return http.Unauthorized({"message": _("Você não está autenticado")})
 
     tournament = Tournament.objects.filter(public_id=public_id).first()
     if tournament is None:
-        return http.NotFound({"message": _("Tournament not found")})
+        return http.NotFound({"message": _("Torneio não encontrado")})
 
     return http.OK(tournament.toDict())
 
 
 def create(request: HttpRequest) -> HttpResponse:
     if not request.user.is_authenticated:
-        return http.Unauthorized({"message": _("You are not authenticated")})
+        return http.Unauthorized({"message": _("Você não está autenticado")})
 
     data = json.loads(request.body)
     challenged_player_id: str = data.get("challenged_player_id")
     player = typing.cast(Player, request.user)
 
     if not challenged_player_id:
-        return http.NotFound({"message": "Player does not exist"})
+        return http.NotFound({"message": _("Jogador não existe")})
 
     challenged_player = Player.objects.filter(public_id=challenged_player_id).first()
 
     if not challenged_player:
-        return http.NotFound({"message": "Player does not exist"})
+        return http.NotFound({"message": _("Jogador não existe")})
 
-    tournament = Tournament(name="Pong Tournament")
+    tournament = Tournament(name="Torneio de Pong")
     tournament.save()
     tournament.players.add(player)
     tournament.players.add(challenged_player)

@@ -6,7 +6,7 @@ export class Loading extends HTMLElement {
   constructor() {
     super();
     this.container = new Component("div", {
-      textContent: "Loading...", // TODO: do a better loading feedback
+      textContent: "Carregando...", // TODO: do a better loading feedback
     });
   }
 
@@ -28,7 +28,7 @@ export class Loading extends HTMLElement {
     if (name === "loading") {
       if (newValue === "true") {
         this.container.clear();
-        this.container.element.textContent = "Loading...";
+        this.container.element.textContent = "Carregando...";
       } else {
         this.container.clear();
         this.container.children([document.createElement("slot")]);

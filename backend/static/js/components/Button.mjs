@@ -59,7 +59,7 @@ export class Button extends HTMLElement {
     } else if (name === "loading") {
       if (newValue === "true") {
         this.button.clear();
-        this.button.element.textContent = "Loading...";
+        this.button.element.textContent = "Carregando...";
       } else {
         this.button.clear();
         this.button.children([document.createElement("slot")]);

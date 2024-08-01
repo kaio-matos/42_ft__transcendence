@@ -9,17 +9,17 @@ export const Registration = () => {
 
   page.element.innerHTML = `
     <form id="registration-form" class="container d-flex flex-column gap-3 mx-auto">
-      <t-input id="input-name" label="Name"></t-input>
+      <t-input id="input-name" label="Nome"></t-input>
       <t-input id="input-email" label="Email" type="email"></t-input>
-      <t-input id="input-password" label="Password" type="password"></t-input>
+      <t-input id="input-password" label="Senha" type="password"></t-input>
 
       <t-errors id="errors"></t-errors>
-      <t-button id="register-button">Register</t-button>
+      <t-button id="register-button">Registrar</t-button>
     </form>
 
     <p class="mt-5 d-flex gap-2">
-      Already has an account?
-      <t-button to="/login">Login now</t-button>
+      Já tem uma conta?
+      <t-button to="/login">Entrar agora</t-button>
     </p>
   `;
 

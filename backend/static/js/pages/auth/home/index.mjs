@@ -11,31 +11,31 @@ export const Home = () => {
   const page = new Component("div").class("container mx-auto row");
 
   page.element.innerHTML = `
-    <t-button to="/auth/profile">Profile</t-button>
+    <t-button to="/auth/profile">Perfil</t-button>
 
     <div class="border border-secondary p-2 rounded col-8">
-      <p>Chat Title</p>
+      <p>Chat</p>
 
       <t-loading id="loading-chat" loading="true">
         <div id="chat" class="border border-secondary p-2 rounded overflow-y-auto mb-3" style="height: 70vh;">
         </div>
 
-        <t-input label="Message" class="mt-3" ></t-input>
+        <t-input label="Mensagem" class="mt-3" ></t-input>
       </t-loading>
     </div>
     <div class="border border-secondary p-2 rounded col-4">
       <div class="border border-secondary p-2 rounded mb-3">
-        <strong class="mb-2 d-block">Add player as friend</strong>
+        <strong class="mb-2 d-block">Adicionar jogador como amigo</strong>
 
         <form id="add-friend-form" class="d-flex gap-1">
           <t-input label="Email" class="col-8"></t-input>
 
-          <t-button class="col-4">Send</t-button>
+          <t-button class="col-4">Adicionar</t-button>
         </form>
       </div>
 
       <div class="border border-secondary p-2 rounded">
-        <strong class="mb-2 d-block">Friends</strong>
+        <strong class="mb-2 d-block">Amigos</strong>
         <t-loading id="loading-players" loading="true">
           <ul id="players-list" class="list-group">
           </ul>
@@ -108,12 +108,12 @@ export const Home = () => {
           .children([
             new Component("div").class("d-flex gap-2").children([
               new Component("t-button", {
-                textContent: "Chat",
+                textContent: "Conversar",
               }).addEventListener("click", () => {
                 console.log("Chat with Player", friend);
               }),
               new Component("t-button", {
-                textContent: "Challenge",
+                textContent: "Desafiar",
               }).addEventListener("click", async () => {
                 // TODO: Handle loading
                 console.log("Challenging Player ", friend);

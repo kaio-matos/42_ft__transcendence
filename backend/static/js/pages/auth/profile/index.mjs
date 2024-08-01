@@ -8,21 +8,21 @@ export const Profile = () => {
 
   page.element.innerHTML = `
     <div class="border border-secondary p-2 rounded">
-      <h1>Profile</h1>
+      <h1>Perfil</h1>
       <form id="update-form">
         <div class="mb-3">
           <strong>Email:</strong>
           <span id="email-placeholder"></span>
         </div>
 
-        <t-input id="input-name" label="Name"></t-input>
+        <t-input id="input-name" label="Nome"></t-input>
 
         <t-errors id="errors"></t-errors>
         <t-toast>
-          <strong slot="header">Success!</strong>
-          Your profile was updated successfully!
+          <strong slot="header">Sucesso!</strong>
+          Seu perfil foi atualizado com sucesso!
         </t-toast>
-        <t-button id="save-button" class="mt-3">Save</t-button>
+        <t-button id="save-button" class="mt-3">Salvar</t-button>
       </form>
     </div>
   `;

@@ -12,14 +12,14 @@ export const Login = () => {
   page.element.innerHTML = `
     <form id="login-form" class="d-flex flex-column gap-3">
       <t-input id="input-email" label="Email" type="email"></t-input>
-      <t-input id="input-password" label="Password" type="password"></t-input>
+      <t-input id="input-password" label="Senha" type="password"></t-input>
 
       <t-errors id="errors"></t-errors>
-      <t-button id="login-button">Login</t-button>
+      <t-button id="login-button">Entrar</t-button>
     </form>
     <p class="mt-5 d-flex gap-2">
-      Does not have an account?
-      <t-button to="/register">Register now</t-button>
+      Não tem uma conta?
+      <t-button to="/register">Registre agora</t-button>
     </p>
   `;
 
