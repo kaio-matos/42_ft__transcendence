@@ -53,6 +53,20 @@ export class Input extends HTMLElement {
   }
 
   /**
+   * @returns {string}
+   */
+  get value() {
+    return this.input.element.value;
+  }
+
+  /**
+   * @param {string} value
+   */
+  set value(value) {
+    this.input.element.value = value;
+  }
+
+  /**
    * @param {string | string[]} error
    */
   addErrors(errors) {
