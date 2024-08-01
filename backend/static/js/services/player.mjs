@@ -1,4 +1,4 @@
-import { GET, POST } from "./http.mjs";
+import { GET, POST, PUT } from "./http.mjs";
 
 /**
  * @typedef {{ id: string, name: string, email: string }} Player
@@ -14,6 +14,15 @@ export const PlayerService = {
   },
 
   /**
+   * @param {{ email: string, password: string }} player
+   * @returns {Promise<Player>}
+   */
+  async login(player) {
+    const { data } = await POST("/api/pong/player/login", player);
+    return data.data;
+  },
+
+  /**
    * @param {{ name: string, email: string, password: string }} player
    * @returns {Promise<Player>}
    */
@@ -23,11 +32,11 @@ export const PlayerService = {
   },
 
   /**
-   * @param {{ email: string, password: string }} player
+   * @param {{ name: string }} player
    * @returns {Promise<Player>}
    */
-  async login(player) {
-    const { data } = await POST("/api/pong/player/login", player);
+  async updatePlayer(player) {
+    const { data } = await PUT("/api/pong/player/update", player);
     return data.data;
   },
 

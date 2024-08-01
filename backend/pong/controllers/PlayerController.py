@@ -23,7 +23,7 @@ def login(request: HttpRequest) -> HttpResponse:
     player = auth.authenticate(request, email=email, password=password)
     if player is not None:
         auth.login(request, player)
-        return http.OK({"player": typing.cast(Player, player).toDict()})
+        return http.OK(typing.cast(Player, player).toDict())
     return http.Unauthorized({"error": {"_errors": "Invalid email or password"}})
 
 
@@ -50,3 +50,20 @@ def create(request: HttpRequest) -> HttpResponse:
     user.save()
 
     return http.Created(user.toDict())
+
+
+def update(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return http.Unauthorized({"message": _("You are not authenticated")})
+
+    player = typing.cast(Player, request.user)
+    data = json.loads(request.body)
+    name = data.get("name")
+
+    if not name:
+        raise ValidationError(_("Nome inválido"))
+
+    player.name = name
+    player.save()
+
+    return http.OK(player.toDict())

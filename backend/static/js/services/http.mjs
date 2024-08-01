@@ -80,9 +80,10 @@ export async function POST(path, payload, options) {
  * @param {string} path
  * @param {Exclude<Parameters<typeof fetch>[0], URL>} options
  */
-export async function PUT(path, options) {
+export async function PUT(path, payload, options) {
   return http(path, {
     ...options,
+    body: JSON.stringify(payload),
     method: "PUT",
   });
 }

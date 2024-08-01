@@ -8,6 +8,7 @@ import "./communication/player.mjs";
 import "./components/index.mjs";
 import { Registration } from "./pages/registration/index.mjs";
 import { session } from "./state/session.mjs";
+import { Profile } from "./pages/auth/profile/index.mjs";
 
 export const router = new Router(
   [
@@ -15,6 +16,7 @@ export const router = new Router(
     new Route("/register", Registration),
     new Route("/auth/", Home),
     new Route("/auth/game", Game),
+    new Route("/auth/profile", Profile),
   ],
   { NotFoundPage: NotFound },
 );
@@ -27,7 +29,7 @@ function validateRoute() {
   if (!router.current?.path?.includes?.("auth")) return;
 
   if (!session.player) {
-    router.navigate("not-found");
+    router.navigate("/not-found");
   }
 }
 

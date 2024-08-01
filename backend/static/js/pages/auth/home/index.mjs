@@ -9,6 +9,8 @@ export const Home = () => {
   const page = new Component("div").class("container mx-auto row");
 
   page.element.innerHTML = `
+    <t-button to="/auth/profile">Profile</t-button>
+
     <div class="border border-secondary p-2 rounded col-8">
       <p>Chat Title</p>
 
@@ -28,6 +30,7 @@ export const Home = () => {
     </div>
   `;
 
+  // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
   // TODO: Remove this listener after page change
   PlayerCommunication.Communication.addEventListener(
     PlayerCommunication.Events.TOURNAMENT_BEGIN,
