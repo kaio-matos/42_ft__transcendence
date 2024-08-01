@@ -35,7 +35,7 @@ export const Home = () => {
   PlayerCommunication.Communication.addEventListener(
     PlayerCommunication.Events.TOURNAMENT_BEGIN,
     ({ tournament }) => {
-      router.navigate("auth/game?tournament=" + tournament.id);
+      router.navigate("/auth/game?tournament=" + tournament.id);
     },
   );
 
