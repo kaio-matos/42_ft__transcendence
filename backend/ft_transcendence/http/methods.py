@@ -17,6 +17,11 @@ def wrapCallback(method: str, callback):
                 return http.UnprocessableEntity({"error": e.message_dict})
             else:
                 return http.UnprocessableEntity({"error": {"_errors": e.messages}})
+        except ValueError as e:
+            if not isinstance(e.args[0], str):
+                return http.BadRequest({"error": e.args[0]})
+            else:
+                return http.BadRequest({"error": {"_errors": e.args[0]}})
         except Exception as e:
             return http.InternalServerError(
                 {"error": {"_errors": traceback.format_exception_only(e)}}
