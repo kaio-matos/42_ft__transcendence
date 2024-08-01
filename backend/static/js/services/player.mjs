@@ -41,6 +41,23 @@ export const PlayerService = {
   },
 
   /**
+   * @returns {Promise<Player[]>}
+   */
+  async getFriends() {
+    const { data } = await GET("/api/pong/player/friends");
+    return data.data;
+  },
+
+  /**
+   * @param {{ email: string }} payload
+   * @returns {Promise<Player>}
+   */
+  async addFriend(payload) {
+    const { data } = await POST("/api/pong/player/friends/add", payload);
+    return data.data;
+  },
+
+  /**
    * @param {string} playerId
    * @returns {Promise<{player: Player, chat: string[]}>}
    */

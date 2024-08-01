@@ -1,8 +1,10 @@
 import { PlayerCommunication } from "../../../communication/player.mjs";
 import { Component } from "../../../components/component.mjs";
 import { router } from "../../../index.mjs";
+import { RequestFailedError } from "../../../services/errors.mjs";
 import { PlayerService } from "../../../services/player.mjs";
 import { TournamentService } from "../../../services/tournament.mjs";
+import { session } from "../../../state/session.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Home = () => {
@@ -22,11 +24,23 @@ export const Home = () => {
       </t-loading>
     </div>
     <div class="border border-secondary p-2 rounded col-4">
-      <p>Online Players</p>
-      <t-loading id="loading-players" loading="true">
-        <ul id="players-list" class="list-group">
-        </ul>
-      </t-loading>
+      <div class="border border-secondary p-2 rounded mb-3">
+        <strong class="mb-2 d-block">Add player as friend</strong>
+
+        <form id="add-friend-form" class="d-flex gap-1">
+          <t-input label="Email" class="col-8"></t-input>
+
+          <t-button class="col-4">Send</t-button>
+        </form>
+      </div>
+
+      <div class="border border-secondary p-2 rounded">
+        <strong class="mb-2 d-block">Friends</strong>
+        <t-loading id="loading-players" loading="true">
+          <ul id="players-list" class="list-group">
+          </ul>
+        </t-loading>
+      </div>
     </div>
   `;
 
@@ -50,13 +64,44 @@ export const Home = () => {
       ),
     );
   });
-  PlayerService.getPlayers().then((players) => {
+
+  const form_add_friend = page.element.querySelector("#add-friend-form");
+  const form_add_friend_t_input_email =
+    form_add_friend.querySelector("t-input");
+
+  let form_add_friend_email = "";
+  form_add_friend_t_input_email.input.addEventListener("change", (e) => {
+    form_add_friend_email = e.target.value;
+  });
+
+  form_add_friend.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    form_add_friend_t_input_email.clearErrors();
+    const form_add_friend_t_input_button =
+      form_add_friend.querySelector("t-button");
+
+    try {
+      form_add_friend_t_input_button.setLoading(true);
+      const player = await PlayerService.addFriend({
+        email: form_add_friend_email,
+      });
+      session.player = player;
+    } catch (error) {
+      if (error instanceof RequestFailedError) {
+        form_add_friend_t_input_email.addErrors(error.data?.error?.email);
+      }
+    } finally {
+      form_add_friend_t_input_button.setLoading(false);
+    }
+  });
+
+  PlayerService.getFriends().then((friends) => {
     page.element.querySelector("#loading-players").setLoading(false);
     const container = page.element.querySelector("#players-list");
 
-    players.map((player) =>
+    friends.map((friend) =>
       container.append(
-        new Component("li", { textContent: player.name })
+        new Component("li", { textContent: friend.name })
           .class(
             "d-flex flex-column list-group-item justify-content-md-between",
           )
@@ -65,15 +110,15 @@ export const Home = () => {
               new Component("t-button", {
                 textContent: "Chat",
               }).addEventListener("click", () => {
-                console.log("Chat with Player", player);
+                console.log("Chat with Player", friend);
               }),
               new Component("t-button", {
                 textContent: "Challenge",
               }).addEventListener("click", async () => {
                 // TODO: Handle loading
-                console.log("Challenging Player ", player);
+                console.log("Challenging Player ", friend);
                 await TournamentService.createTournament({
-                  challenged_player_id: player.id,
+                  challenged_player_id: friend.id,
                 });
               }),
             ]),

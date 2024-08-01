@@ -51,6 +51,7 @@ class Player(AbstractBaseUser, PermissionsMixin):
     public_id = models.UUIDField(
         unique=True, db_index=True, default=uuid.uuid4, editable=False
     )
+    friends = models.ManyToManyField("self", blank=True)
 
     objects = CustomUserManager()
 

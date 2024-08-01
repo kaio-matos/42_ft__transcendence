@@ -67,3 +67,42 @@ def update(request: HttpRequest) -> HttpResponse:
     player.save()
 
     return http.OK(player.toDict())
+
+
+def addFriend(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return http.Unauthorized({"message": _("You are not authenticated")})
+
+    player = typing.cast(Player, request.user)
+    data = json.loads(request.body)
+    email = data.get("email")
+
+    try:
+        validators.validate_email(email)
+    except ValidationError:
+        raise ValidationError({"email": _("Email inválido!")})
+
+    print(player.friends.filter(email=email).first())
+    if player.friends.filter(email=email).first() is not None:
+        raise ValueError({"email": "Este jogador já é seu amigo"})
+
+    friend = Player.objects.filter(email=email).first()
+
+    if not friend:
+        return http.NotFound({"message": _("Jogador não encontrado")})
+
+    player.friends.add(friend)
+    player.save()
+
+    return http.OK(player.toDict())
+
+
+def getFriends(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return http.Unauthorized({"message": _("You are not authenticated")})
+
+    player = typing.cast(Player, request.user)
+    friends = player.friends.all()
+    friends = [player.toDict() for player in friends]
+
+    return http.OK(friends)

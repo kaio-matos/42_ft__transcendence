@@ -24,7 +24,7 @@ export class Button extends HTMLElement {
     const shadow = this.attachShadow({ mode: "open" });
     attachBootstrap(shadow);
 
-    this.button.class("btn btn-primary w-100");
+    this.button.class("btn btn-primary w-100 h-100");
     this.button.class(Array.from(this.classList.values()));
     this.button.element.append(document.createElement("slot"));
     shadow.appendChild(this.button.element);
