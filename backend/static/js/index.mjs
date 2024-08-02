@@ -9,6 +9,7 @@ import "./components/index.mjs";
 import { Registration } from "./pages/registration/index.mjs";
 import { session } from "./state/session.mjs";
 import { Profile } from "./pages/auth/profile/index.mjs";
+import { PlayerProfile } from "./pages/auth/player/profile/index.mjs";
 
 export const router = new Router(
   [
@@ -17,6 +18,7 @@ export const router = new Router(
     new Route("/auth/", Home),
     new Route("/auth/game", Game),
     new Route("/auth/profile", Profile),
+    new Route("/auth/player/profile", PlayerProfile),
   ],
   { NotFoundPage: NotFound },
 );

@@ -6,14 +6,6 @@ import { GET, POST, PUT } from "./http.mjs";
 
 export const PlayerService = {
   /**
-   * @returns {Promise<Player[]>}
-   */
-  async getPlayers() {
-    const { data } = await GET("/api/pong/player");
-    return data.data;
-  },
-
-  /**
    * @param {{ email: string, password: string }} player
    * @returns {Promise<Player>}
    */
@@ -28,6 +20,23 @@ export const PlayerService = {
    */
   async createPlayer(player) {
     const { data } = await POST("/api/pong/player/create", player);
+    return data.data;
+  },
+
+  /**
+   * @returns {Promise<Player[]>}
+   */
+  async getPlayers() {
+    const { data } = await GET("/api/pong/player");
+    return data.data;
+  },
+
+  /**
+   * @param {{ player_id: string }} player
+   * @returns {Promise<Player>}
+   */
+  async getPlayer({ player_id }) {
+    const { data } = await GET("/api/pong/player/" + player_id);
     return data.data;
   },
 

@@ -9,13 +9,6 @@ from django.core.exceptions import ValidationError
 from django.contrib import auth
 
 
-def index(request: HttpRequest) -> HttpResponse:
-    players = Player.objects.all()
-    players = [player.toDict() for player in players]
-
-    return http.OK(players)
-
-
 def login(request: HttpRequest) -> HttpResponse:
     data = json.loads(request.body)
     email = data.get("email")
@@ -50,6 +43,28 @@ def create(request: HttpRequest) -> HttpResponse:
     user.save()
 
     return http.Created(user.toDict())
+
+
+def index(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return http.Unauthorized({"message": _("Você não está autenticado")})
+
+    players = Player.objects.all()
+    players = [player.toDict() for player in players]
+
+    return http.OK(players)
+
+
+def get(request: HttpRequest, public_id: str) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return http.Unauthorized({"message": _("Você não está autenticado")})
+
+    player = Player.objects.filter(public_id=public_id).first()
+
+    if not player:
+        return http.NotFound({"message": _("Jogador não encontrado")})
+
+    return http.OK(player.toDict())
 
 
 def update(request: HttpRequest) -> HttpResponse:

@@ -108,15 +108,19 @@ export const Home = () => {
           .children([
             new Component("div").class("d-flex gap-2").children([
               new Component("t-button", {
-                textContent: "Conversar",
+                textContent: "Perfil",
               }).addEventListener("click", () => {
-                console.log("Chat with Player", friend);
+                router.navigate("/auth/player/profile?player=" + friend.id);
               }),
+
+              new Component("t-button", {
+                textContent: "Conversar",
+              }).addEventListener("click", () => {}),
+
               new Component("t-button", {
                 textContent: "Desafiar",
               }).addEventListener("click", async () => {
                 // TODO: Handle loading
-                console.log("Challenging Player ", friend);
                 await TournamentService.createTournament({
                   challenged_player_id: friend.id,
                 });
