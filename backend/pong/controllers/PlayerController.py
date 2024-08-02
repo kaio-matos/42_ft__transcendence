@@ -82,7 +82,9 @@ def addFriend(request: HttpRequest) -> HttpResponse:
     except ValidationError:
         raise ValidationError({"email": _("Email inválido!")})
 
-    print(player.friends.filter(email=email).first())
+    if email == player.email:
+        raise ValueError({"email": _("Você não pode adicionar a si mesmo como amigo")})
+
     if player.friends.filter(email=email).first() is not None:
         raise ValueError({"email": _("Este jogador já é seu amigo")})
 
