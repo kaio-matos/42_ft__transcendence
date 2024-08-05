@@ -114,9 +114,10 @@ export class Component {
   /**
    * @param {Parameters<HTMLElement['addEventListener']>[0]} event
    * @param {Parameters<HTMLElement['addEventListener']>[1]} callback
+   * @param {Parameters<HTMLElement['addEventListener']>[2]} options
    */
-  addEventListener(event, callback) {
-    this.element.addEventListener(event, callback);
+  addEventListener(event, callback, options) {
+    this.element.addEventListener(event, callback, options);
     return this;
   }
 
