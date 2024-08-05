@@ -11,8 +11,6 @@ export const Home = () => {
   const page = new Component("div").class("container mx-auto row");
 
   page.element.innerHTML = `
-    <t-button to="/auth/profile">Perfil</t-button>
-
     <div class="border border-secondary p-2 rounded col-8">
       <p>Chat</p>
 
@@ -24,20 +22,23 @@ export const Home = () => {
       </t-loading>
     </div>
     <div class="border border-secondary p-2 rounded col-4">
+      <t-button to="/auth/profile" class="d-block mb-2" btn-class="w-100">Perfil</t-button>
+
       <div class="border border-secondary p-2 rounded mb-3">
         <strong class="mb-2 d-block">Adicionar jogador como amigo</strong>
 
         <form id="add-friend-form" class="d-flex gap-1">
           <t-input label="Email" class="col-8"></t-input>
 
-          <t-button class="col-4">Adicionar</t-button>
+          <t-button class="d-block col-4" btn-class="w-100 h-100">Adicionar</t-button>
         </form>
       </div>
 
-      <div class="border border-secondary p-2 rounded">
+      <div class="border border-secondary p-2 rounded h-50 overflow-y-auto">
         <strong class="mb-2 d-block">Amigos</strong>
         <t-loading id="loading-players" loading="true">
           <ul id="players-list" class="list-group">
+            Nenhum amigo encontrado
           </ul>
         </t-loading>
       </div>

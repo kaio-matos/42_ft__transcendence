@@ -14,10 +14,10 @@ export const Registration = () => {
       <t-input id="input-password" label="Senha" type="password"></t-input>
 
       <t-errors id="errors"></t-errors>
-      <t-button id="register-button">Registrar</t-button>
+      <t-button id="register-button" class="d-block" btn-class="w-100">Registrar</t-button>
     </form>
 
-    <p class="mt-5 d-flex gap-2">
+    <p class="mt-5 d-flex gap-2 align-items-center">
       Já tem uma conta?
       <t-button to="/login">Entrar agora</t-button>
     </p>

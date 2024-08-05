@@ -58,6 +58,7 @@ export class InputImage extends HTMLElement {
 
   connectedCallback() {
     const shadow = this.attachShadow({ mode: "open" });
+    shadow.innerHTML = "<style>:host { display: block; }</style>";
     attachBootstrap(shadow);
 
     this.button.children([this.input]);

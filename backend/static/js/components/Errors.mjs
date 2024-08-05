@@ -13,6 +13,7 @@ export class Errors extends HTMLElement {
 
   connectedCallback() {
     const shadow = this.attachShadow({ mode: "open" });
+    shadow.innerHTML = "<style>:host { display: block; }</style>";
     attachBootstrap(shadow);
 
     this.container.class(["text-danger-emphasis", ""]);

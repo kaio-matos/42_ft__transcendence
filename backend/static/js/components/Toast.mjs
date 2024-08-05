@@ -31,6 +31,7 @@ export class Toast extends HTMLElement {
 
   connectedCallback() {
     const shadow = this.attachShadow({ mode: "open" });
+    shadow.innerHTML = "<style>:host { display: block; }</style>";
     attachBootstrap(shadow);
 
     shadow.appendChild(this.container.element);

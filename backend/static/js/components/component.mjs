@@ -58,7 +58,7 @@ export class Component {
   }
 
   /**
-   * @param {string | string[]} classes
+   * @param {string | string[] | null | undefined} classes
    */
   class(classes) {
     if (!classes) return this;

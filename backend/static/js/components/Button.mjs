@@ -2,7 +2,7 @@ import { router } from "../index.mjs";
 import { attachBootstrap, Component } from "./component.mjs";
 
 export class Button extends HTMLElement {
-  static observedAttributes = ["to", "loading", "theme"];
+  static observedAttributes = ["to", "loading", "theme", "btn-class"];
 
   /** @type {Component} */
   button;
@@ -25,18 +25,19 @@ export class Button extends HTMLElement {
 
   connectedCallback() {
     const shadow = this.attachShadow({ mode: "open" });
+    shadow.innerHTML = "<style>:host { display: inline-block; }</style>";
     attachBootstrap(shadow);
 
     const themes = {
       none: "bg-transparent",
-      primary: "btn btn-primary w-100 h-100",
+      primary: "btn btn-primary",
     };
 
     if (this.theme === "none") {
       this.button.styles({ outline: "none", padding: "0px", border: "none" });
     }
     this.button.class(themes[this.theme]);
-    this.button.class(Array.from(this.classList.values()));
+    this.button.class(this.attributes.getNamedItem("btn-class")?.nodeValue);
     this.button.element.append(document.createElement("slot"));
     shadow.appendChild(this.button.element);
 

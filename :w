@@ -17,7 +17,7 @@ export const Login = () => {
       <t-errors id="errors"></t-errors>
       <t-button id="login-button" class="d-block" btn-class="w-100">Entrar</t-button>
     </form>
-    <p class="mt-5 d-flex align-items-center gap-2">
+    <p class="mt-5 d-flex gap-2">
       Não tem uma conta?
       <t-button to="/register">Registre agora</t-button>
     </p>

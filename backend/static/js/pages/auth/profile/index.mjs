@@ -19,11 +19,11 @@ export const Profile = () => {
           <t-input-image theme="none" class="position-relative w-100 profile_avatar_edit_container">
             <img id="avatar-preview" style="max-width: 100%; max-height: 200px" />
             <span class="position-absolute top-50 start-50 translate-middle h-100 w-100 profile_avatar_edit_overlay"> 
-              <span class="position-absolute top-50 start-50 translate-middle">Edit</span>
+              <span class="position-absolute top-50 start-50 translate-middle">Editar</span>
             </span>
           </t-input-image>
-          <t-button id="avatar-save-button">
-            Save
+          <t-button id="avatar-save-button" class="d-block" btn-class="w-100">
+            Salvar
           </t-button>
         </div>
       </div>
@@ -37,7 +37,7 @@ export const Profile = () => {
         <t-input id="input-name" label="Nome"></t-input>
 
         <t-errors id="update-form-errors"></t-errors>
-        <t-button id="save-button" class="mt-3">Salvar</t-button>
+        <t-button id="save-button" class="d-block mt-3" btn-class="w-100">Salvar</t-button>
       </form>
 
       <t-toast id="update-avatar-toast-success">
