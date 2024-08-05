@@ -2,11 +2,14 @@ import { router } from "../index.mjs";
 import { attachBootstrap, Component } from "./component.mjs";
 
 export class Button extends HTMLElement {
-  static observedAttributes = ["to", "loading"];
+  static observedAttributes = ["to", "loading", "theme"];
 
   /** @type {Component} */
   button;
+
   listeners = new Map();
+
+  theme = "primary";
 
   constructor() {
     super();
@@ -24,7 +27,15 @@ export class Button extends HTMLElement {
     const shadow = this.attachShadow({ mode: "open" });
     attachBootstrap(shadow);
 
-    this.button.class("btn btn-primary w-100 h-100");
+    const themes = {
+      none: "bg-transparent",
+      primary: "btn btn-primary w-100 h-100",
+    };
+
+    if (this.theme === "none") {
+      this.button.styles({ outline: "none", padding: "0px", border: "none" });
+    }
+    this.button.class(themes[this.theme]);
     this.button.class(Array.from(this.classList.values()));
     this.button.element.append(document.createElement("slot"));
     shadow.appendChild(this.button.element);
@@ -64,6 +75,8 @@ export class Button extends HTMLElement {
         this.button.clear();
         this.button.children([document.createElement("slot")]);
       }
+    } else if (name === "theme") {
+      this.theme = newValue ? newValue : "primary";
     }
   }
 }
