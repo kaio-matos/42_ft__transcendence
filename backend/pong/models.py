@@ -1,3 +1,4 @@
+import os
 import uuid
 from asgiref.sync import async_to_sync
 from channels.consumer import get_channel_layer
@@ -43,13 +44,22 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-class Player(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(_("email address"), unique=True)
-    name = models.CharField(max_length=150, unique=True)
+def playerAvatarPath(player, filename: str):
+    _, extension = os.path.splitext(filename)
+    return f"player/avatar/{player.public_id}{extension}"
 
+
+class Player(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
     public_id = models.UUIDField(
         unique=True, db_index=True, default=uuid.uuid4, editable=False
+    )
+    email = models.EmailField(_("email address"), unique=True)
+    name = models.CharField(max_length=150, unique=True)
+    avatar = models.ImageField(
+        upload_to=playerAvatarPath,
+        default="/default/player/avatar/default.jpg",
+        blank=True,
     )
     friends = models.ManyToManyField("self", blank=True)
 
@@ -66,6 +76,7 @@ class Player(AbstractBaseUser, PermissionsMixin):
             "id": str(self.public_id),
             "name": self.name,
             "email": self.email,
+            "avatar": None if not self.avatar else self.avatar.url,
         }
 
 

@@ -1,4 +1,8 @@
 import { Component } from "../../../components/component.mjs";
+import {
+  RequestFailedError,
+  UnprocessableEntityError,
+} from "../../../services/errors.mjs";
 import { PlayerService } from "../../../services/player.mjs";
 import { session } from "../../../state/session.mjs";
 
@@ -8,7 +12,22 @@ export const Profile = () => {
 
   page.element.innerHTML = `
     <div class="border border-secondary p-2 rounded">
-      <h1>Perfil</h1>
+      <div class="d-flex justify-content-between">
+        <h1>Perfil</h1>
+
+        <div class="d-flex flex-column gap-2" style="width: 200px">
+          <t-input-image theme="none" class="position-relative w-100 profile_avatar_edit_container">
+            <img id="avatar-preview" style="max-width: 100%; max-height: 200px" />
+            <span class="position-absolute top-50 start-50 translate-middle h-100 w-100 profile_avatar_edit_overlay"> 
+              <span class="position-absolute top-50 start-50 translate-middle">Edit</span>
+            </span>
+          </t-input-image>
+          <t-button id="avatar-save-button">
+            Save
+          </t-button>
+        </div>
+      </div>
+
       <form id="update-form">
         <div class="mb-3">
           <strong>Email:</strong>
@@ -17,22 +36,39 @@ export const Profile = () => {
 
         <t-input id="input-name" label="Nome"></t-input>
 
-        <t-errors id="errors"></t-errors>
-        <t-toast>
-          <strong slot="header">Sucesso!</strong>
-          Seu perfil foi atualizado com sucesso!
-        </t-toast>
+        <t-errors id="update-form-errors"></t-errors>
         <t-button id="save-button" class="mt-3">Salvar</t-button>
       </form>
+
+      <t-toast id="update-avatar-toast-success">
+        <strong slot="header">Sucesso!</strong>
+        Seu avatar foi atualizado com sucesso!
+      </t-toast>
+      <t-toast id="update-form-toast-success">
+        <strong slot="header">Sucesso!</strong>
+        Seu perfil foi atualizado com sucesso!
+      </t-toast>
     </div>
   `;
 
+  const t_input_image_avatar = page.element.querySelector("t-input-image");
+  const img_avatar_preview = page.element.querySelector("#avatar-preview");
+  const t_button_avatar_save = page.element.querySelector(
+    "#avatar-save-button",
+  );
+
   const form = page.element.querySelector("#update-form");
   const t_input_name = form.querySelector("#input-name");
-  const t_errors = form.querySelector("#errors");
+  const t_errors_update_form = form.querySelector("#update-form-errors");
   const t_button_save = form.querySelector("#save-button");
   const email_placeholder = form.querySelector("#email-placeholder");
-  const t_toast_success = form.querySelector("t-toast");
+
+  const t_toast_success_update_avatar = page.element.querySelector(
+    "#update-avatar-toast-success",
+  );
+  const t_toast_success_update_form = page.element.querySelector(
+    "#update-form-toast-success",
+  );
 
   t_input_name.value = session.player.name;
   email_placeholder.textContent = session.player.email;
@@ -43,10 +79,38 @@ export const Profile = () => {
     name = e.target.value;
   });
 
+  t_input_image_avatar.input.addEventListener("change", async (event) => {
+    const images = await t_input_image_avatar.getImages();
+    img_avatar_preview.src = images[0].src;
+  });
+
+  img_avatar_preview.src = session.player.avatar ?? undefined;
+
+  t_button_avatar_save.addEventListener("click", async (event) => {
+    try {
+      const file = t_input_image_avatar.files[0];
+      if (!file) return;
+      t_button_avatar_save.setLoading(true);
+      const player = await PlayerService.updatePlayerAvatar({
+        avatar: file,
+      });
+      session.player = player;
+      t_toast_success_update_avatar.open();
+    } catch (error) {
+      if (error instanceof UnprocessableEntityError) {
+        t_input_image_avatar.addErrors(error.data?.error?.name);
+      } else if (error instanceof RequestFailedError) {
+        t_input_image_avatar.addErrors(error.data?.error?.name);
+      }
+    } finally {
+      t_button_avatar_save.setLoading(false);
+    }
+  });
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     t_input_name.clearErrors();
-    t_errors.clearErrors();
+    t_errors_update_form.clearErrors();
 
     try {
       t_button_save.setLoading(true);
@@ -54,13 +118,13 @@ export const Profile = () => {
         name: name,
       });
       session.player = player;
-      t_toast_success.open();
+      t_toast_success_update_form.open();
     } catch (error) {
       if (error instanceof UnprocessableEntityError) {
         t_input_name.addErrors(error.data?.error?.name);
-        t_errors.addErrors(error.data?.error?._errors);
+        t_errors_update_form.addErrors(error.data?.error?._errors);
       } else if (error instanceof RequestFailedError) {
-        t_errors.addErrors(error.data?.error?._errors);
+        t_errors_update_form.addErrors(error.data?.error?._errors);
       }
     } finally {
       t_button_save.setLoading(false);

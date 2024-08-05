@@ -1,6 +1,7 @@
 import json
 import typing
 from django.core import validators
+from django import forms
 from django.http import HttpRequest, HttpResponse
 from django.utils.translation import gettext_lazy as _
 from ft_transcendence.http import http
@@ -43,6 +44,27 @@ def create(request: HttpRequest) -> HttpResponse:
     user.save()
 
     return http.Created(user.toDict())
+
+
+class AvatarForm(forms.Form):
+    avatar = forms.ImageField(required=True)
+
+
+def setAvatar(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return http.Unauthorized({"message": _("Você não está autenticado")})
+
+    player = typing.cast(Player, request.user)
+
+    form = AvatarForm(request.POST, request.FILES)
+
+    if not form.is_valid():
+        raise ValueError({"avatar": form.errors.values()})
+
+    player.avatar = form.files.get("avatar")
+    player.save()
+
+    return http.OK(player.toDict())
 
 
 def index(request: HttpRequest) -> HttpResponse:

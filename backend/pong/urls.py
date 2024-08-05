@@ -5,6 +5,7 @@ urlpatterns = [
     GET("player", PlayerController.index),
     POST("player/create", PlayerController.create),
     PUT("player/update", PlayerController.update),
+    POST("player/avatar", PlayerController.setAvatar),
     POST("player/login", PlayerController.login),
     GET("player/friends", PlayerController.getFriends),
     POST("player/friends/add", PlayerController.addFriend),

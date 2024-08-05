@@ -65,13 +65,13 @@ export async function GET(path, options) {
 
 /**
  * @param {string} path
- * @param {object} payload
+ * @param {object | FormData} payload
  * @param {Exclude<Parameters<typeof fetch>[0], URL>} options
  */
 export async function POST(path, payload, options) {
   return http(path, {
     ...options,
-    body: JSON.stringify(payload),
+    body: payload instanceof FormData ? payload : JSON.stringify(payload),
     method: "POST",
   });
 }

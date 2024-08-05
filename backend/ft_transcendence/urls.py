@@ -19,6 +19,7 @@ from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.contrib.staticfiles import views
+from django.conf.urls.static import static
 
 urlpatterns = []
 
@@ -28,6 +29,8 @@ if settings.DEBUG:
         re_path(r"^static/(?P<path>.*)$", views.serve),
     ]
 
+# TODO: This is not recommended, we should at least use nginx to serve these dynamic files
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += [
     path("api/pong/", include("pong.urls")),

@@ -2,3 +2,13 @@
 	height: 100vh;
 	width: 100vw;
 }
+
+.profile_avatar_edit_overlay {
+	opacity: 0;
+	transition: all 250ms;
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+.profile_avatar_edit_container:hover .profile_avatar_edit_overlay {
+	opacity: 1;
+}

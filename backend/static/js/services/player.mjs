@@ -1,7 +1,7 @@
 import { GET, POST, PUT } from "./http.mjs";
 
 /**
- * @typedef {{ id: string, name: string, email: string }} Player
+ * @typedef {{ id: string, name: string, email: string, avatar: string }} Player
  */
 
 export const PlayerService = {
@@ -46,6 +46,19 @@ export const PlayerService = {
    */
   async updatePlayer(player) {
     const { data } = await PUT("/api/pong/player/update", player);
+    return data.data;
+  },
+
+  /**
+   * @param {{ avatar: File }} payload
+   * @returns {Promise<Player>}
+   */
+  async updatePlayerAvatar(payload) {
+    const form = new FormData();
+
+    form.append("avatar", payload.avatar);
+
+    const { data } = await POST("/api/pong/player/avatar", form);
     return data.data;
   },
 
