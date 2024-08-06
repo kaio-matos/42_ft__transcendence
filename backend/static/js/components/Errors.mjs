@@ -13,10 +13,10 @@ export class Errors extends HTMLElement {
 
   connectedCallback() {
     const shadow = this.attachShadow({ mode: "open" });
-    shadow.innerHTML = "<style>:host { display: block; }</style>";
+    shadow.innerHTML = "<style>:host { display: none; }</style>";
     attachBootstrap(shadow);
 
-    this.container.class(["text-danger-emphasis", ""]);
+    this.container.class("text-danger-emphasis");
 
     shadow.appendChild(this.container.element);
   }
@@ -32,11 +32,15 @@ export class Errors extends HTMLElement {
       this.errors.push(error);
     }
     this.#updateUI();
+    this.classList.add("d-flex");
+    this.classList.remove("d-none");
   }
 
   clearErrors() {
     this.errors = [];
     this.#updateUI();
+    this.classList.add("d-none");
+    this.classList.remove("d-flex");
   }
 
   #updateUI() {
