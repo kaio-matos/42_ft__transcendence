@@ -8,7 +8,9 @@ import { session } from "../../../state/session.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Home = () => {
-  const page = new Component("div").class("container mx-auto row");
+  const page = new Component("div")
+    .class("container mx-auto row")
+    .styles({ maxHeight: "80vh" });
 
   page.element.innerHTML = `
     <div class="border border-secondary p-2 rounded col-8">
@@ -21,10 +23,10 @@ export const Home = () => {
         <t-input label="Mensagem" class="mt-3" ></t-input>
       </t-loading>
     </div>
-    <div class="border border-secondary p-2 rounded col-4">
+    <div class="d-flex flex-column border border-secondary p-2 rounded col-4">
       <t-button to="/auth/profile" class="d-block mb-2" btn-class="w-100">Perfil</t-button>
 
-      <div class="border border-secondary p-2 rounded mb-3">
+      <div class="border border-secondary p-2 rounded">
         <strong class="mb-2 d-block">Adicionar jogador como amigo</strong>
 
         <form id="add-friend-form" class="d-flex gap-1">
@@ -34,13 +36,18 @@ export const Home = () => {
         </form>
       </div>
 
-      <div class="border border-secondary p-2 rounded h-50 overflow-y-auto">
+      <div class="border border-secondary p-2 my-3 rounded overflow-y-auto" style="height: 50vh">
         <strong class="mb-2 d-block">Amigos</strong>
         <t-loading id="loading-players" loading="true">
           <ul id="players-list" class="list-group">
             Nenhum amigo encontrado
           </ul>
         </t-loading>
+      </div>
+
+      <div class="border border-secondary p-2 mt-auto rounded">
+          <t-button id="find-match-button" class="d-block" btn-class="w-100">Encontrar Partida</t-button>
+          <t-errors id="find-match-errors" class="mt-2"></t-errors>
       </div>
     </div>
   `;
@@ -130,6 +137,23 @@ export const Home = () => {
           ]).element,
       ),
     );
+  });
+
+  const t_button_find_match = page.element.querySelector("#find-match-button");
+  const t_errors_find_match = page.element.querySelector("#find-match-errors");
+
+  t_button_find_match.addEventListener("click", async () => {
+    t_errors_find_match.clearErrors();
+    try {
+      t_button_find_match.setLoading(true);
+      await TournamentService.findTournament();
+    } catch (error) {
+      if (error instanceof RequestFailedError) {
+        t_errors_find_match.addErrors(error.data?.message);
+      }
+    } finally {
+      t_button_find_match.setLoading(false);
+    }
   });
 
   return page;

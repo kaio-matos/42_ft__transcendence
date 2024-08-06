@@ -12,6 +12,7 @@ urlpatterns = [
     GET("player/<slug:public_id>", PlayerController.get),
     #
     GET("tournament", TournamentController.index),
+    GET("tournament/matchmaking", TournamentController.matchmaking),
     POST("tournament/create", TournamentController.create),
     GET("tournament/<slug:public_id>", TournamentController.get),
 ]

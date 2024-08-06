@@ -29,6 +29,38 @@ def get(request: HttpRequest, public_id: str) -> HttpResponse:
     return http.OK(tournament.toDict())
 
 
+def matchmaking(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return http.Unauthorized({"message": _("Você não está autenticado")})
+
+    player = typing.cast(Player, request.user)
+
+    # TODO: the challenged player should be someone that is Online
+
+    # first we try to find someone that its not his friend
+    challenged_player = player.query_by_not_friends().order_by("?").first()
+
+    if not challenged_player:
+        # if there is no one available we try to match him with some friend
+        challenged_player = player.friends.order_by("?").first()
+        # TODO: If currently there is no one to accept the tournament, should we wait for someone to show up or just return that there is no player?
+        if not challenged_player:
+            return http.NotFound(
+                {"message": _("Não há nenhum jogador disponível para a partida")}
+            )
+
+    tournament = Tournament(name="Torneio de Pong")
+    tournament.save()
+    tournament.players.add(player)
+    tournament.players.add(challenged_player)
+
+    tournament.broadcast(
+        ws.WSResponse(ws.WSEvents.TOURNAMENT_BEGIN, {"tournament": tournament.toDict()})
+    )
+
+    return http.Created(tournament.toDict())
+
+
 def create(request: HttpRequest) -> HttpResponse:
     if not request.user.is_authenticated:
         return http.Unauthorized({"message": _("Você não está autenticado")})
@@ -38,7 +70,7 @@ def create(request: HttpRequest) -> HttpResponse:
     if not form.is_valid():
         raise ValidationError(form.errors.as_data())
 
-    challenged_player_id: str = form.data.get("challenged_player_id")
+    challenged_player_id: str | None = form.data.get("challenged_player_id")
     player = typing.cast(Player, request.user)
 
     if not challenged_player_id:

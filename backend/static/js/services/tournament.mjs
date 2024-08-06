@@ -23,6 +23,14 @@ export const TournamentService = {
   },
 
   /**
+   * @returns {Promise<Tournament>}
+   */
+  async findTournament() {
+    const { data } = await GET("/api/pong/tournament/matchmaking");
+    return data.data;
+  },
+
+  /**
    * @param {{ challenged_player_id: string }} payload
    * @returns {Promise<Tournament>}
    */

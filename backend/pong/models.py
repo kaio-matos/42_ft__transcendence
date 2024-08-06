@@ -68,6 +68,12 @@ class Player(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name", "password"]
 
+    def query_exclude_self(self):
+        return Player.objects.exclude(id=self.id)
+
+    def query_by_not_friends(self):
+        return self.query_exclude_self().exclude(id__in=self.friends.all())
+
     def __str__(self):
         return f"{self.name} ({self.email})"
 
