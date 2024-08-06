@@ -3,7 +3,7 @@ import uuid
 from asgiref.sync import async_to_sync
 from channels.consumer import get_channel_layer
 from django.contrib.auth.base_user import BaseUserManager
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext as _
 from django.core import serializers
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models

@@ -1,7 +1,7 @@
 import json
 import typing
 from django.http import HttpRequest, HttpResponse
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext as _
 from ft_transcendence.http import http
 from pong.models import Player
 from django.core.exceptions import ValidationError
@@ -28,7 +28,7 @@ def login(request: HttpRequest) -> HttpResponse:
     if player is not None:
         auth.login(request, player)
         return http.OK(typing.cast(Player, player).toDict())
-    return http.Unauthorized({"error": {"_errors": "Email ou senha inválidos"}})
+    return http.Unauthorized({"error": {"_errors": _("Email ou senha inválidos")}})
 
 
 def create(request: HttpRequest) -> HttpResponse:
@@ -38,10 +38,10 @@ def create(request: HttpRequest) -> HttpResponse:
         raise ValidationError(form.errors.as_data())
 
     if Player.objects.filter(email=form.data.get("email")).exists():
-        raise ValueError({"email": "Email já existente!"})
+        raise ValueError({"email": _("Email já existente!")})
 
     if Player.objects.filter(name=form.data.get("name")).exists():
-        raise ValueError({"name": "Nome de usuário já existente!"})
+        raise ValueError({"name": _("Nome de usuário já existente!")})
 
     user = Player.objects.create_user(
         name=form.data.get("name"),
@@ -120,12 +120,12 @@ def addFriend(request: HttpRequest) -> HttpResponse:
         raise ValidationError(form.errors.as_data())
 
     if email == player.email:
-        raise ValueError({"email": "Você não pode adicionar a si mesmo como amigo"})
+        raise ValueError({"email": _("Você não pode adicionar a si mesmo como amigo")})
 
     friend = Player.objects.filter(email=email).first()
 
     if not friend:
-        raise ValueError({"email": "Jogador não encontrado"})
+        raise ValueError({"email": _("Jogador não encontrado")})
 
     player.friends.add(friend)
     player.save()

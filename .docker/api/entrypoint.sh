@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Create translation files
+echo "Creating Tranlation Files"
+python manage.py makemessages --all
+
 # Apply database migrations
 echo "Apply database migrations"
 python manage.py migrate
