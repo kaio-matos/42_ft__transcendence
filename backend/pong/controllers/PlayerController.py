@@ -1,7 +1,5 @@
 import json
 import typing
-from django.core import validators
-from django import forms
 from django.http import HttpRequest, HttpResponse
 from django.utils.translation import gettext_lazy as _
 from ft_transcendence.http import http
@@ -9,12 +7,24 @@ from pong.models import Player
 from django.core.exceptions import ValidationError
 from django.contrib import auth
 
+from pong.forms.PlayerForms import (
+    PlayerAddFriendForm,
+    PlayerAvatarForm,
+    PlayerLoginForm,
+    PlayerRegistrationForm,
+    PlayerUpdateForm,
+)
+
 
 def login(request: HttpRequest) -> HttpResponse:
-    data = json.loads(request.body)
-    email = data.get("email")
-    password = data.get("password")
-    player = auth.authenticate(request, email=email, password=password)
+    form = PlayerLoginForm(json.loads(request.body))
+
+    if not form.is_valid():
+        raise ValidationError(form.errors.as_data())
+
+    player = auth.authenticate(
+        request, email=form.data.get("email"), password=form.data.get("password")
+    )
     if player is not None:
         auth.login(request, player)
         return http.OK(typing.cast(Player, player).toDict())
@@ -22,32 +32,25 @@ def login(request: HttpRequest) -> HttpResponse:
 
 
 def create(request: HttpRequest) -> HttpResponse:
-    data = json.loads(request.body)
-    name = data.get("name")
-    email = data.get("email")
-    password = data.get("password")
+    form = PlayerRegistrationForm(json.loads(request.body))
 
-    if not name or not email or not password:
-        raise ValidationError(_("Email, nome e senha são campos obrigatórios!"))
-    try:
-        validators.validate_email(email)
-    except ValidationError:
-        raise ValidationError({"email": _("Email inválido!")})
+    if not form.is_valid():
+        raise ValidationError(form.errors.as_data())
 
-    if Player.objects.filter(email=email).exists():
-        raise ValidationError({"email": _("Email já existente!")})
+    if Player.objects.filter(email=form.data.get("email")).exists():
+        raise ValueError({"email": "Email já existente!"})
 
-    if Player.objects.filter(name=name).exists():
-        raise ValidationError({"name": _("Nome de usuário já existente!")})
+    if Player.objects.filter(name=form.data.get("name")).exists():
+        raise ValueError({"name": "Nome de usuário já existente!"})
 
-    user = Player.objects.create_user(name=name, email=email, password=password)
+    user = Player.objects.create_user(
+        name=form.data.get("name"),
+        email=form.data.get("email"),
+        password=form.data.get("password"),
+    )
     user.save()
 
     return http.Created(user.toDict())
-
-
-class AvatarForm(forms.Form):
-    avatar = forms.ImageField(required=True)
 
 
 def setAvatar(request: HttpRequest) -> HttpResponse:
@@ -56,10 +59,10 @@ def setAvatar(request: HttpRequest) -> HttpResponse:
 
     player = typing.cast(Player, request.user)
 
-    form = AvatarForm(request.POST, request.FILES)
+    form = PlayerAvatarForm(request.POST, request.FILES)
 
     if not form.is_valid():
-        raise ValueError({"avatar": form.errors.values()})
+        raise ValidationError(form.errors.as_data())
 
     player.avatar = form.files.get("avatar")
     player.save()
@@ -94,13 +97,12 @@ def update(request: HttpRequest) -> HttpResponse:
         return http.Unauthorized({"message": _("Você não está autenticado")})
 
     player = typing.cast(Player, request.user)
-    data = json.loads(request.body)
-    name = data.get("name")
+    form = PlayerUpdateForm(json.loads(request.body))
 
-    if not name:
-        raise ValidationError(_("Nome inválido"))
+    if not form.is_valid():
+        raise ValidationError(form.errors.as_data())
 
-    player.name = name
+    player.name = form.data.get("name")
     player.save()
 
     return http.OK(player.toDict())
@@ -111,24 +113,19 @@ def addFriend(request: HttpRequest) -> HttpResponse:
         return http.Unauthorized({"message": _("Você não está autenticado")})
 
     player = typing.cast(Player, request.user)
-    data = json.loads(request.body)
-    email = data.get("email")
+    form = PlayerAddFriendForm(json.loads(request.body))
+    email = form.data.get("email")
 
-    try:
-        validators.validate_email(email)
-    except ValidationError:
-        raise ValidationError({"email": _("Email inválido!")})
+    if not form.is_valid():
+        raise ValidationError(form.errors.as_data())
 
     if email == player.email:
-        raise ValueError({"email": _("Você não pode adicionar a si mesmo como amigo")})
-
-    if player.friends.filter(email=email).first() is not None:
-        raise ValueError({"email": _("Este jogador já é seu amigo")})
+        raise ValueError({"email": "Você não pode adicionar a si mesmo como amigo"})
 
     friend = Player.objects.filter(email=email).first()
 
     if not friend:
-        return http.NotFound({"message": _("Jogador não encontrado")})
+        raise ValueError({"email": "Jogador não encontrado"})
 
     player.friends.add(friend)
     player.save()

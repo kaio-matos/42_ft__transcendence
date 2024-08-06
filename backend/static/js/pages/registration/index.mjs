@@ -1,6 +1,9 @@
 import { Component } from "../../components/component.mjs";
 import { PlayerService } from "../../services/player.mjs";
-import { UnprocessableEntityError } from "../../services/errors.mjs";
+import {
+  RequestFailedError,
+  UnprocessableEntityError,
+} from "../../services/errors.mjs";
 import { router } from "../../index.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
@@ -67,6 +70,9 @@ export const Registration = () => {
         t_input_password.addErrors(error.data?.error?.password);
         t_errors.addErrors(error.data?.error?._errors);
       } else if (error instanceof RequestFailedError) {
+        t_input_name.addErrors(error.data?.error?.name);
+        t_input_email.addErrors(error.data?.error?.email);
+        t_input_password.addErrors(error.data?.error?.password);
         t_errors.addErrors(error.data?.error?._errors);
       }
     } finally {

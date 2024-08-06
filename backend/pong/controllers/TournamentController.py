@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.http import HttpRequest, HttpResponse
 from ft_transcendence.http import http
 from ft_transcendence.http import ws
+from pong.forms.TournamentForms import TournamentRegistrationForm
 from pong.models import Player, Tournament
 
 
@@ -32,8 +33,12 @@ def create(request: HttpRequest) -> HttpResponse:
     if not request.user.is_authenticated:
         return http.Unauthorized({"message": _("Você não está autenticado")})
 
-    data = json.loads(request.body)
-    challenged_player_id: str = data.get("challenged_player_id")
+    form = TournamentRegistrationForm(json.loads(request.body))
+
+    if not form.is_valid():
+        raise ValidationError(form.errors.as_data())
+
+    challenged_player_id: str = form.data.get("challenged_player_id")
     player = typing.cast(Player, request.user)
 
     if not challenged_player_id:
