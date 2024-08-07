@@ -3,7 +3,7 @@ import typing
 from django.http import HttpRequest, HttpResponse
 from django.utils.translation import gettext as _
 from ft_transcendence.http import http
-from pong.models import Player
+from pong.models import Chat, Player
 from django.core.exceptions import ValidationError
 from django.contrib import auth
 
@@ -129,6 +129,11 @@ def addFriend(request: HttpRequest) -> HttpResponse:
 
     player.friends.add(friend)
     player.save()
+
+    chat = Chat(is_private=True)
+    chat.save()
+    chat.players.add(player)
+    chat.players.add(friend)
 
     return http.OK(player.toDict())
 

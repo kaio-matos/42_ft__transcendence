@@ -62,6 +62,7 @@ class Player(AbstractBaseUser, PermissionsMixin):
         blank=True,
     )
     friends = models.ManyToManyField("self", blank=True)
+    blocked_chats = models.ManyToManyField("Chat")
 
     objects = CustomUserManager()
 
@@ -84,6 +85,73 @@ class Player(AbstractBaseUser, PermissionsMixin):
             "email": self.email,
             "avatar": None if not self.avatar else self.avatar.url,
         }
+
+
+class Message(models.Model):
+    id = models.AutoField(primary_key=True)
+    public_id = models.UUIDField(
+        unique=True, db_index=True, default=uuid.uuid4, editable=False
+    )
+    sender = models.ForeignKey(Player, on_delete=models.DO_NOTHING)
+    text = models.CharField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def toDict(self) -> dict:
+        r = {}
+        r["id"] = str(self.public_id)
+        r["sender"] = self.sender.toDict()
+        r["text"] = str(self.text)
+        r["created_at"] = str(self.created_at)
+        r["updated_at"] = str(self.updated_at)
+        return r
+
+    def __str__(self):
+        return serializers.serialize(
+            "json",
+            [
+                self,
+            ],
+        )
+
+
+class Chat(models.Model):
+    id = models.AutoField(primary_key=True)
+    public_id = models.UUIDField(
+        unique=True, db_index=True, default=uuid.uuid4, editable=False
+    )
+    name = models.CharField(max_length=100, null=True)
+    players = models.ManyToManyField(Player)
+    messages = models.ManyToManyField(Message)
+    is_private = models.BooleanField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def broadcast(self, ws_response: dict):
+        channel_layer = get_channel_layer()
+        players = self.players.all()
+
+        for player in players:
+            async_to_sync(channel_layer.group_send)(str(player.public_id), ws_response)
+
+    def toDict(self) -> dict:
+        r = {}
+        r["id"] = str(self.public_id)
+        r["messages"] = [message.toDict() for message in self.messages.all()]
+        r["players"] = [player.toDict() for player in self.players.all()]
+        r["is_private"] = self.is_private
+        r["created_at"] = str(self.created_at)
+        r["updated_at"] = str(self.updated_at)
+
+        return r
+
+    def __str__(self):
+        return serializers.serialize(
+            "json",
+            [
+                self,
+            ],
+        )
 
 
 class Tournament(models.Model):
