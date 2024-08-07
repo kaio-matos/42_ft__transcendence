@@ -62,9 +62,21 @@ export class ServerCommunication {
         }
       });
     };
+    return this;
+  }
 
-    this.socket.onclose = (event) => {}; // TODO
-
+  /**
+   * @param {() => void} onClose
+   */
+  disconnect(onClose) {
+    if (this.isClosed()) {
+      onClose();
+      return this;
+    }
+    this.socket.onclose = onClose;
+    this.socket.close();
+    this.socket.onmessage = () => {};
+    this.events.clear();
     return this;
   }
 

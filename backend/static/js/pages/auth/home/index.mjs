@@ -1,6 +1,7 @@
 import { PlayerCommunication } from "../../../communication/player.mjs";
 import { Component } from "../../../components/component.mjs";
 import { router } from "../../../index.mjs";
+import { ChatService } from "../../../services/chat.mjs";
 import { RequestFailedError } from "../../../services/errors.mjs";
 import { PlayerService } from "../../../services/player.mjs";
 import { TournamentService } from "../../../services/tournament.mjs";
@@ -13,16 +14,7 @@ export const Home = () => {
     .styles({ maxHeight: "80vh" });
 
   page.element.innerHTML = `
-    <div class="border border-secondary p-2 rounded col-8">
-      <p>Chat</p>
-
-      <t-loading id="loading-chat" loading="true">
-        <div id="chat" class="border border-secondary p-2 rounded overflow-y-auto mb-3" style="height: 70vh;">
-        </div>
-
-        <t-input label="Mensagem" class="mt-3" ></t-input>
-      </t-loading>
-    </div>
+    <t-chat class="col-8"></t-chat>
     <div class="d-flex flex-column border border-secondary p-2 rounded col-4">
       <t-button to="/auth/profile" class="d-block mb-2" btn-class="w-100">Perfil</t-button>
 
@@ -61,17 +53,12 @@ export const Home = () => {
     },
   );
 
-  PlayerService.getChatWith().then((conversation) => {
-    page.element.querySelector("#loading-chat").setLoading(false);
-    const container = page.element.querySelector("#chat");
+  // PlayerService.getChatWith().then((conversation) => {
+  //
+  //   );
+  // });
 
-    conversation.chat.forEach((message) =>
-      container.append(
-        new Component("span", { textContent: message }).class("d-block")
-          .element,
-      ),
-    );
-  });
+  const t_chat = page.element.querySelector("t-chat");
 
   const form_add_friend = page.element.querySelector("#add-friend-form");
   const form_add_friend_t_input_email =
@@ -103,11 +90,16 @@ export const Home = () => {
     }
   });
 
-  PlayerService.getFriends().then((friends) => {
+  ChatService.getChats().then((chats) => {
     page.element.querySelector("#loading-players").setLoading(false);
     const container = page.element.querySelector("#players-list");
+    const private_chats = chats.filter((chat) => chat.is_private);
 
-    friends.map((friend) =>
+    private_chats.forEach((chat) => {
+      const friend = chat.players.filter(
+        (player) => player.id !== session.player.id,
+      )[0];
+
       container.append(
         new Component("li", { textContent: friend.name })
           .class(
@@ -123,7 +115,15 @@ export const Home = () => {
 
               new Component("t-button", {
                 textContent: "Conversar",
-              }).addEventListener("click", () => {}),
+              }).addEventListener("click", async () => {
+                t_chat.t_loading.setLoading(true);
+                ChatService.getChat({ chat_id: chat.id }).then((chat) => {
+                  // always get the latest version to avoid bugs
+                  t_chat.setChat(chat, (newmessage) =>
+                    chat.messages.push(newmessage),
+                  );
+                });
+              }),
 
               new Component("t-button", {
                 textContent: "Desafiar",
@@ -135,8 +135,8 @@ export const Home = () => {
               }),
             ]),
           ]).element,
-      ),
-    );
+      );
+    });
   });
 
   const t_button_find_match = page.element.querySelector("#find-match-button");
