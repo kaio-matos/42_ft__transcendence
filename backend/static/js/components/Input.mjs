@@ -67,6 +67,10 @@ export class Input extends HTMLElement {
     this.input.element.value = value;
   }
 
+  focus() {
+    this.input.element.focus();
+  }
+
   /**
    * @param {string | string[]} error
    */
