@@ -66,11 +66,11 @@ export class ServerCommunication {
   }
 
   /**
-   * @param {() => void} onClose
+   * @param {undefined | () => void} onClose
    */
   disconnect(onClose) {
     if (this.isClosed()) {
-      onClose();
+      onClose?.();
       return this;
     }
     this.socket.onclose = onClose;
