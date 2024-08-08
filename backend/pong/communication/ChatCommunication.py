@@ -52,7 +52,11 @@ class ChatCommunicationConsumer(JsonWebsocketConsumer):
             form = ChatSendMessageForm(content["payload"])
 
             if not form.is_valid():
-                self.error(ws.WSCommands.CHAT_SEND_MESSAGE.value, form.errors.as_data())
+                self.error(
+                    ws.WSCommands.CHAT_SEND_MESSAGE.value,
+                    form.errors.as_data(),
+                    content["timestamp"],
+                )
                 return
 
             sender = Player.objects.get(public_id=form.data.get("sender_id"))
@@ -61,6 +65,7 @@ class ChatCommunicationConsumer(JsonWebsocketConsumer):
                 self.error(
                     ws.WSCommands.CHAT_SEND_MESSAGE.value,
                     {"_errors": _("O remetente não foi encontrado")},
+                    content["timestamp"],
                 )
                 return
             message = Message(sender=sender, text=content["payload"]["text"])
@@ -72,12 +77,13 @@ class ChatCommunicationConsumer(JsonWebsocketConsumer):
                 ws.WSResponse(ws.WSEvents.CHAT_MESSAGE, message.toDict()),
             )
 
-    def error(self, command, error):
-        self.send_json(
+    def error(self, command, error, timestamp):
+        self.send_event(
             ws.WSResponse(
                 ws.WSEvents.ERROR,
                 {
                     "caused_by_command": command,
+                    "timestamp": timestamp,  # the timestamp is used by the frontend to identify which function call caused the error, so we just repass it
                     "error": ValidationError(error).message_dict,
                 },
             )

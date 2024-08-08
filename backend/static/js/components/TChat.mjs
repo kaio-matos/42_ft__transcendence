@@ -65,6 +65,7 @@ export class TChat extends HTMLElement {
 
     this.form.addEventListener("submit", () => {
       if (!ChatCommunication.Communication.isOpen()) return;
+      this.t_input.clearErrors();
 
       const message = this.t_input.value;
       if (!message) return;
@@ -73,6 +74,10 @@ export class TChat extends HTMLElement {
       ChatCommunication.Communication.send(
         ChatCommunication.Commands.CHAT_SEND_MESSAGE,
         { sender_id: session.player.id, text: message },
+        (error) => {
+          this.t_input.addErrors(error.text);
+          this.t_input.value = message;
+        },
       );
       this.t_input.focus();
     });
@@ -104,7 +109,8 @@ export class TChat extends HTMLElement {
         );
         this.t_loading.setLoading(false);
         this.t_input.focus();
-        this.showMessage(this.chat.messages.at(-1));
+        const lastMessage = this.chat.messages.at(-1);
+        if (lastMessage) this.showMessage(lastMessage);
       });
     });
   }
