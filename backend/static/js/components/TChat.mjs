@@ -39,7 +39,7 @@ export class TChat extends HTMLElement {
 
       <t-conditional condition="false">
         <t-loading slot="if" id="loading-chat" loading="true" style="min-height: 70vh;">
-          <div id="chat" class="border border-secondary p-2 rounded overflow-y-auto mb-3" style="height: 70vh;">
+          <div id="chat" class="d-flex flex-column gap-1 border border-secondary p-2 rounded overflow-y-auto mb-3" style="height: 70vh;">
           </div>
 
           <form class="d-flex gap-1 p-2 mt-3 border border-secondary rounded">
@@ -133,10 +133,15 @@ export class TChat extends HTMLElement {
     messages.forEach((message) =>
       this.messages_container.children([
         new Component("span", {
-          textContent: `${message.sender.name}: ${message.text}`,
+          textContent: message.text,
         })
           .attributes({ "data-id": message.id })
-          .class("d-block"),
+          .class("d-inline-block flex-grow-0 text-break py-2 px-4 rounded")
+          .class(
+            message.sender.id === session.player.id
+              ? "bg-secondary-subtle align-self-end"
+              : "bg-info-subtle align-self-start",
+          ),
       ]),
     );
   }
