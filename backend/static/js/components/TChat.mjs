@@ -45,11 +45,11 @@ export class TChat extends HTMLElement {
           <form class="d-flex gap-1 p-2 mt-3 border border-secondary rounded">
             <t-input label="Mensagem" class="col-8"></t-input>
 
-            <t-button class="d-block col-4" btn-class="w-100 h-100">Send</t-button>
+            <t-button class="d-block col-4" btn-class="w-100 h-100">Enviar</t-button>
           </form>
         </t-loading>
         <div slot="else" class="border border-secondary p-2 rounded overflow-y-auto mb-3" style="height: 70vh;">
-          No chat selected
+          Nenhuma conversa selecionada
         </div>
       </t-conditional>
     `;

@@ -1,9 +1,12 @@
 import typing
 from channels.generic.websocket import JsonWebsocketConsumer
 from channels.http import async_to_sync
+from django.core.exceptions import ValidationError
 
 from ft_transcendence.http import ws
+from pong.forms.ChatForms import ChatSendMessageForm
 from pong.models import Chat, Message, Player
+from django.utils.translation import gettext as _
 
 
 class ChatCommunicationConsumer(JsonWebsocketConsumer):
@@ -34,32 +37,51 @@ class ChatCommunicationConsumer(JsonWebsocketConsumer):
 
     def receive_json(self, content, **kwargs):
         player = typing.cast(Player, self.scope["user"])
-        match content["command"]:
-            case ws.WSCommands.CHAT_JOIN.value:
-                async_to_sync(self.channel_layer.group_send)(
-                    self.chat_channel_id,
-                    ws.WSResponse(ws.WSEvents.CHAT_JOIN, self.chat.toDict()),
+
+        if content["command"] == ws.WSCommands.CHAT_JOIN.value:
+            async_to_sync(self.channel_layer.group_send)(
+                self.chat_channel_id,
+                ws.WSResponse(ws.WSEvents.CHAT_JOIN, self.chat.toDict()),
+            )
+            return
+
+        if content["command"] == ws.WSCommands.CHAT_SEND_MESSAGE.value:
+            if self.chat in player.blocked_chats.all():
+                return
+
+            form = ChatSendMessageForm(content["payload"])
+
+            if not form.is_valid():
+                self.error(ws.WSCommands.CHAT_SEND_MESSAGE.value, form.errors.as_data())
+                return
+
+            sender = Player.objects.get(public_id=form.data.get("sender_id"))
+
+            if sender is None:
+                self.error(
+                    ws.WSCommands.CHAT_SEND_MESSAGE.value,
+                    {"_errors": _("O remetente não foi encontrado")},
                 )
+                return
+            message = Message(sender=sender, text=content["payload"]["text"])
+            message.save()
+            self.chat.messages.add(message)
 
-            case ws.WSCommands.CHAT_SEND_MESSAGE.value:
-                if self.chat in player.blocked_chats.all():
-                    return
+            async_to_sync(self.channel_layer.group_send)(
+                self.chat_channel_id,
+                ws.WSResponse(ws.WSEvents.CHAT_MESSAGE, message.toDict()),
+            )
 
-                # TODO: Validate object
-                sender = Player.objects.get(public_id=content["payload"]["sender_id"])
-                # TODO: Handle this case
-                if sender is None:
-                    raise ValueError("Sender does not exist")
-                message = Message(sender=sender, text=content["payload"]["text"])
-                message.save()
-                self.chat.messages.add(message)
-
-                async_to_sync(self.channel_layer.group_send)(
-                    self.chat_channel_id,
-                    ws.WSResponse(ws.WSEvents.CHAT_MESSAGE, message.toDict()),
-                )
+    def error(self, command, error):
+        self.send_json(
+            ws.WSResponse(
+                ws.WSEvents.ERROR,
+                {
+                    "caused_by_command": command,
+                    "error": ValidationError(error).message_dict,
+                },
+            )
+        )
 
     def send_event(self, event):
         self.send_json(event["event"])
-
-    pass

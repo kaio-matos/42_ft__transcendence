@@ -10,6 +10,7 @@ class WSEvents(Enum):
     TOURNAMENT_FINISH = "onTournamentFinish"
     CHAT_JOIN = "onChatJoin"
     CHAT_MESSAGE = "onChatMessage"
+    ERROR = "onError"
 
 
 # Commands are requests from the frontend to the backend
