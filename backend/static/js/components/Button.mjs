@@ -31,6 +31,8 @@ export class Button extends HTMLElement {
     const themes = {
       none: "bg-transparent",
       primary: "btn btn-primary",
+      secondary: "btn btn-secondary",
+      dark: "btn btn-dark",
     };
 
     if (this.theme === "none") {

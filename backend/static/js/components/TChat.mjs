@@ -1,5 +1,6 @@
 import { ChatCommunication } from "../communication/chat.mjs";
 import { session } from "../state/session.mjs";
+import { Button } from "./Button.mjs";
 import { attachBootstrap, Component } from "./component.mjs";
 import { Input } from "./Input.mjs";
 import { Loading } from "./Loading.mjs";
@@ -10,6 +11,9 @@ export class TChat extends HTMLElement {
 
   /** @type {Loading} */
   t_loading;
+
+  /** @type {Button} */
+  t_chat_title_button;
 
   /** @type {Input} */
   t_input;
@@ -35,11 +39,11 @@ export class TChat extends HTMLElement {
       "border border-secondary p-2 rounded",
     );
     this.container.element.innerHTML = `
-      <p>Chat</p>
-
       <t-conditional condition="false">
         <t-loading slot="if" id="loading-chat" loading="true" style="min-height: 70vh;">
-          <div id="chat" class="d-flex flex-column gap-1 border border-secondary p-2 rounded overflow-y-auto mb-3" style="height: 70vh;">
+          <t-button id="chat-title-button" theme="secondary" class="w-100" btn-class="w-100 text-start rounded-top rounded-bottom-0"></t-button>
+
+          <div id="chat" class="d-flex flex-column gap-1 border border-secondary p-2 rounded-bottom overflow-y-auto mb-3" style="height: 70vh;">
           </div>
 
           <form class="d-flex gap-1 p-2 mt-3 border border-secondary rounded">
@@ -54,6 +58,8 @@ export class TChat extends HTMLElement {
       </t-conditional>
     `;
 
+    this.t_chat_title_button =
+      this.container.element.querySelector("#chat-title-button");
     this.form = new Component(this.container.element.querySelector("form"));
     this.t_input = this.container.element.querySelector("t-input");
     this.t_conditional_show_chat =
@@ -95,6 +101,22 @@ export class TChat extends HTMLElement {
       ChatCommunication.Communication.setPath("/ws/chat/" + this.chat.id);
 
       ChatCommunication.Communication.connect(() => {
+        const participants = this.chat.players.filter(
+          (p) => p.id !== session.player.id,
+        );
+
+        this.t_chat_title_button.textContent = participants
+          .map((p) => p.name)
+          .join(" ");
+
+        if (this.chat.is_private) {
+          // if the chat is between only two people we set the header link to his profile
+          this.t_chat_title_button.setAttribute(
+            "to",
+            "/auth/player/profile?player=" + participants[0].id,
+          );
+        }
+
         this.t_input.value = "";
         this.messages_container.clear();
         this.appendMessages(this.chat.messages);
