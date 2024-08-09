@@ -62,9 +62,21 @@ export class ServerCommunication {
         }
       });
     };
+    return this;
+  }
 
-    this.socket.onclose = (event) => {}; // TODO
-
+  /**
+   * @param {undefined | () => void} onClose
+   */
+  disconnect(onClose) {
+    if (this.isClosed()) {
+      onClose?.();
+      return this;
+    }
+    this.socket.onclose = onClose;
+    this.socket.close();
+    this.socket.onmessage = () => {};
+    this.events.clear();
     return this;
   }
 
@@ -93,17 +105,37 @@ export class ServerCommunication {
     return this;
   }
 
+  // TODO: We are not handling errors (for example trying to send a message with more than 1000 characters will throw an error)
+  // The backend is returning the event 'onError' with information about which command caused the error and the error itsself
   /**
    * @param {string} command
    * @param {object} payload
+   * @param {undefined | (Record<string, any>) => void} onError
    */
-  send(command, payload) {
+  send(command, payload, onError) {
+    const timestamp = new Date().toISOString();
+
     this.socket.send(
       JSON.stringify({
         command,
         payload,
+        timestamp,
       }),
     );
+    if (onError) {
+      const handleError = (data) => {
+        if (
+          command === data.caused_by_command &&
+          timestamp === data.timestamp
+        ) {
+          onError(data.error);
+          this.removeEventListener("onError", handleError); // after handling the error we dont need it anymore
+        }
+      };
+      this.addEventListener("onError", handleError);
+    } else {
+      console.warn("Missing error handling for command: " + command);
+    }
     return this;
   }
 }

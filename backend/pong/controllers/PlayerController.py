@@ -3,7 +3,7 @@ import typing
 from django.http import HttpRequest, HttpResponse
 from django.utils.translation import gettext as _
 from ft_transcendence.http import http
-from pong.models import Player
+from pong.models import Chat, Player
 from django.core.exceptions import ValidationError
 from django.contrib import auth
 
@@ -27,7 +27,11 @@ def login(request: HttpRequest) -> HttpResponse:
     )
     if player is not None:
         auth.login(request, player)
-        return http.OK(typing.cast(Player, player).toDict())
+        player = typing.cast(Player, player)
+        return http.OK(
+            player.toDict()
+            | {"blocked_chats": [chat.toDict() for chat in player.blocked_chats.all()]}
+        )
     return http.Unauthorized({"error": {"_errors": _("Email ou senha inválidos")}})
 
 
@@ -89,7 +93,10 @@ def get(request: HttpRequest, public_id: str) -> HttpResponse:
     if not player:
         return http.NotFound({"message": _("Jogador não encontrado")})
 
-    return http.OK(player.toDict())
+    return http.OK(
+        player.toDict()
+        | {"blocked_chats": [chat.toDict() for chat in player.blocked_chats.all()]}
+    )
 
 
 def update(request: HttpRequest) -> HttpResponse:
@@ -126,9 +133,13 @@ def addFriend(request: HttpRequest) -> HttpResponse:
 
     if not friend:
         raise ValueError({"email": _("Jogador não encontrado")})
-
     player.friends.add(friend)
     player.save()
+
+    chat = Chat(is_private=True)
+    chat.save()
+    chat.players.add(player)
+    chat.players.add(friend)
 
     return http.OK(player.toDict())
 
