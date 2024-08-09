@@ -2,7 +2,13 @@ import { router } from "../index.mjs";
 import { attachBootstrap, Component } from "./component.mjs";
 
 export class Button extends HTMLElement {
-  static observedAttributes = ["to", "loading", "theme", "btn-class"];
+  static observedAttributes = [
+    "to",
+    "loading",
+    "theme",
+    "btn-class",
+    "disabled",
+  ];
 
   /** @type {Component} */
   button;
@@ -23,6 +29,13 @@ export class Button extends HTMLElement {
     this.setAttribute("loading", value ? "true" : "false");
   }
 
+  /**
+   * @param {boolean} value
+   */
+  setDisabled(value) {
+    this.setAttribute("disabled", value ? "true" : "false");
+  }
+
   connectedCallback() {
     const shadow = this.attachShadow({ mode: "open" });
     shadow.innerHTML = "<style>:host { display: inline-block; }</style>";
@@ -32,14 +45,20 @@ export class Button extends HTMLElement {
       none: "bg-transparent",
       primary: "btn btn-primary",
       secondary: "btn btn-secondary",
+      danger: "btn btn-danger",
       dark: "btn btn-dark",
     };
 
     if (this.theme === "none") {
-      this.button.styles({ outline: "none", padding: "0px", border: "none" });
+      this.button.styles({
+        outline: "none",
+        padding: "0px",
+        border: "none",
+      });
     }
-    this.button.class(themes[this.theme]);
-    this.button.class(this.attributes.getNamedItem("btn-class")?.nodeValue);
+    this.button
+      .class(themes[this.theme])
+      .class(this.attributes.getNamedItem("btn-class")?.nodeValue);
     this.button.element.append(document.createElement("slot"));
     shadow.appendChild(this.button.element);
 
@@ -74,12 +93,20 @@ export class Button extends HTMLElement {
       if (newValue === "true") {
         this.button.clear();
         this.button.element.textContent = "Carregando...";
+        this.button.class("disabled");
       } else {
         this.button.clear();
+        this.button.removeClass("disabled");
         this.button.children([document.createElement("slot")]);
       }
     } else if (name === "theme") {
       this.theme = newValue ? newValue : "primary";
+    } else if (name === "disabled") {
+      if (this.getAttribute("disabled") === "true") {
+        this.button.element.setAttribute("disabled", "true");
+      } else {
+        this.button.element.removeAttribute("disabled");
+      }
     }
   }
 }
