@@ -20,11 +20,12 @@ class ChatCommunicationConsumer(JsonWebsocketConsumer):
             return
         player = typing.cast(Player, player)
         chat_channel_id = self.scope["url_route"]["kwargs"]["chat_id"]
-        self.chat = Chat.objects.get(public_id=chat_channel_id)
+        chat = Chat.objects.filter(public_id=chat_channel_id).first()
 
-        if self.chat is None:
+        if chat is None:
             return
 
+        self.chat = chat
         self.accept()
         async_to_sync(self.channel_layer.group_add)(
             self.create_channel_name(player.public_id, chat_channel_id),
@@ -56,25 +57,15 @@ class ChatCommunicationConsumer(JsonWebsocketConsumer):
 
             if not form.is_valid():
                 self.error(
-                    ws.WSCommands.CHAT_SEND_MESSAGE.value,
+                    ws.WSCommands.CHAT_SEND_MESSAGE,
                     form.errors.as_data(),
-                    content["timestamp"],
-                )
-                return
-
-            sender = Player.objects.get(public_id=form.data.get("sender_id"))
-
-            if sender is None:
-                self.error(
-                    ws.WSCommands.CHAT_SEND_MESSAGE.value,
-                    {"_errors": _("O remetente não foi encontrado")},
                     content["timestamp"],
                 )
                 return
 
             participants = self.chat.players.all()
 
-            message = Message(sender=sender, text=content["payload"]["text"])
+            message = Message(sender=player, text=content["payload"]["text"])
             message.save()
             self.chat.messages.add(message)
 
