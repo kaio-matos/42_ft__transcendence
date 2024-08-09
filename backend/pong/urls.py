@@ -14,6 +14,7 @@ urlpatterns = [
     GET("chat", ChatController.index),
     POST("chat/create", ChatController.create),
     GET("chat/block/<slug:public_id>", ChatController.block),
+    GET("chat/unblock/<slug:public_id>", ChatController.unblock),
     GET("chat/<slug:public_id>", ChatController.get),
     #
     GET("tournament", TournamentController.index),

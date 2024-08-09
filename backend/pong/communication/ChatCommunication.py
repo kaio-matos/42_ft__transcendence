@@ -8,9 +8,10 @@ from pong.forms.ChatForms import ChatSendMessageForm
 from pong.models import Chat, Message, Player
 from django.utils.translation import gettext as _
 
+from pong.resources.ChatResource import ChatResource
+
 
 class ChatCommunicationConsumer(JsonWebsocketConsumer):
-    chat_channel_id: str
     chat: Chat
 
     def connect(self):
@@ -18,37 +19,39 @@ class ChatCommunicationConsumer(JsonWebsocketConsumer):
         if not player.is_authenticated:
             return
         player = typing.cast(Player, player)
-        self.chat_channel_id = self.scope["url_route"]["kwargs"]["chat_id"]
-        self.chat = Chat.objects.get(public_id=self.chat_channel_id)
+        chat_channel_id = self.scope["url_route"]["kwargs"]["chat_id"]
+        self.chat = Chat.objects.get(public_id=chat_channel_id)
 
         if self.chat is None:
             return
 
         self.accept()
         async_to_sync(self.channel_layer.group_add)(
-            self.chat_channel_id, self.channel_name
+            self.create_channel_name(player.public_id, chat_channel_id),
+            self.channel_name,
         )
 
     def disconnect(self, code):
-        if self.chat_channel_id:
+        player = typing.cast(Player, self.scope["user"])
+        if self.chat:
             async_to_sync(self.channel_layer.group_discard)(
-                self.chat_channel_id, self.channel_name
+                self.create_channel_name(player.public_id, self.chat.public_id),
+                self.channel_name,
             )
 
     def receive_json(self, content, **kwargs):
         player = typing.cast(Player, self.scope["user"])
+        if not player.can_send_messages_to(self.chat):
+            return
 
         if content["command"] == ws.WSCommands.CHAT_JOIN.value:
             async_to_sync(self.channel_layer.group_send)(
-                self.chat_channel_id,
-                ws.WSResponse(ws.WSEvents.CHAT_JOIN, self.chat.toDict()),
+                self.create_channel_name(player.public_id, self.chat.public_id),
+                ws.WSResponse(ws.WSEvents.CHAT_JOIN, ChatResource(self.chat, player)),
             )
             return
 
         if content["command"] == ws.WSCommands.CHAT_SEND_MESSAGE.value:
-            if self.chat in player.blocked_chats.all():
-                return
-
             form = ChatSendMessageForm(content["payload"])
 
             if not form.is_valid():
@@ -68,14 +71,23 @@ class ChatCommunicationConsumer(JsonWebsocketConsumer):
                     content["timestamp"],
                 )
                 return
+
+            participants = self.chat.players.all()
+
             message = Message(sender=sender, text=content["payload"]["text"])
             message.save()
             self.chat.messages.add(message)
 
-            async_to_sync(self.channel_layer.group_send)(
-                self.chat_channel_id,
-                ws.WSResponse(ws.WSEvents.CHAT_MESSAGE, message.toDict()),
-            )
+            for participant in participants:
+                if not participant.can_receive_messages_from(self.chat):
+                    return
+
+                async_to_sync(self.channel_layer.group_send)(
+                    self.create_channel_name(
+                        participant.public_id, self.chat.public_id
+                    ),
+                    ws.WSResponse(ws.WSEvents.CHAT_MESSAGE, message.toDict()),
+                )
 
     def error(self, command, error, timestamp):
         self.send_event(
@@ -91,3 +103,6 @@ class ChatCommunicationConsumer(JsonWebsocketConsumer):
 
     def send_event(self, event):
         self.send_json(event["event"])
+
+    def create_channel_name(self, player_id, chat_id):
+        return str(chat_id) + "__" + str(player_id)

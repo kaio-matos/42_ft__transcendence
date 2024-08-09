@@ -53,11 +53,6 @@ export const Home = () => {
     },
   );
 
-  // PlayerService.getChatWith().then((conversation) => {
-  //
-  //   );
-  // });
-
   const t_chat = page.element.querySelector("t-chat");
 
   const form_add_friend = page.element.querySelector("#add-friend-form");
@@ -106,7 +101,7 @@ export const Home = () => {
             "d-flex flex-column list-group-item justify-content-md-between",
           )
           .children([
-            new Component("div").class("d-flex gap-2").children([
+            new Component("div").class("d-flex flex-wrap gap-2").children([
               new Component("t-button", {
                 textContent: "Perfil",
               }).addEventListener("click", () => {
@@ -115,23 +110,49 @@ export const Home = () => {
 
               new Component("t-button", {
                 textContent: "Conversar",
-              }).addEventListener("click", async () => {
-                t_chat.t_loading.setLoading(true);
-                ChatService.getChat({ chat_id: chat.id }).then((chat) => {
-                  // always get the latest version to avoid bugs
-                  t_chat.setChat(chat, (newmessage) =>
-                    chat.messages.push(newmessage),
-                  );
-                });
-              }),
+              })
+                .attributes({ disabled: chat.is_blocked })
+                .addEventListener("click", async () => {
+                  t_chat.t_loading.setLoading(true);
+                  ChatService.getChat({ chat_id: chat.id }).then((chat) => {
+                    // always get the latest version to avoid bugs
+                    t_chat.setChat(chat, (newmessage) =>
+                      chat.messages.push(newmessage),
+                    );
+                  });
+                }),
+
+              new Component("t-button", {
+                textContent: chat.is_blocked ? "Desbloquear" : "Bloquear",
+              })
+                .attributes({ theme: "danger" })
+                .addEventListener("click", async (event) => {
+                  event.target.setLoading(true);
+                  let btn_text = "Bloquear";
+                  if (chat.is_blocked) {
+                    chat = await ChatService.unblockChat({ chat_id: chat.id });
+                  } else {
+                    chat = await ChatService.blockChat({ chat_id: chat.id });
+                    btn_text = "Desbloquear";
+                  }
+
+                  // then update player
+                  session.player = await PlayerService.getPlayer({
+                    player_id: session.player.id,
+                  });
+
+                  event.target.setLoading(false);
+                  event.target.textContent = btn_text;
+                }),
 
               new Component("t-button", {
                 textContent: "Desafiar",
-              }).addEventListener("click", async () => {
-                // TODO: Handle loading
+              }).addEventListener("click", async (event) => {
+                event.currentTarget.setLoading(true);
                 await TournamentService.createTournament({
                   challenged_player_id: friend.id,
                 });
+                event.currentTarget.setLoading(true);
               }),
             ]),
           ]).element,

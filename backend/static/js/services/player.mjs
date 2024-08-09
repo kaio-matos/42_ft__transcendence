@@ -1,7 +1,7 @@
 import { GET, POST, PUT } from "./http.mjs";
 
 /**
- * @typedef {{ id: string, name: string, email: string, avatar: string }} Player
+ * @typedef {{ id: string, name: string, email: string, avatar: string, blocked_chats: import("./chat.mjs").Chat[] }} Player
  */
 
 export const PlayerService = {

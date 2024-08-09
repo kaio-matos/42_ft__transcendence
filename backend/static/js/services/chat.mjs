@@ -5,7 +5,7 @@ import { GET, POST } from "./http.mjs";
  */
 
 /**
- * @typedef {{ id: string, messages: Message[], players: import("./player.mjs").Player[], is_private: boolean, created_at: string, updated_at: string }} Chat
+ * @typedef {{ id: string, messages: Message[], players: import("./player.mjs").Player[], is_private: boolean, is_blocked: boolean, created_at: string, updated_at: string }} Chat
  */
 
 export const ChatService = {
@@ -41,6 +41,15 @@ export const ChatService = {
    */
   async blockChat({ chat_id }) {
     const { data } = await GET("/api/pong/chat/block/" + chat_id);
+    return data.data;
+  },
+
+  /**
+   * @param {{ chat_id: string }} player
+   * @returns {Promise<Chat>}
+   */
+  async unblockChat({ chat_id }) {
+    const { data } = await GET("/api/pong/chat/unblock/" + chat_id);
     return data.data;
   },
 };

@@ -27,7 +27,11 @@ def login(request: HttpRequest) -> HttpResponse:
     )
     if player is not None:
         auth.login(request, player)
-        return http.OK(typing.cast(Player, player).toDict())
+        player = typing.cast(Player, player)
+        return http.OK(
+            player.toDict()
+            | {"blocked_chats": [chat.toDict() for chat in player.blocked_chats.all()]}
+        )
     return http.Unauthorized({"error": {"_errors": _("Email ou senha inválidos")}})
 
 
@@ -89,7 +93,10 @@ def get(request: HttpRequest, public_id: str) -> HttpResponse:
     if not player:
         return http.NotFound({"message": _("Jogador não encontrado")})
 
-    return http.OK(player.toDict())
+    return http.OK(
+        player.toDict()
+        | {"blocked_chats": [chat.toDict() for chat in player.blocked_chats.all()]}
+    )
 
 
 def update(request: HttpRequest) -> HttpResponse:
@@ -126,7 +133,6 @@ def addFriend(request: HttpRequest) -> HttpResponse:
 
     if not friend:
         raise ValueError({"email": _("Jogador não encontrado")})
-
     player.friends.add(friend)
     player.save()
 

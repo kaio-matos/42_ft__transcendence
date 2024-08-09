@@ -75,6 +75,15 @@ class Player(AbstractBaseUser, PermissionsMixin):
     def query_by_not_friends(self):
         return self.query_exclude_self().exclude(id__in=self.friends.all())
 
+    def is_chat_blocked(self, chat):
+        return chat in self.blocked_chats.all()
+
+    def can_receive_messages_from(self, chat):
+        return chat not in self.blocked_chats.all()
+
+    def can_send_messages_to(self, chat):
+        return chat not in self.blocked_chats.all()
+
     def __str__(self):
         return f"{self.name} ({self.email})"
 
@@ -134,10 +143,9 @@ class Chat(models.Model):
         for player in players:
             async_to_sync(channel_layer.group_send)(str(player.public_id), ws_response)
 
-    def toDict(self) -> dict:
+    def toDict(self, can_see_messages=False) -> dict:
         r = {}
         r["id"] = str(self.public_id)
-        r["messages"] = [message.toDict() for message in self.messages.all()]
         r["players"] = [player.toDict() for player in self.players.all()]
         r["is_private"] = self.is_private
         r["created_at"] = str(self.created_at)
