@@ -8,6 +8,9 @@ class WSEvents(Enum):
     TOURNAMENT_START = "onTournamentStart"
     TOURNAMENT_UPDATE = "onTournamentUpdate"
     TOURNAMENT_FINISH = "onTournamentFinish"
+    CHAT_JOIN = "onChatJoin"
+    CHAT_MESSAGE = "onChatMessage"
+    ERROR = "onError"
 
 
 # Commands are requests from the frontend to the backend
@@ -15,6 +18,8 @@ class WSEvents(Enum):
 class WSCommands(Enum):
     JOIN_TOURNAMENT = "JOIN_TOURNAMENT"
     KEY_PRESS = "KEY_PRESS"
+    CHAT_JOIN = "CHAT_JOIN"
+    CHAT_SEND_MESSAGE = "CHAT_SEND_MESSAGE"
 
 
 def WSResponse(event: WSEvents, data: dict) -> dict:

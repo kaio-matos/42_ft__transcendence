@@ -1,6 +1,7 @@
 import { PlayerCommunication } from "../../../communication/player.mjs";
 import { Component } from "../../../components/component.mjs";
 import { router } from "../../../index.mjs";
+import { ChatService } from "../../../services/chat.mjs";
 import { RequestFailedError } from "../../../services/errors.mjs";
 import { PlayerService } from "../../../services/player.mjs";
 import { TournamentService } from "../../../services/tournament.mjs";
@@ -13,16 +14,7 @@ export const Home = () => {
     .styles({ maxHeight: "80vh" });
 
   page.element.innerHTML = `
-    <div class="border border-secondary p-2 rounded col-8">
-      <p>Chat</p>
-
-      <t-loading id="loading-chat" loading="true">
-        <div id="chat" class="border border-secondary p-2 rounded overflow-y-auto mb-3" style="height: 70vh;">
-        </div>
-
-        <t-input label="Mensagem" class="mt-3" ></t-input>
-      </t-loading>
-    </div>
+    <t-chat class="col-8"></t-chat>
     <div class="d-flex flex-column border border-secondary p-2 rounded col-4">
       <t-button to="/auth/profile" class="d-block mb-2" btn-class="w-100">Perfil</t-button>
 
@@ -61,17 +53,7 @@ export const Home = () => {
     },
   );
 
-  PlayerService.getChatWith().then((conversation) => {
-    page.element.querySelector("#loading-chat").setLoading(false);
-    const container = page.element.querySelector("#chat");
-
-    conversation.chat.forEach((message) =>
-      container.append(
-        new Component("span", { textContent: message }).class("d-block")
-          .element,
-      ),
-    );
-  });
+  const t_chat = page.element.querySelector("t-chat");
 
   const form_add_friend = page.element.querySelector("#add-friend-form");
   const form_add_friend_t_input_email =
@@ -103,40 +85,81 @@ export const Home = () => {
     }
   });
 
-  PlayerService.getFriends().then((friends) => {
+  ChatService.getChats().then((chats) => {
     page.element.querySelector("#loading-players").setLoading(false);
     const container = page.element.querySelector("#players-list");
+    const private_chats = chats.filter((chat) => chat.is_private);
 
-    friends.map((friend) =>
-      container.append(
-        new Component("li", { textContent: friend.name })
-          .class(
-            "d-flex flex-column list-group-item justify-content-md-between",
-          )
-          .children([
-            new Component("div").class("d-flex gap-2").children([
-              new Component("t-button", {
-                textContent: "Perfil",
-              }).addEventListener("click", () => {
-                router.navigate("/auth/player/profile?player=" + friend.id);
-              }),
+    private_chats.forEach((chat) => {
+      const friend = chat.players.filter(
+        (player) => player.id !== session.player.id,
+      )[0];
 
-              new Component("t-button", {
-                textContent: "Conversar",
-              }).addEventListener("click", () => {}),
+      const li = new Component("li").class(
+        "d-flex flex-column list-group-item justify-content-md-between",
+      );
 
-              new Component("t-button", {
-                textContent: "Desafiar",
-              }).addEventListener("click", async () => {
-                // TODO: Handle loading
-                await TournamentService.createTournament({
-                  challenged_player_id: friend.id,
-                });
-              }),
-            ]),
-          ]).element,
-      ),
-    );
+      li.element.innerHTML = `
+        <span></span>
+        <div class="d-flex flex-wrap gap-2">
+          <t-button id="profile-button">Perfil</t-button>
+          <t-button id="chat-button" disabled="${chat.is_blocked}">Conversar</t-button>
+          <t-button id="toggle-block-button" theme="danger">${chat.is_blocked ? "Desbloquear" : "Bloquear"}</t-button>
+          <t-button id="challenge-button">Desafiar</t-button>
+        </div>
+      `;
+
+      li.element.querySelector("span").textContent = friend.name;
+      const t_button_profile = li.element.querySelector("#profile-button");
+      const t_button_chat = li.element.querySelector("#chat-button");
+      const t_button_toggle_block = li.element.querySelector(
+        "#toggle-block-button",
+      );
+      const t_button_challenge = li.element.querySelector("#challenge-button");
+
+      t_button_profile.button.addEventListener("click", () => {
+        router.navigate("/auth/player/profile?player=" + friend.id);
+      });
+
+      t_button_chat.button.addEventListener("click", async () => {
+        t_chat.t_loading.setLoading(true);
+        ChatService.getChat({ chat_id: chat.id }).then((chat) => {
+          // always get the latest version to avoid bugs
+          t_chat.setChat(chat, (newmessage) => chat.messages.push(newmessage));
+        });
+      });
+
+      t_button_toggle_block.button.addEventListener("click", async (event) => {
+        t_button_toggle_block.setLoading(true);
+        let btn_text = "Bloquear";
+        if (chat.is_blocked) {
+          chat = await ChatService.unblockChat({ chat_id: chat.id });
+          t_button_chat.setDisabled(false);
+        } else {
+          chat = await ChatService.blockChat({ chat_id: chat.id });
+          t_button_chat.setDisabled(true);
+          btn_text = "Desbloquear";
+        }
+
+        // then update player
+        session.player = await PlayerService.getPlayer({
+          player_id: session.player.id,
+        });
+
+        t_button_toggle_block.setLoading(false);
+        t_button_toggle_block.textContent = btn_text;
+      });
+
+      t_button_challenge.button.addEventListener("click", async (event) => {
+        t_button_challenge.setLoading(true);
+        await TournamentService.createTournament({
+          challenged_player_id: friend.id,
+        });
+        t_button_challenge.setLoading(true);
+      });
+
+      container.append(li.element);
+    });
   });
 
   const t_button_find_match = page.element.querySelector("#find-match-button");
