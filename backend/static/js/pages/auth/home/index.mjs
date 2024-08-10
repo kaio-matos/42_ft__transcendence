@@ -16,7 +16,10 @@ export const Home = () => {
   page.element.innerHTML = `
     <t-chat class="col-8"></t-chat>
     <div class="d-flex flex-column border border-secondary p-2 rounded col-4">
-      <t-button to="/auth/profile" class="d-block mb-2" btn-class="w-100">Perfil</t-button>
+      <div class="d-flex gap-1 mb-2">
+        <t-button to="/auth/profile" class="d-block flex-grow-1" btn-class="w-100">Perfil</t-button>
+        <t-button id="logout-button" class="d-block" theme="danger">Logout</t-button>
+      </div>
 
       <div class="border border-secondary p-2 rounded">
         <strong class="mb-2 d-block">Adicionar jogador como amigo</strong>
@@ -188,6 +191,20 @@ export const Home = () => {
       }
     } finally {
       t_button_find_match.setLoading(false);
+    }
+  });
+
+  const t_logout_button = page.element.querySelector("#logout-button");
+
+  t_logout_button.button.addEventListener("click", async () => {
+    try {
+      t_logout_button.setLoading(true);
+      await PlayerService.logout();
+    } catch {
+    } finally {
+      t_logout_button.setLoading(false);
+      session.player = undefined;
+      router.navigate("/login");
     }
   });
 

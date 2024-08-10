@@ -36,6 +36,15 @@ def login(request: HttpRequest) -> HttpResponse:
     return http.Unauthorized({"error": {"_errors": _("Email ou senha inválidos")}})
 
 
+def logout(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return http.Unauthorized({"message": _("Você não está autenticado")})
+    player = typing.cast(Player, request.user)
+    player.set_activity_status(player.ActivityStatus.OFFLINE)
+    auth.logout(request)
+    return http.NoContent()
+
+
 def create(request: HttpRequest) -> HttpResponse:
     form = PlayerRegistrationForm(json.loads(request.body))
 

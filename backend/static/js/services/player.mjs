@@ -11,12 +11,21 @@ export const ActivityStatus = Object.freeze({
 
 export const PlayerService = {
   /**
+   * Sets a session key cookie
+   *
    * @param {{ email: string, password: string }} player
    * @returns {Promise<Player>}
    */
   async login(player) {
     const { data } = await POST("/api/pong/player/login", player);
     return data.data;
+  },
+
+  /**
+   * Deletes the local cookie set by the backend
+   */
+  async logout() {
+    await POST("/api/pong/player/logout");
   },
 
   /**

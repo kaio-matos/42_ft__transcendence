@@ -2,10 +2,13 @@ from django.http import HttpResponse
 import json
 
 
-def JSONResponse(obj: dict | list, options={}) -> HttpResponse:
+def JSONResponse(obj: dict | list | None, options={}) -> HttpResponse:
     """
     Generic response, avoid using it
     """
+
+    if obj is None:
+        return HttpResponse(content_type="application/json", **options)
 
     response = {}
     response["data"] = obj
@@ -28,11 +31,11 @@ def Created(obj: dict | list, options={"status": 201}) -> HttpResponse:
     return JSONResponse(obj, options)
 
 
-def NoContent(obj: dict | list, options={"status": 204}) -> HttpResponse:
+def NoContent(options={"status": 204}) -> HttpResponse:
     """
     https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/204
     """
-    return JSONResponse(obj, options)
+    return JSONResponse(None, options)
 
 
 def BadRequest(obj: dict | list, options={"status": 400}) -> HttpResponse:
