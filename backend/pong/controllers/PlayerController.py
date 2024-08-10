@@ -28,6 +28,7 @@ def login(request: HttpRequest) -> HttpResponse:
     if player is not None:
         auth.login(request, player)
         player = typing.cast(Player, player)
+        player.set_activity_status(player.ActivityStatus.ONLINE)
         return http.OK(
             player.toDict()
             | {"blocked_chats": [chat.toDict() for chat in player.blocked_chats.all()]}

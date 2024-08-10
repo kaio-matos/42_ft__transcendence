@@ -9,6 +9,8 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
+from ft_transcendence.http import ws
+
 
 class CustomUserManager(BaseUserManager):
     """
@@ -50,6 +52,10 @@ def playerAvatarPath(player, filename: str):
 
 
 class Player(AbstractBaseUser, PermissionsMixin):
+    class ActivityStatus(models.TextChoices):
+        ONLINE = "ONLINE", _("Online")
+        OFFLINE = "OFFLINE", _("Offline")
+
     id = models.AutoField(primary_key=True)
     public_id = models.UUIDField(
         unique=True, db_index=True, default=uuid.uuid4, editable=False
@@ -60,6 +66,9 @@ class Player(AbstractBaseUser, PermissionsMixin):
         upload_to=playerAvatarPath,
         default="/default/player/avatar/default.jpg",
         blank=True,
+    )
+    activity_status = models.CharField(
+        max_length=20, choices=ActivityStatus.choices, default=ActivityStatus.OFFLINE
     )
     friends = models.ManyToManyField("self", blank=True)
     blocked_chats = models.ManyToManyField("Chat")
@@ -84,6 +93,20 @@ class Player(AbstractBaseUser, PermissionsMixin):
     def can_send_messages_to(self, chat):
         return chat not in self.blocked_chats.all()
 
+    def set_activity_status(self, activity_status: ActivityStatus):
+        self.activity_status = activity_status
+        self.save()
+        self.broadcast_friends(
+            ws.WSResponse(ws.WSEvents.FRIEND_ACTIVITY_STATUS, self.toDict())
+        )
+
+    def broadcast_friends(self, ws_response: dict):
+        channel_layer = get_channel_layer()
+        friends = self.friends.all()
+
+        for player in friends:
+            async_to_sync(channel_layer.group_send)(str(player.public_id), ws_response)
+
     def __str__(self):
         return f"{self.name} ({self.email})"
 
@@ -93,6 +116,7 @@ class Player(AbstractBaseUser, PermissionsMixin):
             "name": self.name,
             "email": self.email,
             "avatar": None if not self.avatar else self.avatar.url,
+            "activity_status": self.activity_status,
         }
 
 

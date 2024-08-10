@@ -85,10 +85,14 @@ export const Home = () => {
     }
   });
 
-  ChatService.getChats().then((chats) => {
+  async function updateFriendsList() {
+    page.element.querySelector("#loading-players").setLoading(true);
+    const chats = await ChatService.getChats();
     page.element.querySelector("#loading-players").setLoading(false);
     const container = page.element.querySelector("#players-list");
     const private_chats = chats.filter((chat) => chat.is_private);
+
+    container.innerHTML = "";
 
     private_chats.forEach((chat) => {
       const friend = chat.players.filter(
@@ -109,7 +113,8 @@ export const Home = () => {
         </div>
       `;
 
-      li.element.querySelector("span").textContent = friend.name;
+      li.element.querySelector("span").textContent =
+        `${friend.name} ${friend.activity_status}`;
       const t_button_profile = li.element.querySelector("#profile-button");
       const t_button_chat = li.element.querySelector("#chat-button");
       const t_button_toggle_block = li.element.querySelector(
@@ -160,7 +165,14 @@ export const Home = () => {
 
       container.append(li.element);
     });
-  });
+  }
+
+  updateFriendsList();
+
+  PlayerCommunication.Communication.addEventListener(
+    PlayerCommunication.Events.FRIEND_ACTIVITY_STATUS,
+    updateFriendsList,
+  );
 
   const t_button_find_match = page.element.querySelector("#find-match-button");
   const t_errors_find_match = page.element.querySelector("#find-match-errors");

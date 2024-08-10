@@ -1,7 +1,12 @@
 import { GET, POST, PUT } from "./http.mjs";
 
+export const ActivityStatus = Object.freeze({
+  ONLINE: "ONLINE",
+  OFFLINE: "OFFLINE",
+});
+
 /**
- * @typedef {{ id: string, name: string, email: string, avatar: string, blocked_chats: import("./chat.mjs").Chat[] }} Player
+ * @typedef {{ id: string, name: string, email: string, avatar: string, blocked_chats: import("./chat.mjs").Chat[], activity_status: keyof typeof ActivityStatus }} Player
  */
 
 export const PlayerService = {
