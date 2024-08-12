@@ -133,9 +133,11 @@ export const Home = () => {
 
       t_button_chat.button.addEventListener("click", async () => {
         t_chat.t_loading.setLoading(true);
-        const chat = await ChatService.getChat({ chat_id: chat.id });
+        const updatedChat = await ChatService.getChat({ chat_id: chat.id });
         // always get the latest version to avoid bugs
-        t_chat.setChat(chat, (newmessage) => chat.messages.push(newmessage));
+        t_chat.setChat(updatedChat, (newmessage) =>
+          updatedChat.messages.push(newmessage),
+        );
       });
 
       t_button_toggle_block.button.addEventListener("click", async (event) => {
