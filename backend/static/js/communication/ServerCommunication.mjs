@@ -105,8 +105,6 @@ export class ServerCommunication {
     return this;
   }
 
-  // TODO: We are not handling errors (for example trying to send a message with more than 1000 characters will throw an error)
-  // The backend is returning the event 'onError' with information about which command caused the error and the error itsself
   /**
    * @param {string} command
    * @param {object} payload

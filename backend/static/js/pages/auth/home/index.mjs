@@ -80,6 +80,7 @@ export const Home = () => {
       });
       session.player = player;
       await updateFriendsList();
+      form_add_friend_t_input_email.value = "";
     } catch (error) {
       if (error instanceof RequestFailedError) {
         form_add_friend_t_input_email.addErrors(error.data?.error?.email);
