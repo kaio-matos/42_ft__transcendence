@@ -79,6 +79,7 @@ export const Home = () => {
         email: form_add_friend_email,
       });
       session.player = player;
+      await updateFriendsList();
     } catch (error) {
       if (error instanceof RequestFailedError) {
         form_add_friend_t_input_email.addErrors(error.data?.error?.email);
@@ -131,10 +132,9 @@ export const Home = () => {
 
       t_button_chat.button.addEventListener("click", async () => {
         t_chat.t_loading.setLoading(true);
-        ChatService.getChat({ chat_id: chat.id }).then((chat) => {
-          // always get the latest version to avoid bugs
-          t_chat.setChat(chat, (newmessage) => chat.messages.push(newmessage));
-        });
+        const chat = await ChatService.getChat({ chat_id: chat.id });
+        // always get the latest version to avoid bugs
+        t_chat.setChat(chat, (newmessage) => chat.messages.push(newmessage));
       });
 
       t_button_toggle_block.button.addEventListener("click", async (event) => {
