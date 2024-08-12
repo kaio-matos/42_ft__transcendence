@@ -1,3 +1,4 @@
+import { router } from "../index.mjs";
 import { RequestFailedError, UnprocessableEntityError } from "./errors.mjs";
 
 export const HTTPStatus = Object.freeze({
@@ -34,6 +35,12 @@ export async function http(path, options) {
 
   if (response.status >= HTTPStatus.BAD_REQUEST) {
     const { data } = await response.json();
+
+    if (response.status === HTTPStatus.UNAUTHORIZED) {
+      router.navigate("/login");
+      session.player = undefined;
+    }
+
     if (response.status === HTTPStatus.UNPROCESSABLE_ENTITY) {
       throw new UnprocessableEntityError(response, data);
     }
