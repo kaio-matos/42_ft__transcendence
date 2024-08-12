@@ -40,6 +40,10 @@ export async function http(path, options) {
     throw new RequestFailedError(response, data);
   }
 
+  if (response.status === HTTPStatus.NO_CONTENT) {
+    return { data: undefined, response };
+  }
+
   try {
     const data = await response.json();
     return {
