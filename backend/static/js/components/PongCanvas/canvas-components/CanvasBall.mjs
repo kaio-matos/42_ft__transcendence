@@ -9,6 +9,17 @@ export class CanvasBall extends CanvasElement {
     return this.__width;
   }
 
+
+  /**
+   * @param {number} width
+   * @param {number} height
+   */
+  constructor(width, height) {
+    super();
+    this.__width = width;
+    this.__height = height;
+  }
+
   /**
    * @param {string} color
    */

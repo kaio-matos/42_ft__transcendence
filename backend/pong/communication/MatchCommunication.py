@@ -58,7 +58,7 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                 if game is None:
                     return
                 direction = content["payload"]["direction"]
-                game.handleKeyPress(player, direction)
+                game.handleKeyPress(player, GameDirection(direction))
 
                 if game.hasFinished():
                     self.match.finish(game.winner)

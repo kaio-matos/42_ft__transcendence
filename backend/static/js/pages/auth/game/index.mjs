@@ -13,7 +13,8 @@ import { NotFound } from "../../not-found/index.mjs";
  *   screen: { width: number, height: number },
  *   game: {
  *      players: { placement: number, position: { x: number, y: number }, data: import("../../../services/player.mjs").Player }[],
- *      ball: { position:  { x: number, y: number} },
+ *      ball: { size: {width: number, height: number} ,position: { x: number, y: number} },
+ *      paddle: {size: {width: number, height: number}},
  *   },
  * }} Game
  */
@@ -93,12 +94,12 @@ export const Game = ({ params }) => {
   function onMatchStart({ game, match, screen }) {
     page.element.querySelector("#loading-match").setLoading(false);
 
-    const ball = new CanvasBall()
+    const ball = new CanvasBall(canvas.VCW(game.ball.size.width), canvas.VCH(game.ball.size.height))
       .pos(canvas.VCW(game.ball.position.x), canvas.VCH(game.ball.position.y))
       .translate(-50, -50);
 
     const players = game.players.map(({ placement, position, data }) => {
-      const paddle = new CanvasPaddle().pos(
+      const paddle = new CanvasPaddle(canvas.VCW(game.paddle.size.width), canvas.VCH(game.paddle.size.height)).pos(
         canvas.VCW(position.x),
         canvas.VCH(position.y),
       );
