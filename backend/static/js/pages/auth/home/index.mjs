@@ -4,7 +4,7 @@ import { router } from "../../../index.mjs";
 import { ChatService } from "../../../services/chat.mjs";
 import { RequestFailedError } from "../../../services/errors.mjs";
 import { PlayerService } from "../../../services/player.mjs";
-import { TournamentService } from "../../../services/tournament.mjs";
+import { MatchService } from "../../../services/match.mjs";
 import { session } from "../../../state/session.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
@@ -50,9 +50,9 @@ export const Home = () => {
   // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
   // TODO: Remove this listener after page change
   PlayerCommunication.Communication.addEventListener(
-    PlayerCommunication.Events.TOURNAMENT_BEGIN,
-    ({ tournament }) => {
-      router.navigate("/auth/game?tournament=" + tournament.id);
+    PlayerCommunication.Events.MATCH_BEGIN,
+    ({ match }) => {
+      router.navigate("/auth/game?match=" + match.id);
     },
   );
 
@@ -163,7 +163,7 @@ export const Home = () => {
 
       t_button_challenge.button.addEventListener("click", async (event) => {
         t_button_challenge.setLoading(true);
-        await TournamentService.createTournament({
+        await MatchService.createMatch({
           challenged_player_id: friend.id,
         });
         t_button_challenge.setLoading(true);
@@ -187,7 +187,7 @@ export const Home = () => {
     t_errors_find_match.clearErrors();
     try {
       t_button_find_match.setLoading(true);
-      await TournamentService.findTournament();
+      await MatchService.findMatch();
     } catch (error) {
       if (error instanceof RequestFailedError) {
         t_errors_find_match.addErrors(error.data?.message);

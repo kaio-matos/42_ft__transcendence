@@ -1,5 +1,5 @@
 from enum import Enum
-from pong.models import Player, Tournament
+from pong.models import Player, Match
 
 
 class Position:
@@ -60,9 +60,9 @@ class Game:
     paddle_velocity = 1
     ball_position = Position(50, 50)
 
-    def __init__(self, tournament: Tournament, screen: GameScreen):
-        self.tournament = tournament
-        self.players = self.tournament.toDict()["players"]
+    def __init__(self, match: Match, screen: GameScreen):
+        self.match = match
+        self.players = self.match.toDict()["players"]
         self.screen = screen
         self.game_players: dict[str, GamePlayer] = {}
         self.reset()
@@ -97,7 +97,7 @@ class Game:
 
     def toDict(self) -> dict:
         return {
-            "tournament": self.tournament.toDict(),
+            "match": self.match.toDict(),
             "screen": self.screen.toDict(),
             "game": {
                 "players": [player.toDict() for player in self.game_players.values()],

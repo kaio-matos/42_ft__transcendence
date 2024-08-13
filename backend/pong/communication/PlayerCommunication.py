@@ -4,7 +4,7 @@ from channels.http import async_to_sync
 
 from ft_transcendence.http import ws
 from pong.game.game import Game, GameDirection, GameScreen
-from pong.models import Player, Tournament
+from pong.models import Player, Match
 
 
 class PlayerCommunicationConsumer(JsonWebsocketConsumer):

@@ -1,5 +1,5 @@
 from django import forms
 
 
-class TournamentRegistrationForm(forms.Form):
+class MatchRegistrationForm(forms.Form):
     challenged_player_id = forms.UUIDField()

@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='Tournament',
+            name='Match',
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('public_id', models.UUIDField(db_index=True, default=uuid.uuid4, editable=False, unique=True)),

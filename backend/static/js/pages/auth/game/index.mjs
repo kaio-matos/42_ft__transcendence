@@ -1,4 +1,4 @@
-import { TournamentCommunication } from "../../../communication/tournament.mjs";
+import { MatchCommunication } from "../../../communication/match.mjs";
 import { Component } from "../../../components/component.mjs";
 import { CanvasBall } from "../../../components/PongCanvas/canvas-components/CanvasBall.mjs";
 import { CanvasPaddle } from "../../../components/PongCanvas/canvas-components/CanvasPaddle.mjs";
@@ -7,7 +7,7 @@ import { NotFound } from "../../not-found/index.mjs";
 
 /**
  * @typedef {{
- *   tournament: import("../../../services/tournament.mjs").Tournament,
+ *   match: import("../../../services/match.mjs").Match,
  *   screen: { width: number, height: number },
  *   game: {
  *      players: { placement: number, position: { x: number, y: number }, data: import("../../../services/player.mjs").Player }[],
@@ -51,15 +51,15 @@ function onKeysPressed(options) {
 
 /** @type {import("../../../router/router.mjs").Page} */
 export const Game = ({ params }) => {
-  const tournament_id = params.tournament;
+  const match_id = params.match;
 
-  if (!tournament_id) {
+  if (!match_id) {
     return NotFound({ params });
   }
 
   const page = new Component("div").class("container mx-auto");
   page.element.innerHTML = `
-      <t-loading id="loading-tournament" loading="true">
+      <t-loading id="loading-match" loading="true">
         <t-pong-canvas id="pong-canvas"></t-pong-canvas>
       </t-loading>
   `;
@@ -67,12 +67,10 @@ export const Game = ({ params }) => {
   /** @type {PongCanvas} */
   const canvas = page.element.querySelector("#pong-canvas");
 
-  TournamentCommunication.Communication.setPath(
-    "/ws/tournament/" + tournament_id,
-  );
-  TournamentCommunication.Communication.connect(() => {
-    TournamentCommunication.Communication.send(
-      TournamentCommunication.Commands.JOIN_TOURNAMENT, // We tell the server that we want to begin the tournament
+  MatchCommunication.Communication.setPath("/ws/match/" + match_id);
+  MatchCommunication.Communication.connect(() => {
+    MatchCommunication.Communication.send(
+      MatchCommunication.Commands.JOIN_MATCH, // We tell the server that we want to begin the match
       {
         screen: {
           width: canvas.width,
@@ -82,16 +80,16 @@ export const Game = ({ params }) => {
     );
   });
 
-  TournamentCommunication.Communication.addEventListener(
-    TournamentCommunication.Events.TOURNAMENT_START, // and then as soon as the server tell us that we can start we setup the canvas and stop loading
-    onTournamentStart,
+  MatchCommunication.Communication.addEventListener(
+    MatchCommunication.Events.MATCH_START, // and then as soon as the server tell us that we can start we setup the canvas and stop loading
+    onMatchStart,
   );
 
   /**
    * @param {Game} param0
    */
-  function onTournamentStart({ game, tournament, screen }) {
-    page.element.querySelector("#loading-tournament").setLoading(false);
+  function onMatchStart({ game, match, screen }) {
+    page.element.querySelector("#loading-match").setLoading(false);
 
     const ball = new CanvasBall()
       .pos(canvas.VCW(game.ball.position.x), canvas.VCH(game.ball.position.y))
@@ -133,14 +131,14 @@ export const Game = ({ params }) => {
       up: "ArrowUp",
       down: "ArrowDown",
       onKeyPressUp() {
-        TournamentCommunication.Communication.send(
-          TournamentCommunication.Commands.KEY_PRESS,
+        MatchCommunication.Communication.send(
+          MatchCommunication.Commands.KEY_PRESS,
           { direction: "UP" },
         );
       },
       onKeyPressDown() {
-        TournamentCommunication.Communication.send(
-          TournamentCommunication.Commands.KEY_PRESS,
+        MatchCommunication.Communication.send(
+          MatchCommunication.Commands.KEY_PRESS,
           { direction: "DOWN" },
         );
       },
@@ -149,7 +147,7 @@ export const Game = ({ params }) => {
     /**
      * @param {Game} param0
      */
-    function onTournamentUpdate({ game }) {
+    function onMatchUpdate({ game }) {
       players.forEach((p, i) =>
         p.paddle.pos(
           canvas.VCW(game.players[i].position.x),
@@ -163,9 +161,9 @@ export const Game = ({ params }) => {
       );
     }
 
-    TournamentCommunication.Communication.addEventListener(
-      TournamentCommunication.Events.TOURNAMENT_UPDATE,
-      onTournamentUpdate,
+    MatchCommunication.Communication.addEventListener(
+      MatchCommunication.Events.MATCH_UPDATE,
+      onMatchUpdate,
     );
 
     setInterval(() => canvas.render(), 16); // TODO: do this the right way

@@ -186,7 +186,7 @@ class Chat(models.Model):
         )
 
 
-class Tournament(models.Model):
+class Match(models.Model):
     id = models.AutoField(primary_key=True)
     public_id = models.UUIDField(
         unique=True, db_index=True, default=uuid.uuid4, editable=False
@@ -216,3 +216,4 @@ class Tournament(models.Model):
                 self,
             ],
         )
+
