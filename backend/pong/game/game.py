@@ -59,6 +59,7 @@ class GamePlayer:
 class Game:
     paddle_velocity = 1
     ball_position = Position(50, 50)
+    winner: None | Player = None
 
     def __init__(self, match: Match, screen: GameScreen):
         self.match = match
@@ -94,6 +95,9 @@ class Game:
         position.y += self.paddle_velocity
         # TODO: calculate new player position...
         self.game_players[str(player.public_id)].position = position
+
+    def hasFinished():
+        return False
 
     def toDict(self) -> dict:
         return {
