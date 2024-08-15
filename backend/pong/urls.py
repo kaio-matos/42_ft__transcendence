@@ -1,5 +1,10 @@
 from ft_transcendence.http.methods import GET, POST, PUT
-from pong.controllers import ChatController, PlayerController, MatchController
+from pong.controllers import (
+    ChatController,
+    PlayerController,
+    MatchController,
+    TournamentController,
+)
 
 urlpatterns = [
     GET("player", PlayerController.index),
@@ -22,4 +27,8 @@ urlpatterns = [
     GET("match/matchmaking", MatchController.matchmaking),
     POST("match/create", MatchController.create),
     GET("match/<slug:public_id>", MatchController.get),
+    #
+    GET("tournament", TournamentController.index),
+    POST("tournament/create", TournamentController.create),
+    GET("tournament/<slug:public_id>", TournamentController.get),
 ]
