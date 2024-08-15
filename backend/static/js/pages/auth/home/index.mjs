@@ -2,10 +2,14 @@ import { PlayerCommunication } from "../../../communication/player.mjs";
 import { Component } from "../../../components/component.mjs";
 import { router } from "../../../index.mjs";
 import { ChatService } from "../../../services/chat.mjs";
-import { RequestFailedError } from "../../../services/errors.mjs";
+import {
+  RequestFailedError,
+  UnprocessableEntityError,
+} from "../../../services/errors.mjs";
 import { PlayerService } from "../../../services/player.mjs";
 import { MatchService } from "../../../services/match.mjs";
 import { session } from "../../../state/session.mjs";
+import { TournamentService } from "../../../services/tournament.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Home = () => {
@@ -40,9 +44,34 @@ export const Home = () => {
         </t-loading>
       </div>
 
+      <div id="tournament-create-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Create Tournament</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <t-input label="Nome"></t-input>
+              <t-multiple-select class="mt-2"></t-multiple-select>
+            </div>
+            <div class="modal-footer">
+              <t-button data-bs-dismiss="modal" theme="secondary">Close</t-button>
+              <t-button id="tournament-create-modal-create-button">Create</t-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
       <div class="border border-secondary p-2 mt-auto rounded">
-          <t-button id="find-match-button" class="d-block" btn-class="w-100">Encontrar Partida</t-button>
-          <t-errors id="find-match-errors" class="mt-2"></t-errors>
+        <t-button id="tournament-create-open-modal-button" class="d-block" btn-class="w-100">Criar Torneio</t-button>
+      </div>
+
+
+      <div class="border border-secondary p-2 mt-auto rounded">
+        <t-button id="find-match-button" class="d-block" btn-class="w-100">Encontrar Partida</t-button>
+        <t-errors id="find-match-errors" class="mt-2"></t-errors>
       </div>
     </div>
   `;
@@ -57,6 +86,60 @@ export const Home = () => {
   );
 
   const t_chat = page.element.querySelector("t-chat");
+
+  const t_button_tournament_open_modal = page.element.querySelector(
+    "#tournament-create-open-modal-button",
+  );
+  const t_button_tournament_create_modal_create = page.element.querySelector(
+    "#tournament-create-modal-create-button",
+  );
+  t_button_tournament_open_modal.button.addEventListener("click", async () => {
+    const container = page.element.querySelector("#tournament-create-modal");
+    const t_multiple_select = container.querySelector("t-multiple-select");
+    const t_input = container.querySelector("t-input");
+    const modal = bootstrap.Modal.getOrCreateInstance(container);
+
+    t_input.value = "";
+    t_multiple_select.clearOptions();
+
+    modal.show();
+
+    const players = await PlayerService.getPlayers();
+    const options = players.map((p) => ({ label: p.name, value: p.id }));
+
+    t_multiple_select.addOptions(options);
+  });
+
+  t_button_tournament_create_modal_create.button.addEventListener(
+    "click",
+    async () => {
+      t_button_tournament_create_modal_create.setLoading(true);
+      const container = page.element.querySelector("#tournament-create-modal");
+      const t_multiple_select = container.querySelector("t-multiple-select");
+      const t_input = container.querySelector("t-input");
+      const modal = bootstrap.Modal.getOrCreateInstance(container);
+
+      t_input.clearErrors();
+      t_multiple_select.errors.element.clearErrors();
+
+      try {
+        await TournamentService.createTournament({
+          name: t_input.value,
+          players_id: t_multiple_select.getSelectedOptions(),
+        });
+        modal.hide();
+      } catch (error) {
+        if (error instanceof UnprocessableEntityError) {
+          t_input.addErrors(error.data?.error?.name);
+          t_multiple_select.errors.element.addErrors(
+            error.data?.error?.players_id,
+          );
+        }
+      } finally {
+        t_button_tournament_create_modal_create.setLoading(false);
+      }
+    },
+  );
 
   const form_add_friend = page.element.querySelector("#add-friend-form");
   const form_add_friend_t_input_email =
