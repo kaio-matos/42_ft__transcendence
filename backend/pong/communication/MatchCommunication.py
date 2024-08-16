@@ -4,7 +4,7 @@ from channels.http import async_to_sync
 
 from ft_transcendence.http import ws
 from pong.game.game import Game, GameDirection, GameScreen
-from pong.models import Player, Match
+from pong.models import Player, Match, Tournament
 
 # TODO: We MUST find some way to do this without creating this variable, and probably without saving into the postgresql
 games: dict[str, Game] = {}
@@ -34,8 +34,11 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
 
     def receive_json(self, content, **kwargs):
         player = typing.cast(Player, self.scope["user"])
+        if self.match.has_finished():
+            return
+
         match content["command"]:
-            case ws.WSCommands.JOIN_MATCH.value:
+            case ws.WSCommands.MATCH_JOIN.value:
                 screen = GameScreen(
                     content["payload"]["screen"]["width"],
                     content["payload"]["screen"]["height"],
@@ -44,8 +47,7 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                 game = games[self.match_group_id]
 
                 # TODO: This code is assuming both players are ready to begint the match, we should add some way to check if both are ready
-                async_to_sync(self.channel_layer.group_send)(
-                    self.match_group_id,
+                self.match.broadcast_match(
                     ws.WSResponse(ws.WSEvents.MATCH_START, game.toDict()),
                 )
 
@@ -58,8 +60,18 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                 direction = content["payload"]["direction"]
                 game.handleKeyPress(player, direction)
 
-                async_to_sync(self.channel_layer.group_send)(
-                    self.match_group_id,
+                if game.hasFinished():
+                    self.match.finish(game.winner)
+                    tournament = Tournament.query_by_match(
+                        self.match.get_root()
+                    ).first()
+                    if tournament:
+                        try:
+                            tournament.finish()
+                        except:
+                            pass
+
+                self.match.broadcast_match(
                     ws.WSResponse(ws.WSEvents.MATCH_UPDATE, game.toDict()),
                 )
 

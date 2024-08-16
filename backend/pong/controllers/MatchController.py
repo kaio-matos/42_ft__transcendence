@@ -54,7 +54,7 @@ def matchmaking(request: HttpRequest) -> HttpResponse:
     match.players.add(player)
     match.players.add(challenged_player)
 
-    match.broadcast(ws.WSResponse(ws.WSEvents.MATCH_BEGIN, {"match": match.toDict()}))
+    match.begin()
 
     return http.Created(match.toDict())
 
@@ -84,6 +84,6 @@ def create(request: HttpRequest) -> HttpResponse:
     match.players.add(player)
     match.players.add(challenged_player)
 
-    match.broadcast(ws.WSResponse(ws.WSEvents.MATCH_BEGIN, {"match": match.toDict()}))
+    match.begin()
 
     return http.Created(match.toDict())

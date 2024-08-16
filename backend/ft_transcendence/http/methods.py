@@ -23,6 +23,7 @@ def wrapCallback(method: str, callback):
             else:
                 return http.BadRequest({"error": {"_errors": e.args[0]}})
         except Exception as e:
+            traceback.print_exception(e)
             return http.InternalServerError(
                 {"error": {"_errors": traceback.format_exception_only(e)}}
             )

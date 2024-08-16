@@ -1,8 +1,10 @@
 import { MatchCommunication } from "../../../communication/match.mjs";
+import { PlayerCommunication } from "../../../communication/player.mjs";
 import { Component } from "../../../components/component.mjs";
 import { CanvasBall } from "../../../components/PongCanvas/canvas-components/CanvasBall.mjs";
 import { CanvasPaddle } from "../../../components/PongCanvas/canvas-components/CanvasPaddle.mjs";
 import { PongCanvas } from "../../../components/PongCanvas/PongCanvas.mjs";
+import { router } from "../../../index.mjs";
 import { NotFound } from "../../not-found/index.mjs";
 
 /**
@@ -70,7 +72,7 @@ export const Game = ({ params }) => {
   MatchCommunication.Communication.setPath("/ws/match/" + match_id);
   MatchCommunication.Communication.connect(() => {
     MatchCommunication.Communication.send(
-      MatchCommunication.Commands.JOIN_MATCH, // We tell the server that we want to begin the match
+      MatchCommunication.Commands.MATCH_JOIN, // We tell the server that we want to begin the match
       {
         screen: {
           width: canvas.width,
@@ -168,6 +170,26 @@ export const Game = ({ params }) => {
 
     setInterval(() => canvas.render(), 16); // TODO: do this the right way
   }
+
+  /**
+   * @param {{tournament: import("../../../services/tournament.mjs").Tournament}} param0
+   */
+  function onPlayerNotifyTournamentEnd({ tournament }) {
+    // TODO: do something else to show that the user has won the game
+    console.log("Voce ganhou parabens!", tournament);
+  }
+
+  PlayerCommunication.Communication.addEventListener(
+    PlayerCommunication.Events.PLAYER_NOTIFY_TOURNAMENT_END,
+    onPlayerNotifyTournamentEnd,
+  );
+
+  // TODO: add toast to notify the user that he has won/lose the match
+  // NOTE: This logic can also be done in MATCH_UPDATE event by checking match.status property
+  MatchCommunication.Communication.addEventListener(
+    MatchCommunication.Events.MATCH_END,
+    () => router.navigate("/auth"),
+  );
 
   return page;
 };

@@ -61,7 +61,6 @@ def block(request: HttpRequest, public_id: str) -> HttpResponse:
     if not request.user.is_authenticated:
         return http.Unauthorized({"message": _("Você não está autenticado")})
     player = typing.cast(Player, request.user)
-    print(public_id)
     chat = player.blocked_chats.filter(public_id=public_id).first()
 
     if chat is not None:

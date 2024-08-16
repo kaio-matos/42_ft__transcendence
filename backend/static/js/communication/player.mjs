@@ -2,7 +2,8 @@ import { ServerCommunication } from "./ServerCommunication.mjs";
 
 export const PlayerCommunication = {
   Events: Object.freeze({
-    MATCH_BEGIN: "onMatchBegin",
+    PLAYER_NOTIFY_MATCH_BEGIN: "onPlayerNotifyMatchBegin",
+    PLAYER_NOTIFY_TOURNAMENT_END: "onPlayerNotifyTournamentEnd",
     FRIEND_ACTIVITY_STATUS: "onFriendActivityStatusChange",
   }),
   Commands: Object.freeze({}),
