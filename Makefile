@@ -6,7 +6,7 @@
 #    By: macarval <macarval@student.42sp.org.br>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/19 16:33:22 by macarval          #+#    #+#              #
-#    Updated: 2024/08/16 08:14:06 by macarval         ###   ########.fr        #
+#    Updated: 2024/08/16 08:19:46 by macarval         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -76,7 +76,7 @@ git:
 			read msg; \
 			echo -n "\n"; \
 			echo "$(BBLUE)"; \
-			git commit -m "[ft_irc] $$type: $$msg"; \
+			git commit -m "[ft_transcendence] $$type: $$msg"; \
 			git checkout $(MAIN_BRANCH); \
 			git pull origin $(MAIN_BRANCH); \
 			git checkout $(shell cat $(BRANCH_FILE)); \
