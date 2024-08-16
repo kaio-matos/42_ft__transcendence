@@ -76,12 +76,21 @@ export const Home = () => {
     </div>
   `;
 
+  function onMatchStart(match) {
+    router.navigate("/auth/game?match=" + match.id);
+  }
+
   // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
+  if (session.player.pendencies.match_to_play) {
+    // TODO: Handle loading and move it to a proper place
+    MatchService.getMatch().then(onMatchStart);
+  }
+
   // TODO: Remove this listener after page change
   PlayerCommunication.Communication.addEventListener(
-    PlayerCommunication.Events.PLAYER_NOTIFY_MATCH_BEGIN,
+    PlayerCommunication.Events.PLAYER_NOTIFY_MATCH_UPDATE,
     ({ match }) => {
-      router.navigate("/auth/game?match=" + match.id);
+      if (match.status == "IN_PROGRESS") onMatchStart(match);
     },
   );
 

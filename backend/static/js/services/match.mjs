@@ -1,7 +1,19 @@
 import { GET, POST } from "./http.mjs";
 
 /**
- * @typedef {{ id: string, name: string, players: import("./player.mjs").Player[] }} Match
+ * @typedef {{
+ *   id: string,
+ *   name: string,
+ *   status: string,
+ *   players: import("./player.mjs").Player[],
+ *   child_upper: Match,
+ *   child_lower: Match,
+ *   winner: import("./player.mjs").Player | null,
+ *   has_finished: boolean,
+ *   has_player?: { accepted: boolean, rejected: boolean },
+ *   created_at: string,
+ *   updated_at: string
+ *  }} Match
  */
 
 export const MatchService = {
@@ -14,11 +26,29 @@ export const MatchService = {
   },
 
   /**
-   * @param {{ match_id: string }} param0
+   * Get the current active match
    * @returns {Promise<Match>}
    */
-  async getMatch({ match_id }) {
-    const { data } = await GET("/api/pong/match/" + match_id);
+  async getMatch() {
+    const { data } = await GET("/api/pong/match/get");
+    return data.data;
+  },
+
+  /**
+   * Get the current active match
+   * @returns {Promise<Match>}
+   */
+  async acceptMatch() {
+    const { data } = await GET("/api/pong/match/accept");
+    return data.data;
+  },
+
+  /**
+   * Get the current active match
+   * @returns {Promise<Match>}
+   */
+  async rejectMatch() {
+    const { data } = await GET("/api/pong/match/reject");
     return data.data;
   },
 

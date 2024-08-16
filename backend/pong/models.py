@@ -12,6 +12,7 @@ from django.db import models
 from threading import Timer
 
 from ft_transcendence.http import ws
+from pong.resources.MatchResource import MatchResource
 
 
 class CustomUserManager(BaseUserManager):
@@ -95,6 +96,15 @@ class Player(AbstractBaseUser, PermissionsMixin):
     def can_send_messages_to(self, chat):
         return chat not in self.blocked_chats.all()
 
+    def has_pending_match_to_answer(self):
+        return Match.query_by_awaiting_matches_with_pending_response_by([self]).exists()
+
+    def has_pending_match_to_play(self):
+        return Match.query_by_active_match_from([self]).exists()
+
+    def has_pending_tournament(self):
+        return False
+
     def set_activity_status(self, activity_status: ActivityStatus):
         self.activity_status = activity_status
         self.save()
@@ -122,6 +132,11 @@ class Player(AbstractBaseUser, PermissionsMixin):
             "email": self.email,
             "avatar": None if not self.avatar else self.avatar.url,
             "activity_status": self.activity_status,
+            "pendencies": {
+                "match_to_accept": self.has_pending_match_to_answer(),
+                "match_to_play": self.has_pending_match_to_play(),
+                "tournament": self.has_pending_tournament(),
+            },
         }
 
 
@@ -171,7 +186,7 @@ class Chat(models.Model):
         for player in players:
             player.send_message(ws_response)
 
-    def toDict(self, can_see_messages=False) -> dict:
+    def toDict(self) -> dict:
         r = {}
         r["id"] = str(self.public_id)
         r["players"] = [player.toDict() for player in self.players.all()]
@@ -196,6 +211,7 @@ class Match(models.Model):
         AWAITING = "AWAITING", _("Aguardando")
         IN_PROGRESS = "IN_PROGRESS", _("Em Progresso")
         FINISHED = "FINISHED", _("Finalizado")
+        CANCELLED = "CANCELLED", _("Cancelado")
 
     id = models.AutoField(primary_key=True)
     public_id = models.UUIDField(
@@ -228,11 +244,56 @@ class Match(models.Model):
         related_name="parent_lower",
     )
     max = models.IntegerField(default=2)
+    accepted_players = models.ManyToManyField(
+        Player, blank=True, related_name="accepted_players"
+    )
+    rejected_players = models.ManyToManyField(
+        Player, blank=True, related_name="rejected_players"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @staticmethod
+    def query_by_player(players):
+        return Match.objects.filter(players__in=players)
+
+    @staticmethod
+    def query_by_awaiting():
+        return Match.objects.filter(status=Match.Status.AWAITING)
+
+    @staticmethod
+    def query_by_active_match_from(players):
+        return Match.objects.filter(players__in=players).filter(
+            models.Q(status=Match.Status.AWAITING)
+            | models.Q(status=Match.Status.IN_PROGRESS)
+        )
+
+    @staticmethod
+    def query_by_awaiting_matches_with_pending_response_by(players):
+        return (
+            Match.objects.filter(players__in=players)
+            .filter(status=Match.Status.AWAITING)
+            .exclude(accepted_players__in=players)
+            .exclude(rejected_players__in=players)
+        )
+
     def is_full(self):
         return bool(self.players.count() >= self.max)
+
+    def is_fully_accepted(self):
+        return bool(self.accepted_players.count() == self.players.count())
+
+    def has_player_accepted(self, player: Player):
+        return self.accepted_players.filter(id=player.id).exists()
+
+    def has_player_rejected(self, player: Player):
+        return self.rejected_players.filter(id=player.id).exists()
+
+    def has_players_in_another_match(self):
+        matches = Match.query_by_active_match_from(self.players.all()).exclude(
+            public_id=self.public_id
+        )
+        return matches.exists()
 
     def has_finished(self):
         if self.winner is not None and self.status == self.Status.FINISHED:
@@ -242,8 +303,17 @@ class Match(models.Model):
     def can_receive_new_players(self):
         return bool(not self.is_full() and not self.has_finished())
 
+    def can_accept_or_reject(self):
+        return bool(
+            self.status == Match.Status.CREATED
+            and not self.has_players_in_another_match()
+            and self.is_full()
+            and not self.is_fully_accepted()
+            and not self.has_finished()
+        )
+
     def can_begin(self):
-        return bool(self.is_full() and not self.has_finished())
+        return bool(self.is_fully_accepted() and not self.has_finished())
 
     def get_root(self) -> Match | None:
         child = self
@@ -270,24 +340,41 @@ class Match(models.Model):
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(str(self.public_id), ws_response)
 
-    def broadcast_individually(self, ws_response: dict):
+    def notify_players_update(self):
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(str(self.public_id), ws_response)
 
         players = self.players.all()
 
         for player in players:
-            player.send_message(ws_response)
+            player.send_message(
+                ws.WSResponse(
+                    ws.WSEvents.PLAYER_NOTIFY_MATCH_UPDATE,
+                    {"match": MatchResource(self, player)},
+                )
+            )
 
     def begin(self):
-        if not self.can_begin():
-            return
-        self.status = Match.Status.IN_PROGRESS
+        if self.can_accept_or_reject():
+            self.status = Match.Status.AWAITING
+            self.save()
+            self.notify_players_update()
+
+        if self.can_begin():
+            self.status = Match.Status.IN_PROGRESS
+            self.save()
+
+    def accept(self, player: Player):
+        self.accepted_players.add(player)
+        if self.is_fully_accepted():
+            self.begin()
+        self.notify_players_update()
+
+    def reject(self, player: Player):
+        self.rejected_players.add(player)
+        self.status = Match.Status.CANCELLED
         self.save()
-        # NOTE: the user is not yet connected to the match room, so we need to send them individually
-        self.broadcast_individually(
-            ws.WSResponse(ws.WSEvents.PLAYER_NOTIFY_MATCH_BEGIN, {"match": self.toDict()})
-        )
+        self.notify_players_update()
 
     def finish(self, winner: Player):
         self.winner = winner
@@ -444,7 +531,10 @@ class Tournament(models.Model):
             self.champion = self.root_match.winner
             self.save()
             self.champion.send_message(
-                ws.WSResponse(ws.WSEvents.PLAYER_NOTIFY_TOURNAMENT_END, {"tournament": self.toDict()})
+                ws.WSResponse(
+                    ws.WSEvents.PLAYER_NOTIFY_TOURNAMENT_END,
+                    {"tournament": self.toDict()},
+                )
             )
         else:
             raise ValueError(
