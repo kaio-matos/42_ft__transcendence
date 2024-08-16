@@ -286,7 +286,7 @@ class Match(models.Model):
         self.save()
         # NOTE: the user is not yet connected to the match room, so we need to send them individually
         self.broadcast_individually(
-            ws.WSResponse(ws.WSEvents.MATCH_BEGIN, {"match": self.toDict()})
+            ws.WSResponse(ws.WSEvents.PLAYER_NOTIFY_MATCH_BEGIN, {"match": self.toDict()})
         )
 
     def finish(self, winner: Player):
@@ -444,7 +444,7 @@ class Tournament(models.Model):
             self.champion = self.root_match.winner
             self.save()
             self.champion.send_message(
-                ws.WSResponse(ws.WSEvents.TOURNAMENT_END, {"tournament": self.toDict()})
+                ws.WSResponse(ws.WSEvents.PLAYER_NOTIFY_TOURNAMENT_END, {"tournament": self.toDict()})
             )
         else:
             raise ValueError(

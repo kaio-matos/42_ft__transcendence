@@ -79,7 +79,7 @@ export const Home = () => {
   // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
   // TODO: Remove this listener after page change
   PlayerCommunication.Communication.addEventListener(
-    PlayerCommunication.Events.MATCH_BEGIN,
+    PlayerCommunication.Events.PLAYER_NOTIFY_MATCH_BEGIN,
     ({ match }) => {
       router.navigate("/auth/game?match=" + match.id);
     },

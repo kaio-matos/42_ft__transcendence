@@ -4,13 +4,11 @@ from enum import Enum
 # Events are responses from the backend to the frontend
 # - example: After a player create a match we should notify all players invited to the match to join the match
 class WSEvents(Enum):
-    # TODO: refactor MATCH_BEGIN to PLAYER_NOTIFY_MATCH_BEGIN or something like that
-    MATCH_BEGIN = "onMatchBegin"
+    PLAYER_NOTIFY_MATCH_BEGIN = "onPlayerNotifyMatchBegin"
+    PLAYER_NOTIFY_TOURNAMENT_END = "onPlayerNotifyTournamentEnd"
     MATCH_START = "onMatchStart"
     MATCH_UPDATE = "onMatchUpdate"
     MATCH_END = "onMatchEnd"
-    # TODO: refactor TOURNAMENT_END to PLAYER_NOTIFY_TOURNAMENT_END or something like that
-    TOURNAMENT_END = "onTournamentEnd"
     CHAT_JOIN = "onChatJoin"
     CHAT_MESSAGE = "onChatMessage"
     ERROR = "onError"

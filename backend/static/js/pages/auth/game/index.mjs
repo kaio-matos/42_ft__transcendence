@@ -174,14 +174,14 @@ export const Game = ({ params }) => {
   /**
    * @param {{tournament: import("../../../services/tournament.mjs").Tournament}} param0
    */
-  function onTournamentEnd({ tournament }) {
+  function onPlayerNotifyTournamentEnd({ tournament }) {
     // TODO: do something else to show that the user has won the game
     console.log("Voce ganhou parabens!", tournament);
   }
 
   PlayerCommunication.Communication.addEventListener(
-    PlayerCommunication.Events.TOURNAMENT_END,
-    onTournamentEnd,
+    PlayerCommunication.Events.PLAYER_NOTIFY_TOURNAMENT_END,
+    onPlayerNotifyTournamentEnd,
   );
 
   // TODO: add toast to notify the user that he has won/lose the match
