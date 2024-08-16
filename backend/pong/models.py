@@ -9,6 +9,7 @@ from django.utils.translation import gettext as _
 from django.core import serializers
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from threading import Timer
 
 from ft_transcendence.http import ws
 
@@ -102,11 +103,14 @@ class Player(AbstractBaseUser, PermissionsMixin):
         )
 
     def broadcast_friends(self, ws_response: dict):
-        channel_layer = get_channel_layer()
         friends = self.friends.all()
 
         for player in friends:
-            async_to_sync(channel_layer.group_send)(str(player.public_id), ws_response)
+            player.send_message(ws_response)
+
+    def send_message(self, ws_response):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(str(self.public_id), ws_response)
 
     def __str__(self):
         return f"{self.name} ({self.email})"
@@ -162,11 +166,10 @@ class Chat(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def broadcast(self, ws_response: dict):
-        channel_layer = get_channel_layer()
         players = self.players.all()
 
         for player in players:
-            async_to_sync(channel_layer.group_send)(str(player.public_id), ws_response)
+            player.send_message(ws_response)
 
     def toDict(self, can_see_messages=False) -> dict:
         r = {}
@@ -229,7 +232,7 @@ class Match(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def is_full(self):
-        return bool(self.players.count() > self.max)
+        return bool(self.players.count() >= self.max)
 
     def has_finished(self):
         if self.winner is not None and self.status == self.Status.FINISHED:
@@ -263,26 +266,36 @@ class Match(models.Model):
             p = self.parent_lower.first()
         return p
 
-    def finish(self, winner):
-        self.winner = winner
-        self.status = self.Status.FINISHED
-        self.save()
-
-    def broadcast(self, ws_response: dict):
+    def broadcast_match(self, ws_response: dict):
         channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(str(self.public_id), ws_response)
+
+    def broadcast_individually(self, ws_response: dict):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(str(self.public_id), ws_response)
+
         players = self.players.all()
 
         for player in players:
-            async_to_sync(channel_layer.group_send)(str(player.public_id), ws_response)
+            player.send_message(ws_response)
 
     def begin(self):
         if not self.can_begin():
             return
         self.status = Match.Status.IN_PROGRESS
         self.save()
-        if self.has_finished():
-            return
-        self.broadcast(ws.WSResponse(ws.WSEvents.MATCH_BEGIN, {"match": self.toDict()}))
+        # NOTE: the user is not yet connected to the match room, so we need to send them individually
+        self.broadcast_individually(
+            ws.WSResponse(ws.WSEvents.MATCH_BEGIN, {"match": self.toDict()})
+        )
+
+    def finish(self, winner: Player):
+        self.winner = winner
+        self.status = self.Status.FINISHED
+        self.save()
+        self.broadcast_match(
+            ws.WSResponse(ws.WSEvents.MATCH_END, {"match": self.toDict()})
+        )
 
     def toDict(self) -> dict:
         r = {}
@@ -336,6 +349,12 @@ class Tournament(models.Model):
     def query_by_match(match: Match):
         return Tournament.objects.filter(root_match=match)
 
+    def has_finished(self):
+        return bool(self.champion != None and self.status == self.Status.FINISHED)
+
+    def can_begin(self):
+        return bool(self.root_match != None and not self.has_finished())
+
     def generate_matches_tree_for(self, players_n: int):
         self.root_match = Match(name=self.name + " - Partida Final")
         self.root_match.save()
@@ -388,7 +407,22 @@ class Tournament(models.Model):
                 parent.players.add(match.winner)
                 parent.save()
             if parent.can_begin():
-                parent.begin()
+                # TODO: After implementing the acceptance step, we will show a modal asking if the user is ready to start the next match
+                # for now lets just wait 10 seconds before the beginning of the next match
+                Timer(10, parent.begin).start()
+
+        self.foreach_match(it)
+
+    def begin(self):
+        if not self.can_begin():
+            return
+
+        self.status = Tournament.Status.IN_PROGRESS
+        self.save()
+
+        def it(match: Match):
+            if match.can_begin():
+                match.begin()
 
         self.foreach_match(it)
 
@@ -409,6 +443,9 @@ class Tournament(models.Model):
             self.status = self.Status.FINISHED
             self.champion = self.root_match.winner
             self.save()
+            self.champion.send_message(
+                ws.WSResponse(ws.WSEvents.TOURNAMENT_END, {"tournament": self.toDict()})
+            )
         else:
             raise ValueError(
                 "All matches must be finished first before finishing the tournament"

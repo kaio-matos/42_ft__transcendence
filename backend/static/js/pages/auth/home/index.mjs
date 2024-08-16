@@ -21,7 +21,7 @@ export const Home = () => {
     <t-chat class="col-8"></t-chat>
     <div class="d-flex flex-column border border-secondary p-2 rounded col-4">
       <div class="d-flex gap-1 mb-2">
-        <t-button to="/auth/profile" class="d-block flex-grow-1" btn-class="w-100">Perfil</t-button>
+        <t-button to="/auth/profile" class="d-block flex-grow-1" btn-class="w-100">${session.player.email}</t-button>
         <t-button id="logout-button" class="d-block" theme="danger">Logout</t-button>
       </div>
 

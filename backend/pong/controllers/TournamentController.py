@@ -1,11 +1,9 @@
-import typing
 from uuid import UUID
 from channels.generic.websocket import json
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from django.http import HttpRequest, HttpResponse
 from ft_transcendence.http import http
-from ft_transcendence.http import ws
 from pong.forms.TournamentForms import TournamentRegistrationForm
 from pong.models import Player, Tournament
 
@@ -50,5 +48,7 @@ def create(request: HttpRequest) -> HttpResponse:
     tournament.save()
     tournament.generate_matches_tree_for(len(players))
     tournament.initialize_matches_tree(list(players))
+    # TODO: We probably should add some extra step asking if all players are ready to begin the tournament
+    tournament.begin()
 
     return http.Created(tournament.toDict())

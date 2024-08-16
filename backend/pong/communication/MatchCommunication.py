@@ -34,8 +34,11 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
 
     def receive_json(self, content, **kwargs):
         player = typing.cast(Player, self.scope["user"])
+        if self.match.has_finished():
+            return
+
         match content["command"]:
-            case ws.WSCommands.JOIN_MATCH.value:
+            case ws.WSCommands.MATCH_JOIN.value:
                 screen = GameScreen(
                     content["payload"]["screen"]["width"],
                     content["payload"]["screen"]["height"],
@@ -44,8 +47,7 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                 game = games[self.match_group_id]
 
                 # TODO: This code is assuming both players are ready to begint the match, we should add some way to check if both are ready
-                async_to_sync(self.channel_layer.group_send)(
-                    self.match_group_id,
+                self.match.broadcast_match(
                     ws.WSResponse(ws.WSEvents.MATCH_START, game.toDict()),
                 )
 
@@ -69,8 +71,7 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                         except:
                             pass
 
-                async_to_sync(self.channel_layer.group_send)(
-                    self.match_group_id,
+                self.match.broadcast_match(
                     ws.WSResponse(ws.WSEvents.MATCH_UPDATE, game.toDict()),
                 )
 
