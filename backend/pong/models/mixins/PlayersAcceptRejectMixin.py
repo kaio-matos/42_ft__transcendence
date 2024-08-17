@@ -15,6 +15,10 @@ class PlayersAcceptRejectMixin(models.Model):
     # Queries
     ##################################################
 
+    ##################################################
+    # Computed
+    ##################################################
+
     def is_fully_accepted(self):
         players_n = self.players.count()
         return bool(players_n > 0 and self.accepted_players.count() == players_n)
@@ -24,10 +28,6 @@ class PlayersAcceptRejectMixin(models.Model):
 
     def has_player_rejected(self, player: Player):
         return self.rejected_players.filter(id=player.id).exists()
-
-    ##################################################
-    # Computed
-    ##################################################
 
     ##################################################
     # Notification
