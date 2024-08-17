@@ -38,7 +38,7 @@ export async function http(path, options) {
 
     if (response.status === HTTPStatus.UNAUTHORIZED) {
       router.navigate("/login");
-      session.player = undefined;
+      session.player = null;
     }
 
     if (response.status === HTTPStatus.UNPROCESSABLE_ENTITY) {
