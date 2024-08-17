@@ -8,10 +8,12 @@ from django.db import models
 
 from ft_transcendence.http import ws
 from pong.models.Player import Player
+from pong.models.mixins.PlayersAcceptRejectMixin import PlayersAcceptRejectMixin
+from pong.models.mixins.TimestampMixin import TimestampMixin
 from pong.resources.MatchResource import MatchResource
 
 
-class Match(models.Model):
+class Match(PlayersAcceptRejectMixin, TimestampMixin):
     class Status(models.TextChoices):
         CREATED = "CREATED", _("Criado")
         AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION", _("Aguardando Confirmação")
@@ -24,7 +26,6 @@ class Match(models.Model):
         unique=True, db_index=True, default=uuid.uuid4, editable=False
     )
     name = models.CharField(max_length=200)
-    players = models.ManyToManyField(Player, blank=True)
     winner = models.ForeignKey(
         Player,
         default=None,
@@ -33,7 +34,7 @@ class Match(models.Model):
         related_name="winner",
     )
     status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.CREATED
+        max_length=100, choices=Status.choices, default=Status.CREATED
     )
     child_upper = models.ForeignKey(
         "self",
@@ -50,14 +51,6 @@ class Match(models.Model):
         related_name="parent_lower",
     )
     max = models.IntegerField(default=2)
-    accepted_players = models.ManyToManyField(
-        Player, blank=True, related_name="accepted_players"
-    )
-    rejected_players = models.ManyToManyField(
-        Player, blank=True, related_name="rejected_players"
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     @staticmethod
     def query_by_player(players):
@@ -91,16 +84,6 @@ class Match(models.Model):
 
     def is_full(self):
         return bool(self.players.count() >= self.max)
-
-    def is_fully_accepted(self):
-        players_n = self.players.count()
-        return bool(players_n > 0 and self.accepted_players.count() == players_n)
-
-    def has_player_accepted(self, player: Player):
-        return self.accepted_players.filter(id=player.id).exists()
-
-    def has_player_rejected(self, player: Player):
-        return self.rejected_players.filter(id=player.id).exists()
 
     def has_players_in_another_match(self):
         return (
@@ -177,14 +160,12 @@ class Match(models.Model):
             self.status = Match.Status.IN_PROGRESS
             self.save()
 
-    def accept(self, player: Player):
-        self.accepted_players.add(player)
+    def onAccept(self, player: Player):
         if self.is_fully_accepted():
             self.begin()
         self.notify_players_update()
 
-    def reject(self, player: Player):
-        self.rejected_players.add(player)
+    def onReject(self, player: Player):
         self.status = Match.Status.CANCELLED
         self.save()
         self.notify_players_update()

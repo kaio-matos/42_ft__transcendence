@@ -4,12 +4,14 @@ import uuid
 from asgiref.sync import async_to_sync
 from channels.consumer import get_channel_layer
 from django.contrib.auth.base_user import BaseUserManager
+from django.core import serializers
 from django.utils.translation import gettext as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.apps import apps
 
 from ft_transcendence.http import ws
+from pong.models.mixins.TimestampMixin import TimestampMixin
 
 
 class CustomUserManager(BaseUserManager):
@@ -51,7 +53,7 @@ def playerAvatarPath(player, filename: str):
     return f"player/avatar/{player.public_id}{extension}"
 
 
-class Player(AbstractBaseUser, PermissionsMixin):
+class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
     class ActivityStatus(models.TextChoices):
         ONLINE = "ONLINE", _("Online")
         OFFLINE = "OFFLINE", _("Offline")
@@ -131,9 +133,6 @@ class Player(AbstractBaseUser, PermissionsMixin):
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(str(self.public_id), ws_response)
 
-    def __str__(self):
-        return f"{self.name} ({self.email})"
-
     def toDict(self) -> dict:
         return {
             "id": str(self.public_id),
@@ -147,3 +146,11 @@ class Player(AbstractBaseUser, PermissionsMixin):
                 "tournament_to_accept": self.has_pending_tournament_to_answer(),
             },
         }
+
+    def __str__(self):
+        return serializers.serialize(
+            "json",
+            [
+                self,
+            ],
+        )

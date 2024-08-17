@@ -6,9 +6,10 @@ from django.db import models
 
 from pong.models.Message import Message
 from pong.models.Player import Player
+from pong.models.mixins.TimestampMixin import TimestampMixin
 
 
-class Chat(models.Model):
+class Chat(TimestampMixin):
     id = models.AutoField(primary_key=True)
     public_id = models.UUIDField(
         unique=True, db_index=True, default=uuid.uuid4, editable=False
@@ -17,8 +18,6 @@ class Chat(models.Model):
     players = models.ManyToManyField(Player)
     messages = models.ManyToManyField(Message)
     is_private = models.BooleanField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def broadcast(self, ws_response: dict):
         players = self.players.all()

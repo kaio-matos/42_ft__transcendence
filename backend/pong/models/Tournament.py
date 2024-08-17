@@ -9,10 +9,12 @@ from threading import Timer
 from ft_transcendence.http import ws
 from pong.models.Match import Match
 from pong.models.Player import Player
+from pong.models.mixins.PlayersAcceptRejectMixin import PlayersAcceptRejectMixin
 from pong.resources.TournamentResource import TournamentResource
+from pong.models.mixins.TimestampMixin import TimestampMixin
 
 
-class Tournament(models.Model):
+class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
     class Status(models.TextChoices):
         CREATED = "CREATED", _("Criado")
         AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION", _("Aguardando Confirmação")
@@ -36,14 +38,7 @@ class Tournament(models.Model):
         related_name="champion",
     )
     status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.CREATED
-    )
-    players = models.ManyToManyField(Player, blank=True)
-    accepted_players = models.ManyToManyField(
-        Player, blank=True, related_name="tournament_accepted_players"
-    )
-    rejected_players = models.ManyToManyField(
-        Player, blank=True, related_name="tournement_rejected_players"
+        max_length=100, choices=Status.choices, default=Status.CREATED
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -85,16 +80,6 @@ class Tournament(models.Model):
             and not self.is_fully_accepted()
             and not self.has_finished()
         )
-
-    def is_fully_accepted(self):
-        players_n = self.players.count()
-        return bool(players_n > 0 and self.accepted_players.count() == players_n)
-
-    def has_player_accepted(self, player: Player):
-        return self.accepted_players.filter(id=player.id).exists()
-
-    def has_player_rejected(self, player: Player):
-        return self.rejected_players.filter(id=player.id).exists()
 
     def has_players_in_another_tournament(self):
         return (
@@ -187,14 +172,12 @@ class Tournament(models.Model):
             self.foreach_match(it)
             self.notify_players_update()
 
-    def accept(self, player: Player):
-        self.accepted_players.add(player)
+    def onAccept(self, player: Player):
         if self.is_fully_accepted():
             self.begin()
         self.notify_players_update()
 
-    def reject(self, player: Player):
-        self.rejected_players.add(player)
+    def onReject(self, player: Player):
         self.status = Tournament.Status.CANCELLED
         self.save()
         self.notify_players_update()
