@@ -32,5 +32,7 @@ urlpatterns = [
     #
     GET("tournament", TournamentController.index),
     POST("tournament/create", TournamentController.create),
-    GET("tournament/<slug:public_id>", TournamentController.get),
+    GET("tournament/get", TournamentController.get),
+    GET("tournament/accept", TournamentController.accept),
+    GET("tournament/reject", TournamentController.reject),
 ]

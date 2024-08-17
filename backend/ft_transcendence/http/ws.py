@@ -5,7 +5,7 @@ from enum import Enum
 # - example: After a player create a match we should notify all players invited to the match to join the match
 class WSEvents(Enum):
     PLAYER_NOTIFY_MATCH_UPDATE = "onPlayerNotifyMatchUpdate"
-    PLAYER_NOTIFY_TOURNAMENT_ACCEPTANCE = "onPlayerNotifyTournamentAcceptance"
+    PLAYER_NOTIFY_TOURNAMENT_UPDATE = "onPlayerNotifyTournamentUpdate"
     PLAYER_NOTIFY_TOURNAMENT_END = "onPlayerNotifyTournamentEnd"
     MATCH_START = "onMatchStart"
     MATCH_UPDATE = "onMatchUpdate"
