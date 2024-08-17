@@ -3,7 +3,7 @@ def TournamentResource(tournament, player):
     rejected = tournament.has_player_rejected(player)
     pending = (
         bool(not accepted and not rejected)
-        and tournament.status == tournament.Status.AWAITING
+        and tournament.status == tournament.Status.AWAITING_CONFIRMATION
     )
 
     r = {

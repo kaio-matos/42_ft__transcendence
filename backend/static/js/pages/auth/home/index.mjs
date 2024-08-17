@@ -490,11 +490,11 @@ export const Home = () => {
         onMatchStart(match);
         return;
       }
-      if (match.status === "AWAITING" && match.confirmation.pending) {
+      if (match.status === "AWAITING_CONFIRMATION" && match.confirmation.pending) {
         onMatchConfirmation(match);
         return;
       }
-      if (match.status === "AWAITING" && match.confirmation.accepted) {
+      if (match.status === "AWAITING_CONFIRMATION" && match.confirmation.accepted) {
         onMatchAwaiting();
         return;
       }
@@ -512,12 +512,12 @@ export const Home = () => {
         closeTournamentModals();
         return;
       }
-      if (tournament.status === "AWAITING" && tournament.confirmation.pending) {
+      if (tournament.status === "AWAITING_CONFIRMATION" && tournament.confirmation.pending) {
         onTournamentConfirmation(tournament);
         return;
       }
       if (
-        tournament.status === "AWAITING" &&
+        tournament.status === "AWAITING_CONFIRMATION" &&
         tournament.confirmation.accepted
       ) {
         onTournamentAwaiting();
