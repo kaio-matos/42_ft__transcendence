@@ -94,6 +94,39 @@ export const Home = () => {
         </div>
       </div>
 
+      <div id="tournament-confirmation-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Partida</h5>
+            </div>
+            <div class="modal-body">
+              <p>Você aceita o torneio?</p>
+
+            </div>
+            <div class="modal-footer">
+              <t-button id="tournament-confirmation-modal-reject-button" theme="danger">Rejeitar</t-button>
+              <t-button id="tournament-confirmation-modal-accept-button">Aceitar</t-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tournament-awaiting-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Partida</h5>
+            </div>
+            <div class="modal-body">
+              <p>Por favor aguarde pela confirmação dos outros participantes</p>
+              <p>Você será redirecionado automaticamente assim que todos os participantes aceitarem</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
       <div class="border border-secondary p-2 mt-auto rounded">
         <t-button id="tournament-create-open-modal-button" class="d-block" btn-class="w-100">Criar Torneio</t-button>
       </div>
@@ -378,8 +411,67 @@ export const Home = () => {
     match_confirmation_modal.show();
   }
 
+  function onTournamentConfirmation() {
+    const container = page.element.querySelector(
+      "#tournament-confirmation-modal",
+    );
+    const tournament_confirmation_modal = bootstrap.Modal.getOrCreateInstance(
+      container,
+      { backdrop: "static" },
+    );
+
+    const reject = container.querySelector(
+      "#tournament-confirmation-modal-reject-button",
+    );
+    const accept = container.querySelector(
+      "#tournament-confirmation-modal-accept-button",
+    );
+
+    reject.button.addEventListener("click", async () => {
+      reject.setLoading(true);
+      await TournamentService.rejectTournament();
+      reject.setLoading(false);
+      tournament_confirmation_modal.hide();
+    });
+    accept.button.addEventListener("click", async () => {
+      accept.setLoading(true);
+      await TournamentService.acceptTournament();
+      accept.setLoading(false);
+      tournament_confirmation_modal.hide();
+    });
+
+    tournament_confirmation_modal.show();
+  }
+
+  function onTournamentAwaiting() {
+    const container = page.element.querySelector("#tournament-awaiting-modal");
+    const tournament_awaiting_modal = bootstrap.Modal.getOrCreateInstance(
+      container,
+      { backdrop: "static" },
+    );
+    tournament_awaiting_modal.show();
+  }
+
+  function closeTournamentModals() {
+    const tournament_awaiting_modal = bootstrap.Modal.getOrCreateInstance(
+      page.element.querySelector("#tournament-awaiting-modal"),
+      { backdrop: "static" },
+    );
+    tournament_awaiting_modal.hide();
+
+    const tournament_confirmation_modal = bootstrap.Modal.getOrCreateInstance(
+      page.element.querySelector("#tournament-confirmation-modal"),
+      { backdrop: "static" },
+    );
+    tournament_confirmation_modal.hide();
+  }
+
   // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
   if (session.player.pendencies) {
+    if (session.player.pendencies.tournament_to_accept) {
+      TournamentService.getTournament().then(onTournamentConfirmation);
+    }
+
     if (session.player.pendencies.match_to_play) {
       // TODO: Handle loading and move it to a proper place
       MatchService.getMatch().then(onMatchStart);
@@ -408,6 +500,31 @@ export const Home = () => {
       }
       if (match.status === "CANCELLED") {
         onMatchCancelled();
+      }
+    },
+  );
+
+  // TODO: Remove this listener after page change
+  PlayerCommunication.Communication.addEventListener(
+    PlayerCommunication.Events.PLAYER_NOTIFY_TOURNAMENT_UPDATE,
+    ({ tournament }) => {
+      if (tournament.status === "IN_PROGRESS") {
+        closeTournamentModals();
+        return;
+      }
+      if (tournament.status === "AWAITING" && tournament.confirmation.pending) {
+        onTournamentConfirmation(tournament);
+        return;
+      }
+      if (
+        tournament.status === "AWAITING" &&
+        tournament.confirmation.accepted
+      ) {
+        onTournamentAwaiting();
+        return;
+      }
+      if (tournament.status === "CANCELLED") {
+        closeTournamentModals();
       }
     },
   );
