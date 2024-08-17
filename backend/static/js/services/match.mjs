@@ -10,7 +10,7 @@ import { GET, POST } from "./http.mjs";
  *   child_lower: Match,
  *   winner: import("./player.mjs").Player | null,
  *   has_finished: boolean,
- *   has_player?: { accepted: boolean, rejected: boolean },
+ *   confirmation?: { accepted: boolean, rejected: boolean },
  *   created_at: string,
  *   updated_at: string
  *  }} Match

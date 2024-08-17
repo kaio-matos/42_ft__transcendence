@@ -100,7 +100,7 @@ class Player(AbstractBaseUser, PermissionsMixin):
         return Match.query_by_awaiting_matches_with_pending_response_by([self]).exists()
 
     def has_pending_match_to_play(self):
-        return Match.query_by_active_match_from([self]).exists()
+        return Match.query_by_in_progress_match_from([self]).exists()
 
     def has_pending_tournament(self):
         return False
@@ -269,6 +269,12 @@ class Match(models.Model):
         )
 
     @staticmethod
+    def query_by_in_progress_match_from(players):
+        return Match.objects.filter(players__in=players).filter(
+            status=Match.Status.IN_PROGRESS
+        )
+
+    @staticmethod
     def query_by_awaiting_matches_with_pending_response_by(players):
         return (
             Match.objects.filter(players__in=players)
@@ -341,9 +347,6 @@ class Match(models.Model):
         async_to_sync(channel_layer.group_send)(str(self.public_id), ws_response)
 
     def notify_players_update(self):
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(str(self.public_id), ws_response)
-
         players = self.players.all()
 
         for player in players:

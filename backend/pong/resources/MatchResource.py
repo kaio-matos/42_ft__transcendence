@@ -6,7 +6,7 @@ def MatchResource(match, player):
     )
 
     r = {
-        "has_player": {
+        "confirmation": {
             "accepted": accepted,
             "rejected": rejected,
             "pending": pending,
