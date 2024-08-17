@@ -101,7 +101,7 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
         return not self.is_chat_blocked(chat)
 
     def can_send_messages_to(self, chat):
-        return self.is_chat_blocked(chat)
+        return not self.is_chat_blocked(chat)
 
     def has_pending_match_to_answer(self):
         return (
