@@ -26,9 +26,13 @@ urlpatterns = [
     GET("match", MatchController.index),
     GET("match/matchmaking", MatchController.matchmaking),
     POST("match/create", MatchController.create),
-    GET("match/<slug:public_id>", MatchController.get),
+    GET("match/get", MatchController.get),
+    GET("match/accept", MatchController.accept),
+    GET("match/reject", MatchController.reject),
     #
     GET("tournament", TournamentController.index),
     POST("tournament/create", TournamentController.create),
-    GET("tournament/<slug:public_id>", TournamentController.get),
+    GET("tournament/get", TournamentController.get),
+    GET("tournament/accept", TournamentController.accept),
+    GET("tournament/reject", TournamentController.reject),
 ]

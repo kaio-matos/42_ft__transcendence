@@ -6,7 +6,19 @@ export const ActivityStatus = Object.freeze({
 });
 
 /**
- * @typedef {{ id: string, name: string, email: string, avatar: string, blocked_chats: import("./chat.mjs").Chat[], activity_status: keyof typeof ActivityStatus }} Player
+ * @typedef {{
+ *    id: string,
+ *    name: string,
+ *    email: string,
+ *    avatar: string,
+ *    blocked_chats: import("./chat.mjs").Chat[],
+ *    activity_status: keyof typeof ActivityStatus,
+ *    pendencies: {
+ *      match_to_play: boolean,
+ *      match_to_accept: boolean,
+ *      tournament_to_accept: boolean,
+ *    }
+ *  }} Player
  */
 
 export const PlayerService = {

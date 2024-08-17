@@ -10,6 +10,7 @@ import { Registration } from "./pages/registration/index.mjs";
 import { session } from "./state/session.mjs";
 import { Profile } from "./pages/auth/profile/index.mjs";
 import { PlayerProfile } from "./pages/auth/player/profile/index.mjs";
+import { PlayerService } from "./services/player.mjs";
 
 export const router = new Router(
   [
@@ -23,7 +24,13 @@ export const router = new Router(
   { NotFoundPage: NotFound },
 );
 
-function render() {
+async function render() {
+  // TODO: Show some type of loading for this update
+  if (session.player) {
+    session.player = await PlayerService.getPlayer({
+      player_id: session.player.id,
+    });
+  }
   router.render();
 }
 

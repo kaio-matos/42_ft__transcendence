@@ -5,7 +5,7 @@ class Session {
   }
   /** @param {import("../services/player.mjs").Player} value */
   set player(value) {
-    localStorage.setItem("player", JSON.stringify(value));
+    localStorage.setItem("player", JSON.stringify(value ?? null));
   }
 }
 

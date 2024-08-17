@@ -48,16 +48,79 @@ export const Home = () => {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Create Tournament</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <h5 class="modal-title">Criar Torneio</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
               <t-input label="Nome"></t-input>
               <t-multiple-select class="mt-2"></t-multiple-select>
             </div>
             <div class="modal-footer">
-              <t-button data-bs-dismiss="modal" theme="secondary">Close</t-button>
-              <t-button id="tournament-create-modal-create-button">Create</t-button>
+              <t-button data-bs-dismiss="modal" theme="secondary">Fechar</t-button>
+              <t-button id="tournament-create-modal-create-button">Criar</t-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="match-confirmation-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Partida</h5>
+            </div>
+            <div class="modal-body">
+              <p>Você aceita a partida?</p>
+            </div>
+            <div class="modal-footer">
+              <t-button id="match-confirmation-modal-reject-button" theme="danger">Rejeitar</t-button>
+              <t-button id="match-confirmation-modal-accept-button">Aceitar</t-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="match-awaiting-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Partida</h5>
+            </div>
+            <div class="modal-body">
+              <p>Por favor aguarde pela confirmação dos outros participantes</p>
+              <p>Você será redirecionado automaticamente assim que todos os participantes aceitarem</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tournament-confirmation-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Torneio</h5>
+            </div>
+            <div class="modal-body">
+              <p>Você aceita o torneio?</p>
+
+            </div>
+            <div class="modal-footer">
+              <t-button id="tournament-confirmation-modal-reject-button" theme="danger">Rejeitar</t-button>
+              <t-button id="tournament-confirmation-modal-accept-button">Aceitar</t-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tournament-awaiting-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Torneio</h5>
+            </div>
+            <div class="modal-body">
+              <p>Por favor aguarde pela confirmação dos outros participantes</p>
+              <p>Você será redirecionado automaticamente assim que todos os participantes aceitarem</p>
             </div>
           </div>
         </div>
@@ -75,15 +138,6 @@ export const Home = () => {
       </div>
     </div>
   `;
-
-  // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
-  // TODO: Remove this listener after page change
-  PlayerCommunication.Communication.addEventListener(
-    PlayerCommunication.Events.PLAYER_NOTIFY_MATCH_BEGIN,
-    ({ match }) => {
-      router.navigate("/auth/game?match=" + match.id);
-    },
-  );
 
   const t_chat = page.element.querySelector("t-chat");
 
@@ -293,6 +347,187 @@ export const Home = () => {
       router.navigate("/login");
     }
   });
+
+  function onMatchStart(match) {
+    const container = page.element.querySelector("#match-awaiting-modal");
+    const match_awaiting_modal = bootstrap.Modal.getOrCreateInstance(
+      container,
+      { backdrop: "static" },
+    );
+    match_awaiting_modal.hide(); // hide awaiting modal
+    router.navigate("/auth/game?match=" + match.id);
+  }
+
+  function onMatchAwaiting() {
+    const container = page.element.querySelector("#match-awaiting-modal");
+    const match_awaiting_modal = bootstrap.Modal.getOrCreateInstance(
+      container,
+      { backdrop: "static" },
+    );
+    match_awaiting_modal.show();
+  }
+
+  function onMatchCancelled() {
+    const match_awaiting_modal = bootstrap.Modal.getOrCreateInstance(
+      page.element.querySelector("#match-awaiting-modal"),
+      { backdrop: "static" },
+    );
+    match_awaiting_modal.hide();
+
+    const match_confirmation_modal = bootstrap.Modal.getOrCreateInstance(
+      page.element.querySelector("#match-confirmation-modal"),
+      { backdrop: "static" },
+    );
+    match_confirmation_modal.hide();
+  }
+
+  function onMatchConfirmation(match) {
+    const container = page.element.querySelector("#match-confirmation-modal");
+    const match_confirmation_modal = bootstrap.Modal.getOrCreateInstance(
+      container,
+      { backdrop: "static" },
+    );
+
+    const reject = container.querySelector(
+      "#match-confirmation-modal-reject-button",
+    );
+    const accept = container.querySelector(
+      "#match-confirmation-modal-accept-button",
+    );
+
+    reject.button.addEventListener("click", async () => {
+      reject.setLoading(true);
+      await MatchService.rejectMatch();
+      reject.setLoading(false);
+      match_confirmation_modal.hide();
+    });
+    accept.button.addEventListener("click", async () => {
+      accept.setLoading(true);
+      await MatchService.acceptMatch();
+      accept.setLoading(false);
+      match_confirmation_modal.hide();
+    });
+
+    match_confirmation_modal.show();
+  }
+
+  function onTournamentConfirmation() {
+    const container = page.element.querySelector(
+      "#tournament-confirmation-modal",
+    );
+    const tournament_confirmation_modal = bootstrap.Modal.getOrCreateInstance(
+      container,
+      { backdrop: "static" },
+    );
+
+    const reject = container.querySelector(
+      "#tournament-confirmation-modal-reject-button",
+    );
+    const accept = container.querySelector(
+      "#tournament-confirmation-modal-accept-button",
+    );
+
+    reject.button.addEventListener("click", async () => {
+      reject.setLoading(true);
+      await TournamentService.rejectTournament();
+      reject.setLoading(false);
+      tournament_confirmation_modal.hide();
+    });
+    accept.button.addEventListener("click", async () => {
+      accept.setLoading(true);
+      await TournamentService.acceptTournament();
+      accept.setLoading(false);
+      tournament_confirmation_modal.hide();
+    });
+
+    tournament_confirmation_modal.show();
+  }
+
+  function onTournamentAwaiting() {
+    const container = page.element.querySelector("#tournament-awaiting-modal");
+    const tournament_awaiting_modal = bootstrap.Modal.getOrCreateInstance(
+      container,
+      { backdrop: "static" },
+    );
+    tournament_awaiting_modal.show();
+  }
+
+  function closeTournamentModals() {
+    const tournament_awaiting_modal = bootstrap.Modal.getOrCreateInstance(
+      page.element.querySelector("#tournament-awaiting-modal"),
+      { backdrop: "static" },
+    );
+    tournament_awaiting_modal.hide();
+
+    const tournament_confirmation_modal = bootstrap.Modal.getOrCreateInstance(
+      page.element.querySelector("#tournament-confirmation-modal"),
+      { backdrop: "static" },
+    );
+    tournament_confirmation_modal.hide();
+  }
+
+  // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
+  if (session.player.pendencies) {
+    if (session.player.pendencies.tournament_to_accept) {
+      TournamentService.getTournament().then(onTournamentConfirmation);
+    }
+
+    if (session.player.pendencies.match_to_play) {
+      // TODO: Handle loading and move it to a proper place
+      MatchService.getMatch().then(onMatchStart);
+    }
+
+    if (session.player.pendencies.match_to_accept) {
+      MatchService.getMatch().then(onMatchConfirmation);
+    }
+  }
+
+  // TODO: Remove this listener after page change
+  PlayerCommunication.Communication.addEventListener(
+    PlayerCommunication.Events.PLAYER_NOTIFY_MATCH_UPDATE,
+    ({ match }) => {
+      if (match.status === "IN_PROGRESS") {
+        onMatchStart(match);
+        return;
+      }
+      if (match.status === "AWAITING" && match.confirmation.pending) {
+        onMatchConfirmation(match);
+        return;
+      }
+      if (match.status === "AWAITING" && match.confirmation.accepted) {
+        onMatchAwaiting();
+        return;
+      }
+      if (match.status === "CANCELLED") {
+        onMatchCancelled();
+      }
+    },
+  );
+
+  // TODO: Remove this listener after page change
+  PlayerCommunication.Communication.addEventListener(
+    PlayerCommunication.Events.PLAYER_NOTIFY_TOURNAMENT_UPDATE,
+    ({ tournament }) => {
+      if (tournament.status === "IN_PROGRESS") {
+        closeTournamentModals();
+        return;
+      }
+      if (tournament.status === "AWAITING" && tournament.confirmation.pending) {
+        onTournamentConfirmation(tournament);
+        return;
+      }
+      if (
+        tournament.status === "AWAITING" &&
+        tournament.confirmation.accepted
+      ) {
+        onTournamentAwaiting();
+        return;
+      }
+      if (tournament.status === "CANCELLED") {
+        closeTournamentModals();
+      }
+    },
+  );
 
   return page;
 };

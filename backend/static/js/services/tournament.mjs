@@ -14,11 +14,28 @@ export const TournamentService = {
   },
 
   /**
-   * @param {{ tournament_id: string }} param0
    * @returns {Promise<Tournament>}
    */
-  async getTournament({ tournament_id }) {
-    const { data } = await GET("/api/pong/tournament/" + tournament_id);
+  async getTournament() {
+    const { data } = await GET("/api/pong/tournament/get");
+    return data.data;
+  },
+
+  /**
+   * Accept the current active tournament
+   * @returns {Promise<Tournament>}
+   */
+  async acceptTournament() {
+    const { data } = await GET("/api/pong/tournament/accept");
+    return data.data;
+  },
+
+  /**
+   * Accept the current active tournament
+   * @returns {Promise<Tournament>}
+   */
+  async rejectTournament() {
+    const { data } = await GET("/api/pong/tournament/reject");
     return data.data;
   },
 
