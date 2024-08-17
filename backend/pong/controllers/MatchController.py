@@ -41,7 +41,12 @@ def matchmaking(request: HttpRequest) -> HttpResponse:
     # TODO: the challenged player should be someone that is Online
 
     # first we try to find someone that its not his friend
-    challenged_player = player.query_by_not_friends().order_by("?").first()
+    challenged_player = (
+        player.query_by_not_friends()
+        .filter(activity_status=Player.ActivityStatus.ONLINE)
+        .order_by("?")
+        .first()
+    )
 
     if not challenged_player:
         # if there is no one available we try to match him with some friend
