@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='match',
             name='status',
-            field=models.CharField(choices=[('CREATED', 'Criado'), ('AWAITING', 'Aguardando'), ('IN_PROGRESS', 'Em Progresso'), ('FINISHED', 'Finalizado'), ('CANCELLED', 'Cancelado')], default='CREATED', max_length=20),
+            field=models.CharField(choices=[('CREATED', 'Criado'), ('AWAITING_CONFIRMATION', 'Aguardando Confirmação'), ('IN_PROGRESS', 'Em Progresso'), ('FINISHED', 'Finalizado'), ('CANCELLED', 'Cancelado')], default='CREATED', max_length=20),
         ),
         migrations.AlterField(
             model_name='tournament',
@@ -40,6 +40,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='tournament',
             name='status',
-            field=models.CharField(choices=[('CREATED', 'Criado'), ('AWAITING', 'Aguardando'), ('IN_PROGRESS', 'Em Progresso'), ('FINISHED', 'Finalizado'), ('CANCELLED', 'Cancelado')], default='CREATED', max_length=20),
+            field=models.CharField(choices=[('CREATED', 'Criado'), ('AWAITING_CONFIRMATION', 'Aguardando Confirmação'), ('IN_PROGRESS', 'Em Progresso'), ('FINISHED', 'Finalizado'), ('CANCELLED', 'Cancelado')], default='CREATED', max_length=20),
         ),
     ]

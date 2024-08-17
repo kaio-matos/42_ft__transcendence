@@ -14,7 +14,7 @@ from pong.resources.MatchResource import MatchResource
 class Match(models.Model):
     class Status(models.TextChoices):
         CREATED = "CREATED", _("Criado")
-        AWAITING = "AWAITING", _("Aguardando")
+        AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION", _("Aguardando Confirmação")
         IN_PROGRESS = "IN_PROGRESS", _("Em Progresso")
         FINISHED = "FINISHED", _("Finalizado")
         CANCELLED = "CANCELLED", _("Cancelado")
@@ -65,12 +65,12 @@ class Match(models.Model):
 
     @staticmethod
     def query_by_awaiting():
-        return Match.objects.filter(status=Match.Status.AWAITING)
+        return Match.objects.filter(status=Match.Status.AWAITING_CONFIRMATION)
 
     @staticmethod
     def query_by_active_match_from(players):
         return Match.objects.filter(players__in=players).filter(
-            models.Q(status=Match.Status.AWAITING)
+            models.Q(status=Match.Status.AWAITING_CONFIRMATION)
             | models.Q(status=Match.Status.IN_PROGRESS)
         )
 
@@ -84,7 +84,7 @@ class Match(models.Model):
     def query_by_awaiting_matches_with_pending_response_by(players):
         return (
             Match.objects.filter(players__in=players)
-            .filter(status=Match.Status.AWAITING)
+            .filter(status=Match.Status.AWAITING_CONFIRMATION)
             .exclude(accepted_players__in=players)
             .exclude(rejected_players__in=players)
         )
@@ -167,14 +167,11 @@ class Match(models.Model):
                 )
             )
 
-    def ask_for_confirmation(self):
+    def begin(self):
         if self.can_accept_or_reject():
-            self.status = Match.Status.AWAITING
+            self.status = Match.Status.AWAITING_CONFIRMATION
             self.save()
             self.notify_players_update()
-
-    def begin(self):
-        self.ask_for_confirmation()
 
         if self.can_begin():
             self.status = Match.Status.IN_PROGRESS

@@ -52,7 +52,7 @@ def create(request: HttpRequest) -> HttpResponse:
     tournament.save()
     tournament.generate_matches_tree_for(len(players))
     tournament.initialize_matches_tree(list(players))
-    # TODO: We probably should add some extra step asking if all players are ready to begin the tournament
+
     tournament.begin()
 
     return http.Created(TournamentResource(tournament, player))

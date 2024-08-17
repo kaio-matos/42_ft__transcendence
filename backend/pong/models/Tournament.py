@@ -15,7 +15,7 @@ from pong.resources.TournamentResource import TournamentResource
 class Tournament(models.Model):
     class Status(models.TextChoices):
         CREATED = "CREATED", _("Criado")
-        AWAITING = "AWAITING", _("Aguardando")
+        AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION", _("Aguardando Confirmação")
         IN_PROGRESS = "IN_PROGRESS", _("Em Progresso")
         FINISHED = "FINISHED", _("Finalizado")
         CANCELLED = "CANCELLED", _("Cancelado")
@@ -55,7 +55,7 @@ class Tournament(models.Model):
     @staticmethod
     def query_by_active_tournament_from(players):
         return Tournament.objects.filter(players__in=players).filter(
-            models.Q(status=Tournament.Status.AWAITING)
+            models.Q(status=Tournament.Status.AWAITING_CONFIRMATION)
             | models.Q(status=Tournament.Status.IN_PROGRESS)
         )
 
@@ -63,7 +63,7 @@ class Tournament(models.Model):
     def query_by_awaiting_tournament_with_pending_response_by(players):
         return (
             Tournament.objects.filter(players__in=players)
-            .filter(status=Tournament.Status.AWAITING)
+            .filter(status=Tournament.Status.AWAITING_CONFIRMATION)
             .exclude(accepted_players__in=players)
             .exclude(rejected_players__in=players)
         )
@@ -173,7 +173,7 @@ class Tournament(models.Model):
 
     def begin(self):
         if self.can_accept_or_reject():
-            self.status = Tournament.Status.AWAITING
+            self.status = Tournament.Status.AWAITING_CONFIRMATION
             self.save()
             self.notify_players_update()
 
