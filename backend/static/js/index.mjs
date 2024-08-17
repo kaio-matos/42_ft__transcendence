@@ -27,9 +27,13 @@ export const router = new Router(
 async function render() {
   // TODO: Show some type of loading for this update
   if (session.player) {
-    session.player = await PlayerService.getPlayer({
-      player_id: session.player.id,
-    });
+    try {
+      session.player = await PlayerService.getPlayer({
+        player_id: session.player.id,
+      });
+    } catch {
+      session.player = null;
+    }
   }
   router.render();
 }
