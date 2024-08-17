@@ -43,6 +43,10 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    ##################################################
+    # Queries
+    ##################################################
+
     @staticmethod
     def query_by_match(match: Match):
         return Tournament.objects.filter(root_match=match)
@@ -55,13 +59,17 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
         )
 
     @staticmethod
-    def query_by_awaiting_tournament_with_pending_response_by(players):
+    def query_by_awaiting_tournament_with_pending_confirmation_by(players):
         return (
             Tournament.objects.filter(players__in=players)
             .filter(status=Tournament.Status.AWAITING_CONFIRMATION)
             .exclude(accepted_players__in=players)
             .exclude(rejected_players__in=players)
         )
+
+    ##################################################
+    # Computed
+    ##################################################
 
     def has_finished(self):
         return bool(self.champion != None and self.status == self.Status.FINISHED)
@@ -87,6 +95,25 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
             .exclude(public_id=self.public_id)
             .exists()
         )
+
+    ##################################################
+    # Notification
+    ##################################################
+
+    def notify_players_update(self):
+        players = self.players.all()
+
+        for player in players:
+            player.send_message(
+                ws.WSResponse(
+                    ws.WSEvents.PLAYER_NOTIFY_TOURNAMENT_UPDATE,
+                    {"tournament": TournamentResource(self, player)},
+                )
+            )
+
+    ##################################################
+    # Logic
+    ##################################################
 
     def generate_matches_tree_for(self, players_n: int):
         self.root_match = Match(name=self.name + " - Partida Final")
@@ -139,22 +166,12 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
                 return
             if parent.can_receive_new_players():
                 parent.players.add(match.winner)
-            # TODO: After implementing the acceptance step, we will show a modal asking if the user is ready to start the next match
-            # for now lets just wait 10 seconds before the beginning of the next match
-            Timer(10, parent.begin).start()
+            if parent.can_accept_or_reject() or parent.can_begin():
+                # TODO: this will delay the start of the next match of the tournament in 10 seconds,
+                # this is not shown on the frontend
+                Timer(10, parent.begin).start()
 
         self.foreach_match(it)
-
-    def notify_players_update(self):
-        players = self.players.all()
-
-        for player in players:
-            player.send_message(
-                ws.WSResponse(
-                    ws.WSEvents.PLAYER_NOTIFY_TOURNAMENT_UPDATE,
-                    {"tournament": TournamentResource(self, player)},
-                )
-            )
 
     def begin(self):
         if self.can_accept_or_reject():
@@ -171,16 +188,6 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
 
             self.foreach_match(it)
             self.notify_players_update()
-
-    def onAccept(self, player: Player):
-        if self.is_fully_accepted():
-            self.begin()
-        self.notify_players_update()
-
-    def onReject(self, player: Player):
-        self.status = Tournament.Status.CANCELLED
-        self.save()
-        self.notify_players_update()
 
     def finish(self):
         has_finished = False
@@ -210,6 +217,16 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
                 "All matches must be finished first before finishing the tournament"
             )
 
+    def onAccept(self, player: Player):
+        if self.is_fully_accepted():
+            self.begin()
+        self.notify_players_update()
+
+    def onReject(self, player: Player):
+        self.status = Tournament.Status.CANCELLED
+        self.save()
+        self.notify_players_update()
+
     def foreach_match(
         self, fn: Callable[[Match], None], start_root: Match | None = None
     ):
@@ -225,6 +242,10 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
                 iterate_tree(match.child_lower)
 
         iterate_tree(start_root)
+
+    ##################################################
+    # Resource
+    ##################################################
 
     def toDict(self) -> dict:
         r = {}

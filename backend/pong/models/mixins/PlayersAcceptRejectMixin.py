@@ -11,6 +11,10 @@ class PlayersAcceptRejectMixin(models.Model):
         Player, blank=True, related_name="%(class)s_rejected_players"
     )
 
+    ##################################################
+    # Queries
+    ##################################################
+
     def is_fully_accepted(self):
         players_n = self.players.count()
         return bool(players_n > 0 and self.accepted_players.count() == players_n)
@@ -20,6 +24,18 @@ class PlayersAcceptRejectMixin(models.Model):
 
     def has_player_rejected(self, player: Player):
         return self.rejected_players.filter(id=player.id).exists()
+
+    ##################################################
+    # Computed
+    ##################################################
+
+    ##################################################
+    # Notification
+    ##################################################
+
+    ##################################################
+    # Logic
+    ##################################################
 
     def accept(self, player: Player):
         self.accepted_players.add(player)
@@ -34,6 +50,10 @@ class PlayersAcceptRejectMixin(models.Model):
 
     def onReject(self, player: Player):
         pass
+
+    ##################################################
+    # Resource
+    ##################################################
 
     class Meta:
         abstract = True

@@ -80,25 +80,33 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name", "password"]
 
+    ##################################################
+    # Queries
+    ##################################################
+
     def query_exclude_self(self):
         return Player.objects.exclude(id=self.id)
 
     def query_by_not_friends(self):
         return self.query_exclude_self().exclude(id__in=self.friends.all())
 
+    ##################################################
+    # Computed
+    ##################################################
+
     def is_chat_blocked(self, chat):
-        return chat in self.blocked_chats.all()
+        return self.blocked_chats.filter(id=chat.id).exists()
 
     def can_receive_messages_from(self, chat):
-        return chat not in self.blocked_chats.all()
+        return not self.is_chat_blocked(chat)
 
     def can_send_messages_to(self, chat):
-        return chat not in self.blocked_chats.all()
+        return self.is_chat_blocked(chat)
 
     def has_pending_match_to_answer(self):
         return (
             apps.get_model("pong.Match")
-            .query_by_awaiting_matches_with_pending_response_by([self])
+            .query_by_awaiting_matches_with_pending_confirmation_by([self])
             .exists()
         )
 
@@ -112,16 +120,13 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
     def has_pending_tournament_to_answer(self):
         return (
             apps.get_model("pong.Tournament")
-            .query_by_awaiting_tournament_with_pending_response_by([self])
+            .query_by_awaiting_tournament_with_pending_confirmation_by([self])
             .exists()
         )
 
-    def set_activity_status(self, activity_status: ActivityStatus):
-        self.activity_status = activity_status
-        self.save()
-        self.broadcast_friends(
-            ws.WSResponse(ws.WSEvents.FRIEND_ACTIVITY_STATUS, self.toDict())
-        )
+    ##################################################
+    # Notification
+    ##################################################
 
     def broadcast_friends(self, ws_response: dict):
         friends = self.friends.all()
@@ -132,6 +137,21 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
     def send_message(self, ws_response):
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(str(self.public_id), ws_response)
+
+    ##################################################
+    # Logic
+    ##################################################
+
+    def set_activity_status(self, activity_status: ActivityStatus):
+        self.activity_status = activity_status
+        self.save()
+        self.broadcast_friends(
+            ws.WSResponse(ws.WSEvents.FRIEND_ACTIVITY_STATUS, self.toDict())
+        )
+
+    ##################################################
+    # Resource
+    ##################################################
 
     def toDict(self) -> dict:
         return {

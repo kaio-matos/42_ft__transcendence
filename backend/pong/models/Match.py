@@ -52,6 +52,10 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
     )
     max = models.IntegerField(default=2)
 
+    ##################################################
+    # Queries
+    ##################################################
+
     @staticmethod
     def query_by_player(players):
         return Match.objects.filter(players__in=players)
@@ -74,13 +78,17 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
         )
 
     @staticmethod
-    def query_by_awaiting_matches_with_pending_response_by(players):
+    def query_by_awaiting_matches_with_pending_confirmation_by(players):
         return (
             Match.objects.filter(players__in=players)
             .filter(status=Match.Status.AWAITING_CONFIRMATION)
             .exclude(accepted_players__in=players)
             .exclude(rejected_players__in=players)
         )
+
+    ##################################################
+    # Computed
+    ##################################################
 
     def is_full(self):
         return bool(self.players.count() >= self.max)
@@ -135,6 +143,10 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
             p = self.parent_lower.first()
         return p
 
+    ##################################################
+    # Notification
+    ##################################################
+
     def broadcast_match(self, ws_response: dict):
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(str(self.public_id), ws_response)
@@ -150,6 +162,10 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
                 )
             )
 
+    ##################################################
+    # Logic
+    ##################################################
+
     def begin(self):
         if self.can_accept_or_reject():
             self.status = Match.Status.AWAITING_CONFIRMATION
@@ -159,6 +175,14 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
         if self.can_begin():
             self.status = Match.Status.IN_PROGRESS
             self.save()
+
+    def finish(self, winner: Player):
+        self.winner = winner
+        self.status = self.Status.FINISHED
+        self.save()
+        self.broadcast_match(
+            ws.WSResponse(ws.WSEvents.MATCH_END, {"match": self.toDict()})
+        )
 
     def onAccept(self, player: Player):
         if self.is_fully_accepted():
@@ -170,13 +194,9 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
         self.save()
         self.notify_players_update()
 
-    def finish(self, winner: Player):
-        self.winner = winner
-        self.status = self.Status.FINISHED
-        self.save()
-        self.broadcast_match(
-            ws.WSResponse(ws.WSEvents.MATCH_END, {"match": self.toDict()})
-        )
+    ##################################################
+    # Resource
+    ##################################################
 
     def toDict(self) -> dict:
         r = {}
