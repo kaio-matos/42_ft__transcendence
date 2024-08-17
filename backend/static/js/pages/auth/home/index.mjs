@@ -98,7 +98,7 @@ export const Home = () => {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Partida</h5>
+              <h5 class="modal-title">Torneio</h5>
             </div>
             <div class="modal-body">
               <p>Você aceita o torneio?</p>
@@ -116,7 +116,7 @@ export const Home = () => {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Partida</h5>
+              <h5 class="modal-title">Torneio</h5>
             </div>
             <div class="modal-body">
               <p>Por favor aguarde pela confirmação dos outros participantes</p>
