@@ -31,9 +31,7 @@ async function render() {
       session.player = await PlayerService.getPlayer({
         player_id: session.player.id,
       });
-    } catch {
-      session.player = null;
-    }
+    } catch {}
   }
   router.render();
 }
