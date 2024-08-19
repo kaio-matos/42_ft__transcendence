@@ -96,7 +96,9 @@ class Game:
         # TODO: calculate new player position...
         self.game_players[str(player.public_id)].position = position
 
-    def hasFinished():
+    def hasFinished(self):
+        # self.winner = self.match.players.first()
+        # return True
         return False
 
     def toDict(self) -> dict:
