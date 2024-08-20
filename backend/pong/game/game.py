@@ -1,5 +1,8 @@
 from enum import Enum
 from pong.models import Player, Match
+import time
+import threading
+from asgiref.sync import async_to_sync
 
 
 class Position:
@@ -63,13 +66,20 @@ class Game:
     ball_size = {"width": 0.8, "height": 0.8}
     ball_position = Position(50, 50)
     winner: None | Player = None
+    ball_velocity = Position(1.5, 1.5)
 
     def __init__(self, match: Match, screen: GameScreen):
         self.match = match
         self.players = self.match.toDict()["players"]
         self.screen = screen
         self.game_players: dict[str, GamePlayer] = {}
+        self.game_running = False
+        self.channel_layer = None
+        self.match_group_id = None
+        self.ball_position = Position(50, 50)
+        self.ball_velocity = Position(1.5, 1.5)
         self.reset()
+
 
     def reset(self):
         n = 1
@@ -92,12 +102,58 @@ class Game:
                     GamePlayerPlacement.FOURTH, Position(50, 100), player
                 )  # Bottom Wall Player
             n += 1
+            
+    def game_loop(self):
+        while self.game_running:
+            self.update_game_state()
+            self.broadcast_game_state()
+            time.sleep(0.016)  # Aproximadamente 60 FPS
+
+    def start_game(self):
+        if not self.game_running:
+            self.game_running = True
+            game_thread = threading.Thread(target=self.game_loop)
+            game_thread.start()
+
+    def broadcast_game_state(self):
+        if self.channel_layer and self.match_group_id:
+            state = self.toDict()
+            async_to_sync(self.channel_layer.group_send)(
+                self.match_group_id,
+                {"type": "send_event", "event": {"command": "MATCH_UPDATE", "payload": state}}
+            )
+    
+    def update_game_state(self):
+        # Atualiza a posição da bola
+        self.ball_position.x += self.ball_velocity.x
+        self.ball_position.y += self.ball_velocity.y
+
+        # Verifica colisões com as paredes
+        if self.ball_position.x <= 0 or self.ball_position.x >= 100:
+            self.ball_velocity.x *= -1
+        if self.ball_position.y <= 0 or self.ball_position.y >= 100:
+            self.ball_velocity.y *= -1
+
+        # Verifica colisões com os paddles
+        for player in self.game_players.values():
+            if self.check_paddle_collision(player):
+                self.ball_velocity.x *= -1
+                break
+
+    def check_paddle_collision(self, player: GamePlayer):
+        paddle_x = player.position.x
+        paddle_y = player.position.y
+        paddle_width = self.paddle_size["width"]
+        paddle_height = self.paddle_size["height"]
+
+        if (self.ball_position.x >= paddle_x - self.ball_size["width"] and
+            self.ball_position.x <= paddle_x + paddle_width and
+            self.ball_position.y >= paddle_y - self.ball_size["height"] and
+            self.ball_position.y <= paddle_y + paddle_height):
+            return True
+        return False
 
     def handleKeyPress(self, player: Player, direction: GameDirection):
-        # position = self.game_players[player.id].position
-        # position.y += self.paddle_velocity
-        # # TODO: calculate new player position...
-        # self.game_players[player.id].position = position
         position = self.game_players[str(player.public_id)].position
         if direction == GameDirection.UP:
             position.y -= self.paddle_velocity

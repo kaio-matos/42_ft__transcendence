@@ -155,18 +155,20 @@ export const Game = ({ params }) => {
         p.paddle.pos(
           canvas.VCW(game.players[i].position.x),
           canvas.VCH(game.players[i].position.y),
-        ),
+        )
       );
 
       ball.pos(
         canvas.VCW(game.ball.position.x),
         canvas.VCH(game.ball.position.y),
       );
+
+      canvas.render();
     }
 
     MatchCommunication.Communication.addEventListener(
       MatchCommunication.Events.MATCH_UPDATE,
-      onMatchUpdate,
+      onMatchUpdate
     );
 
     setInterval(() => canvas.render(), 16); // TODO: do this the right way

@@ -43,14 +43,20 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                     content["payload"]["screen"]["width"],
                     content["payload"]["screen"]["height"],
                 )
-                games[self.match_group_id] = Game(self.match, screen)
-                game = games[self.match_group_id]
+                game = Game(self.match, screen)
+                game.channel_layer = self.channel_layer
+                game.match_group_id = self.match_group_id
+                games[self.match_group_id] = game
+                game.start_game()
+
+                # Adicione logs para debug
+                print(f"Game created for match {self.match_group_id}")
+                print(f"Sending MATCH_START event")
 
                 # TODO: This code is assuming both players are ready to begint the match, we should add some way to check if both are ready
                 self.match.broadcast_match(
                     ws.WSResponse(ws.WSEvents.MATCH_START, game.toDict()),
                 )
-
             case ws.WSCommands.KEY_PRESS.value:
                 if self.match is None:
                     return
