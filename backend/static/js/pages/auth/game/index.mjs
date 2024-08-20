@@ -15,6 +15,7 @@ import { NotFound } from "../../not-found/index.mjs";
  *      players: { placement: number, position: { x: number, y: number }, data: import("../../../services/player.mjs").Player }[],
  *      ball: { size: {width: number, height: number} ,position: { x: number, y: number} },
  *      paddle: {size: {width: number, height: number}},
+ *      is_running: boolean
  *   },
  * }} Game
  */
@@ -88,21 +89,29 @@ export const Game = ({ params }) => {
     onMatchStart,
   );
 
+  let has_started_running = false;
+
   /**
    * @param {Game} param0
    */
   function onMatchStart({ game, match, screen }) {
+    if (game.is_running && has_started_running) {
+      return;
+    }
     page.element.querySelector("#loading-match").setLoading(false);
 
-    const ball = new CanvasBall(canvas.VCW(game.ball.size.width), canvas.VCH(game.ball.size.height))
+    const ball = new CanvasBall(
+      canvas.VCW(game.ball.size.width),
+      canvas.VCH(game.ball.size.height),
+    )
       .pos(canvas.VCW(game.ball.position.x), canvas.VCH(game.ball.position.y))
       .translate(-50, -50);
 
     const players = game.players.map(({ placement, position, data }) => {
-      const paddle = new CanvasPaddle(canvas.VCW(game.paddle.size.width), canvas.VCH(game.paddle.size.height)).pos(
-        canvas.VCW(position.x),
-        canvas.VCH(position.y),
-      );
+      const paddle = new CanvasPaddle(
+        canvas.VCW(game.paddle.size.width),
+        canvas.VCH(game.paddle.size.height),
+      ).pos(canvas.VCW(position.x), canvas.VCH(position.y));
 
       switch (placement) {
         case 1:
@@ -155,7 +164,7 @@ export const Game = ({ params }) => {
         p.paddle.pos(
           canvas.VCW(game.players[i].position.x),
           canvas.VCH(game.players[i].position.y),
-        )
+        ),
       );
 
       ball.pos(
@@ -168,9 +177,9 @@ export const Game = ({ params }) => {
 
     MatchCommunication.Communication.addEventListener(
       MatchCommunication.Events.MATCH_UPDATE,
-      onMatchUpdate
+      onMatchUpdate,
     );
-
+    has_started_running = true;
   }
 
   /**

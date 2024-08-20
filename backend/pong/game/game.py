@@ -9,6 +9,7 @@ from .ball import Ball
 from .paddle import Paddle
 from ..models import Match, Player
 
+
 class Game:
     paddle_size = {"width": 1, "height": 15}
     paddle_velocity = 1
@@ -23,8 +24,6 @@ class Game:
         self.players = {}
         self.ball = Ball()
         self.game_running = False
-        self.channel_layer = None
-        self.match_group_id = None
         self.reset()
 
     def reset(self):
@@ -41,9 +40,11 @@ class Game:
             elif i == 3:
                 placement = GamePlayerPlacement.SECOND_RIGHT
                 position = Position(CANVAS_WIDTH, 3 * CANVAS_HEIGHT / 4)
-            
-            self.players[str(player.public_id)] = GamePlayer(placement, position, player.toDict())
-        
+
+            self.players[str(player.public_id)] = GamePlayer(
+                placement, position, player.toDict()
+            )
+
         self.ball.reset()
 
     def update_game_state(self):
@@ -88,12 +89,6 @@ class Game:
             time.sleep(0.016)
 
     def broadcast_game_state(self):
-        if self.channel_layer and self.match_group_id:
-            state = self.toDict()
-            self.match.broadcast_match(
-                    ws.WSResponse(ws.WSEvents.MATCH_UPDATE, self.toDict()),
-                )
-
         # Verifica colisões com as paredes
         if self.ball_position.x <= 0 or self.ball_position.x >= 100:
             self.ball_velocity.x *= -1
@@ -111,13 +106,15 @@ class Game:
         paddle_y = player.position.y
         paddle_width = self.paddle_size["width"]
         paddle_height = self.paddle_size["height"]
-
         if (self.ball_position.x >= paddle_x - self.ball_size["width"] and
             self.ball_position.x <= paddle_x + paddle_width and
             self.ball_position.y >= paddle_y - self.ball_size["height"] and
             self.ball_position.y <= paddle_y + paddle_height):
             return True
         return False
+        self.match.broadcast_match(
+            ws.WSResponse(ws.WSEvents.MATCH_UPDATE, self.toDict()),
+        )
 
     def handleKeyPress(self, player: Player, direction: GameDirection):
         position = self.players[str(player.public_id)].position
@@ -136,7 +133,6 @@ class Game:
         # return True
         return False
 
-        
     def toDict(self) -> dict:
         return {
             "match": self.match.toDict(),
@@ -144,7 +140,8 @@ class Game:
             "game": {
                 "players": [player.toDict() for player in self.players.values()],
                 "ball": self.ball.toDict(),
-                "paddle": {"size": self.paddle_size}
-    
+                "paddle": {"size": self.paddle_size},
+                "is_running": self.game_running,
             },
         }
+

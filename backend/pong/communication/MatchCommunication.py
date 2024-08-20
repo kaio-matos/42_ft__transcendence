@@ -34,18 +34,23 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
 
     def receive_json(self, content, **kwargs):
         player = typing.cast(Player, self.scope["user"])
+        game = games.get(self.match_group_id)
+
         if self.match.has_finished():
             return
 
         match content["command"]:
             case ws.WSCommands.MATCH_JOIN.value:
+                if game:
+                    self.match.broadcast_match(
+                        ws.WSResponse(ws.WSEvents.MATCH_START, game.toDict()),
+                    )
+                    return
                 screen = GameScreen(
                     content["payload"]["screen"]["width"],
                     content["payload"]["screen"]["height"],
                 )
                 game = Game(self.match, screen)
-                game.channel_layer = self.channel_layer
-                game.match_group_id = self.match_group_id
                 games[self.match_group_id] = game
                 game.start_game()
 
@@ -53,15 +58,11 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                 print(f"Game created for match {self.match_group_id}")
                 print(f"Sending MATCH_START event")
 
-                # TODO: This code is assuming both players are ready to begint the match, we should add some way to check if both are ready
                 self.match.broadcast_match(
                     ws.WSResponse(ws.WSEvents.MATCH_START, game.toDict()),
                 )
             case ws.WSCommands.KEY_PRESS.value:
-                if self.match is None:
-                    return
-                game = games[self.match_group_id]
-                if game is None:
+                if self.match is None or game is None:
                     return
                 direction = content["payload"]["direction"]
                 game.handleKeyPress(player, GameDirection(direction))
