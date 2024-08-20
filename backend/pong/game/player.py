@@ -1,5 +1,6 @@
 from .constants import GamePlayerPlacement
-from .models import Position
+from .position import Position
+
 
 class GamePlayer:
     def __init__(self, placement: GamePlayerPlacement, position: Position, data: dict):
@@ -13,3 +14,4 @@ class GamePlayer:
             "position": self.position.toDict(),
             "data": self.data,
         }
+
