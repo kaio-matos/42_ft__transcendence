@@ -77,10 +77,6 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                         except:
                             pass
 
-                self.match.broadcast_match(
-                    ws.WSResponse(ws.WSEvents.MATCH_UPDATE, game.toDict()),
-                )
-
     def send_event(self, event):
         self.send_json(event["event"])
 

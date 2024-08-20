@@ -171,7 +171,6 @@ export const Game = ({ params }) => {
       onMatchUpdate
     );
 
-    setInterval(() => canvas.render(), 16); // TODO: do this the right way
   }
 
   /**

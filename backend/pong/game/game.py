@@ -2,6 +2,7 @@ import time
 import threading
 from asgiref.sync import async_to_sync
 from .constants import GamePlayerPlacement, GameDirection, CANVAS_WIDTH, CANVAS_HEIGHT
+from ft_transcendence.http import ws
 from .models import GameScreen, Position
 from .player import GamePlayer
 from .ball import Ball
@@ -41,7 +42,7 @@ class Game:
                 placement = GamePlayerPlacement.SECOND_RIGHT
                 position = Position(CANVAS_WIDTH, 3 * CANVAS_HEIGHT / 4)
             
-            self.players[player.id] = GamePlayer(placement, position, player.toDict())
+            self.players[str(player.public_id)] = GamePlayer(placement, position, player.toDict())
         
         self.ball.reset()
 
@@ -89,10 +90,9 @@ class Game:
     def broadcast_game_state(self):
         if self.channel_layer and self.match_group_id:
             state = self.toDict()
-            async_to_sync(self.channel_layer.group_send)(
-                self.match_group_id,
-                {"type": "send_event", "event": {"command": "MATCH_UPDATE", "payload": state}}
-            )
+            self.match.broadcast_match(
+                    ws.WSResponse(ws.WSEvents.MATCH_UPDATE, self.toDict()),
+                )
 
         # Verifica colisões com as paredes
         if self.ball_position.x <= 0 or self.ball_position.x >= 100:
@@ -101,7 +101,7 @@ class Game:
             self.ball_velocity.y *= -1
 
         # Verifica colisões com os paddles
-        for player in self.game_players.values():
+        for player in self.players.values():
             if self.check_paddle_collision(player):
                 self.ball_velocity.x *= -1
                 break
@@ -120,7 +120,7 @@ class Game:
         return False
 
     def handleKeyPress(self, player: Player, direction: GameDirection):
-        position = self.game_players[str(player.public_id)].position
+        position = self.players[str(player.public_id)].position
         if direction == GameDirection.UP:
             position.y -= self.paddle_velocity
             if position.y < self.paddle_size["height"] / 2:
@@ -129,7 +129,7 @@ class Game:
             position.y += self.paddle_velocity
             if position.y > 100 - self.paddle_size["height"] / 2:
                 position.y = 100 - self.paddle_size["height"] / 2
-        self.game_players[str(player.public_id)].position = position
+        self.players[str(player.public_id)].position = position
 
     def hasFinished(self):
         # self.winner = self.match.players.first()
@@ -144,5 +144,7 @@ class Game:
             "game": {
                 "players": [player.toDict() for player in self.players.values()],
                 "ball": self.ball.toDict(),
+                "paddle": {"size": self.paddle_size}
+    
             },
         }
