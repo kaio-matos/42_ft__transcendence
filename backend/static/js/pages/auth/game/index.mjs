@@ -13,7 +13,9 @@ import { NotFound } from "../../not-found/index.mjs";
  *   screen: { width: number, height: number },
  *   game: {
  *      players: { placement: number, position: { x: number, y: number }, data: import("../../../services/player.mjs").Player }[],
- *      ball: { position:  { x: number, y: number} },
+ *      ball: { size: {width: number, height: number} ,position: { x: number, y: number} },
+ *      paddle: {size: {width: number, height: number}},
+ *      is_running: boolean
  *   },
  * }} Game
  */
@@ -87,34 +89,42 @@ export const Game = ({ params }) => {
     onMatchStart,
   );
 
+  let has_started_running = false;
+
   /**
    * @param {Game} param0
    */
   function onMatchStart({ game, match, screen }) {
+    if (game.is_running && has_started_running) {
+      return;
+    }
     page.element.querySelector("#loading-match").setLoading(false);
 
-    const ball = new CanvasBall()
+    const ball = new CanvasBall(
+      canvas.VCW(game.ball.size.width),
+      canvas.VCH(game.ball.size.height),
+    )
       .pos(canvas.VCW(game.ball.position.x), canvas.VCH(game.ball.position.y))
-      .translate(-50, -50);
+      .translate(0, 0);
 
     const players = game.players.map(({ placement, position, data }) => {
-      const paddle = new CanvasPaddle().pos(
-        canvas.VCW(position.x),
-        canvas.VCH(position.y),
-      );
+      const paddle = new CanvasPaddle(
+        canvas.VCW(game.paddle.size.width),
+        canvas.VCH(game.paddle.size.height),
+      ).pos(canvas.VCW(position.x), canvas.VCH(position.y));
 
       switch (placement) {
         case 1:
-          paddle.translate(0, -50);
+          paddle.translate(0, 0);
           break;
         case 2:
-          paddle.translate(-100, -50);
+          paddle.translate(0, 0);
           break;
         case 3:
-          paddle.translate(-50, 100);
+          paddle.translate(0, 0);
           break;
         case 4:
-          paddle.translate(-50, -100);
+          paddle.translate(0, 0);
           break;
       }
 
@@ -161,14 +171,15 @@ export const Game = ({ params }) => {
         canvas.VCW(game.ball.position.x),
         canvas.VCH(game.ball.position.y),
       );
+
+      canvas.render();
     }
 
     MatchCommunication.Communication.addEventListener(
       MatchCommunication.Events.MATCH_UPDATE,
       onMatchUpdate,
     );
-
-    setInterval(() => canvas.render(), 16); // TODO: do this the right way
+    has_started_running = true;
   }
 
   /**

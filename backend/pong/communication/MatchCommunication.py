@@ -34,31 +34,38 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
 
     def receive_json(self, content, **kwargs):
         player = typing.cast(Player, self.scope["user"])
+        game = games.get(self.match_group_id)
+
         if self.match.has_finished():
             return
 
         match content["command"]:
             case ws.WSCommands.MATCH_JOIN.value:
+                if game:
+                    self.match.broadcast_match(
+                        ws.WSResponse(ws.WSEvents.MATCH_START, game.toDict()),
+                    )
+                    return
                 screen = GameScreen(
                     content["payload"]["screen"]["width"],
                     content["payload"]["screen"]["height"],
                 )
-                games[self.match_group_id] = Game(self.match, screen)
-                game = games[self.match_group_id]
+                game = Game(self.match, screen)
+                games[self.match_group_id] = game
+                game.start_game()
 
-                # TODO: This code is assuming both players are ready to begint the match, we should add some way to check if both are ready
+                # Adicione logs para debug
+                print(f"Game created for match {self.match_group_id}")
+                print(f"Sending MATCH_START event")
+
                 self.match.broadcast_match(
                     ws.WSResponse(ws.WSEvents.MATCH_START, game.toDict()),
                 )
-
             case ws.WSCommands.KEY_PRESS.value:
-                if self.match is None:
-                    return
-                game = games[self.match_group_id]
-                if game is None:
+                if self.match is None or game is None:
                     return
                 direction = content["payload"]["direction"]
-                game.handleKeyPress(player, direction)
+                game.handleKeyPress(player, GameDirection(direction))
 
                 if game.hasFinished():
                     self.match.finish(game.winner)
@@ -70,10 +77,6 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                             tournament.finish()
                         except:
                             pass
-
-                self.match.broadcast_match(
-                    ws.WSResponse(ws.WSEvents.MATCH_UPDATE, game.toDict()),
-                )
 
     def send_event(self, event):
         self.send_json(event["event"])
