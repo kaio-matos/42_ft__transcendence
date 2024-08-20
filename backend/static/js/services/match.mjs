@@ -61,7 +61,7 @@ export const MatchService = {
   },
 
   /**
-   * @param {{ challenged_player_id: string }} payload
+   * @param {{ players_id: string[] }} payload
    * @returns {Promise<Match>}
    */
   async createMatch(payload) {

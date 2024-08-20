@@ -76,21 +76,16 @@ def create(request: HttpRequest) -> HttpResponse:
     if not form.is_valid():
         raise ValidationError(form.errors.as_data())
 
-    challenged_player_id: str | None = form.data.get("challenged_player_id")
     player = typing.cast(Player, request.user)
+    players_id: list[UUID] = form.data.get("players_id")
+    players = Player.objects.filter(public_id__in=players_id).all()
 
-    if not challenged_player_id:
-        return http.NotFound({"message": _("Jogador não existe")})
-
-    challenged_player = Player.objects.filter(public_id=challenged_player_id).first()
-
-    if not challenged_player:
-        return http.NotFound({"message": _("Jogador não existe")})
+    if not players:
+        return http.NotFound({"message": _("Jogadores não encontrados")})
 
     match = Match(name="Partida de Pong")
     match.save()
-    match.players.add(player)
-    match.players.add(challenged_player)
+    match.players.add(*players)
 
     match.begin()
 

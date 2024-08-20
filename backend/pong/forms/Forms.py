@@ -8,8 +8,9 @@ from django.utils.translation import gettext as _
 
 class ArrayUUIDsField(forms.Field):
 
-    def __init__(self, *args, min=1, is_even=False, **kwargs):
+    def __init__(self, *args, min=1, max: None | int = None, is_even=False, **kwargs):
         self.min = min
+        self.max = max
         self.is_even = is_even
 
         super().__init__(*args, **kwargs)
@@ -23,6 +24,10 @@ class ArrayUUIDsField(forms.Field):
         if len(ids) < self.min:
             raise ValidationError(
                 _("Esta lista deve ser maior do que " + str(self.min)), code="min"
+            )
+        if self.max and len(ids) > self.max:
+            raise ValidationError(
+                _("Esta lista deve ser menor do que " + str(self.max)), code="max"
             )
 
         if self.is_even and (len(ids) % 2 != 0):
