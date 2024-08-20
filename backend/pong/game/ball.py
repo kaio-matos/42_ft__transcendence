@@ -1,4 +1,4 @@
-from .models import Position
+from .position import Position
 from .constants import BALL_SIZE, INITIAL_BALL_VELOCITY, CANVAS_WIDTH, CANVAS_HEIGHT
 
 class Ball:

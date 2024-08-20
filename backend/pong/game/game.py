@@ -5,7 +5,8 @@ import math
 from asgiref.sync import async_to_sync
 from .constants import GamePlayerPlacement, GameDirection, CANVAS_WIDTH, CANVAS_HEIGHT
 from ft_transcendence.http import ws
-from .models import GameScreen, Position
+from .position import Position
+from .gamescreen import GameScreen
 from .player import GamePlayer
 from .ball import Ball
 from .paddle import Paddle

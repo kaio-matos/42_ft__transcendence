@@ -1,5 +1,5 @@
 from .constants import PADDLE_SIZE, PADDLE_VELOCITY, CANVAS_HEIGHT
-from .models import Position
+from .position import Position
 
 class Paddle:
     def __init__(self, initial_position: Position):
