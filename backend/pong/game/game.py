@@ -1,4 +1,5 @@
-import time, threading
+import time
+import threading
 from asgiref.sync import async_to_sync
 from .constants import GamePlayerPlacement, GameDirection, CANVAS_WIDTH, CANVAS_HEIGHT
 from .models import GameScreen, Position
