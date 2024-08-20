@@ -1,64 +1,11 @@
-from enum import Enum
-from pong.models import Player, Match
-import time
-import threading
+import time, threading
 from asgiref.sync import async_to_sync
-
-
-class Position:
-    def __init__(self, x: float, y: float):
-        if x < 0 or x > 100:
-            raise ValueError(
-                "Position.x is outside of boundary, Position coordinates should be between 0 and 100"
-            )
-        if y < 0 or y > 100:
-            raise ValueError(
-                "Position.y is outside of boundary, Position coordinates should be between 0 and 100"
-            )
-        self.x = x
-        self.y = y
-
-    def toDict(self) -> dict:
-        return {"x": self.x, "y": self.y}
-
-
-class GameDirection(Enum):
-    UP = "UP"
-    DOWN = "DOWN"
-    LEFT = "LEFT"
-    RIGHT = "RIGHT"
-
-
-class GamePlayerPlacement(Enum):
-    FIRST = 1
-    SECOND = 2
-    THIRD = 3
-    FOURTH = 4
-
-
-class GameScreen:
-    
-    def __init__(self, width: int, height: int):
-        self.width = width
-        self.height = height
-
-    def toDict(self) -> dict:
-        return {"width": self.width, "height": self.height}
-
-
-class GamePlayer:
-    def __init__(self, placement: GamePlayerPlacement, position: Position, data: dict):
-        self.placement = placement
-        self.position = position
-        self.data = data
-
-    def toDict(self) -> dict:
-        return {
-            "placement": self.placement.value,
-            "position": self.position.toDict(),
-            "data": self.data,
-        }
-
+from .constants import GamePlayerPlacement, GameDirection, CANVAS_WIDTH, CANVAS_HEIGHT
+from .models import GameScreen, Position
+from .player import GamePlayer
+from .ball import Ball
+from .paddle import Paddle
+from ..models import Match, Player
 
 class Game:
     paddle_size = {"width": 1, "height": 15}
@@ -70,50 +17,73 @@ class Game:
 
     def __init__(self, match: Match, screen: GameScreen):
         self.match = match
-        self.players = self.match.toDict()["players"]
         self.screen = screen
-        self.game_players: dict[str, GamePlayer] = {}
+        self.players = {}
+        self.ball = Ball()
         self.game_running = False
         self.channel_layer = None
         self.match_group_id = None
-        self.ball_position = Position(50, 50)
-        self.ball_velocity = Position(1.5, 1.5)
         self.reset()
 
-
     def reset(self):
-        n = 1
-        for player in self.players:
-            id = player["id"]
-            if n == 1:
-                self.game_players[id] = GamePlayer(
-                    GamePlayerPlacement.FIRST, Position(0, 50), player
-                )  # Left Wall Player
-            if n == 2:
-                self.game_players[id] = GamePlayer(
-                    GamePlayerPlacement.SECOND, Position(100, 50), player
-                )  # Right Wall Player
-            if n == 3:
-                self.game_players[id] = GamePlayer(
-                    GamePlayerPlacement.THIRD, Position(50, 0), player
-                )  # Top Wall Player
-            if n == 4:
-                self.game_players[id] = GamePlayer(
-                    GamePlayerPlacement.FOURTH, Position(50, 100), player
-                )  # Bottom Wall Player
-            n += 1
+        for i, player in enumerate(self.match.players.all()):
+            if i == 0:
+                placement = GamePlayerPlacement.FIRST_LEFT
+                position = Position(0, CANVAS_HEIGHT / 4)
+            elif i == 1:
+                placement = GamePlayerPlacement.FIRST_RIGHT
+                position = Position(CANVAS_WIDTH, CANVAS_HEIGHT / 4)
+            elif i == 2:
+                placement = GamePlayerPlacement.SECOND_LEFT
+                position = Position(0, 3 * CANVAS_HEIGHT / 4)
+            elif i == 3:
+                placement = GamePlayerPlacement.SECOND_RIGHT
+                position = Position(CANVAS_WIDTH, 3 * CANVAS_HEIGHT / 4)
             
-    def game_loop(self):
-        while self.game_running:
-            self.update_game_state()
-            self.broadcast_game_state()
-            time.sleep(0.016)  # Aproximadamente 60 FPS
+            self.players[player.id] = GamePlayer(placement, position, player.toDict())
+        
+        self.ball.reset()
+
+    def update_game_state(self):
+        self.ball.update_position()
+        self.check_collisions()
+
+    def check_collisions(self):
+        for player in self.players.values():
+            if self.check_paddle_collision(player):
+                self.ball.velocity.x *= -1
+                break
+
+    def check_paddle_collision(self, player: GamePlayer):
+        paddle = Paddle(player.position)
+        if (self.ball.position.x <= paddle.position.x + paddle.size["width"] and
+            self.ball.position.x >= paddle.position.x and
+            self.ball.position.y >= paddle.position.y and
+            self.ball.position.y <= paddle.position.y + paddle.size["height"]):
+            return True
+        return False
+
+    def handleKeyPress(self, player: Player, direction: GameDirection):
+        game_player = self.players.get(player.id)
+        if game_player:
+            paddle = Paddle(game_player.position)
+            if direction == GameDirection.UP:
+                paddle.move(-1)
+            elif direction == GameDirection.DOWN:
+                paddle.move(1)
+            game_player.position = paddle.position
 
     def start_game(self):
         if not self.game_running:
             self.game_running = True
             game_thread = threading.Thread(target=self.game_loop)
             game_thread.start()
+
+    def game_loop(self):
+        while self.game_running:
+            self.update_game_state()
+            self.broadcast_game_state()
+            time.sleep(0.016)
 
     def broadcast_game_state(self):
         if self.channel_layer and self.match_group_id:
@@ -122,11 +92,6 @@ class Game:
                 self.match_group_id,
                 {"type": "send_event", "event": {"command": "MATCH_UPDATE", "payload": state}}
             )
-    
-    def update_game_state(self):
-        # Atualiza a posição da bola
-        self.ball_position.x += self.ball_velocity.x
-        self.ball_position.y += self.ball_velocity.y
 
         # Verifica colisões com as paredes
         if self.ball_position.x <= 0 or self.ball_position.x >= 100:
@@ -176,7 +141,7 @@ class Game:
             "match": self.match.toDict(),
             "screen": self.screen.toDict(),
             "game": {
-                "players": [player.toDict() for player in self.game_players.values()],
-                "ball": {"size": self.ball_size,"position": self.ball_position.toDict()}, "paddle": {"size": self.paddle_size},
+                "players": [player.toDict() for player in self.players.values()],
+                "ball": self.ball.toDict(),
             },
         }
