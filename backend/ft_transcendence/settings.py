@@ -29,7 +29,7 @@ SECRET_KEY = "qlg0#c&np28=2f)@u@m!(oaw7z8x@_%i9t3e#!mj45@if3ao5!"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("API_ALLOWED_HOSTS").split(",")
 
 
 # Application definition
