@@ -105,7 +105,7 @@ export const Game = ({ params }) => {
       canvas.VCH(game.ball.size.height),
     )
       .pos(canvas.VCW(game.ball.position.x), canvas.VCH(game.ball.position.y))
-      .translate(-50, -50);
+      .translate(0, 0);
 
     const players = game.players.map(({ placement, position, data }) => {
       const paddle = new CanvasPaddle(
@@ -115,16 +115,16 @@ export const Game = ({ params }) => {
 
       switch (placement) {
         case 1:
-          paddle.translate(0, -50);
+          paddle.translate(0, 0);
           break;
         case 2:
-          paddle.translate(-100, -50);
+          paddle.translate(0, 0);
           break;
         case 3:
-          paddle.translate(-50, 100);
+          paddle.translate(0, 0);
           break;
         case 4:
-          paddle.translate(-50, -100);
+          paddle.translate(0, 0);
           break;
       }
 
