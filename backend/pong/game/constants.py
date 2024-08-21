@@ -1,10 +1,10 @@
 from enum import Enum
 
 class GamePlayerPlacement(Enum):
-    FIRST_LEFT = 1
-    FIRST_RIGHT = 2
-    SECOND_LEFT = 3
-    SECOND_RIGHT = 4
+    LEFT = 1
+    RIGHT = 2
+    TOP = 3
+    BOTTOM = 4
 
 class GameDirection(Enum):
     UP = "UP"
