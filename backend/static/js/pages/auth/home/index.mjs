@@ -88,6 +88,9 @@ export const Home = () => {
             </div>
             <div class="modal-body">
               <p>Você aceita a partida?</p>
+
+              <span class="d-block">Jogadores:</span>
+              <div id="match-confirmation-modal-players"></div>
             </div>
             <div class="modal-footer">
               <t-button id="match-confirmation-modal-reject-button" theme="danger">Rejeitar</t-button>
@@ -120,6 +123,8 @@ export const Home = () => {
             <div class="modal-body">
               <p>Você aceita o torneio?</p>
 
+              <span class="d-block">Jogadores:</span>
+              <div id="tournament-confirmation-modal-players"></div>
             </div>
             <div class="modal-footer">
               <t-button id="tournament-confirmation-modal-reject-button" theme="danger">Rejeitar</t-button>

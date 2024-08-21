@@ -269,6 +269,7 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
         r["status"] = self.status
         r["root_match"] = None if not self.root_match else self.root_match.toDict()
         r["champion"] = None if not self.champion else self.champion.toDict()
+        r["players"] = [player.toDict() for player in self.players.all()]
         r["created_at"] = str(self.created_at)
         r["updated_at"] = str(self.updated_at)
 

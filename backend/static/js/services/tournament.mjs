@@ -7,6 +7,7 @@ import { GET, POST } from "./http.mjs";
  *    status: string,
  *    root_match: import("./match.mjs").Match,
  *    champion: import("./player.mjs").Player | null,
+ *    players: import("./player.mjs").Player[]
  *    created_at: string,
  *    updated_at: string,
  *    confirmation?: {

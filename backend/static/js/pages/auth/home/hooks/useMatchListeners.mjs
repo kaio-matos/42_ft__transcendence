@@ -34,6 +34,9 @@ export function useMatchListeners(page) {
     }).hide();
   }
 
+  /**
+   * @param {import("../../../../services/match.mjs").Match} match
+   */
   function onMatchConfirmation(match) {
     const container = page.element.querySelector("#match-confirmation-modal");
     const match_confirmation_modal = getModal(container);
@@ -43,6 +46,14 @@ export function useMatchListeners(page) {
     );
     const accept = container.querySelector(
       "#match-confirmation-modal-accept-button",
+    );
+
+    const players_container = new Component(
+      container.querySelector("#match-confirmation-modal-players"),
+    ).class("d-flex gap-2 flex-wrap");
+
+    players_container.children(
+      match.players.map((p) => new Component("b", { textContent: p.email })),
     );
 
     reject.button.addEventListener("click", async () => {

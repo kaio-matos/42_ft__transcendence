@@ -7,20 +7,36 @@ import { session } from "../../../../state/session.mjs";
  * @param {Component} page
  */
 export function useTournamentListeners(page) {
-  function onTournamentConfirmation() {
+  function getModal(container) {
+    return bootstrap.Modal.getOrCreateInstance(container, {
+      backdrop: "static",
+    });
+  }
+
+  /**
+   * @param {import("../../../../services/tournament.mjs").Tournament} tournament
+   */
+  function onTournamentConfirmation(tournament) {
     const container = page.element.querySelector(
       "#tournament-confirmation-modal",
     );
-    const tournament_confirmation_modal = bootstrap.Modal.getOrCreateInstance(
-      container,
-      { backdrop: "static" },
-    );
+    const tournament_confirmation_modal = getModal(container);
 
     const reject = container.querySelector(
       "#tournament-confirmation-modal-reject-button",
     );
     const accept = container.querySelector(
       "#tournament-confirmation-modal-accept-button",
+    );
+
+    const players_container = new Component(
+      container.querySelector("#tournament-confirmation-modal-players"),
+    ).class("d-flex gap-2 flex-wrap");
+
+    players_container.children(
+      tournament.players.map(
+        (p) => new Component("b", { textContent: p.email }),
+      ),
     );
 
     reject.button.addEventListener("click", async () => {
@@ -41,23 +57,18 @@ export function useTournamentListeners(page) {
 
   function onTournamentAwaiting() {
     const container = page.element.querySelector("#tournament-awaiting-modal");
-    const tournament_awaiting_modal = bootstrap.Modal.getOrCreateInstance(
-      container,
-      { backdrop: "static" },
-    );
+    const tournament_awaiting_modal = getModal(container);
     tournament_awaiting_modal.show();
   }
 
   function closeTournamentModals() {
-    const tournament_awaiting_modal = bootstrap.Modal.getOrCreateInstance(
+    const tournament_awaiting_modal = getModal(
       page.element.querySelector("#tournament-awaiting-modal"),
-      { backdrop: "static" },
     );
     tournament_awaiting_modal.hide();
 
-    const tournament_confirmation_modal = bootstrap.Modal.getOrCreateInstance(
+    const tournament_confirmation_modal = getModal(
       page.element.querySelector("#tournament-confirmation-modal"),
-      { backdrop: "static" },
     );
     tournament_confirmation_modal.hide();
   }
