@@ -66,11 +66,6 @@ export const Game = ({ params }) => {
       <t-loading id="loading-match" loading="true">
         <t-pong-canvas id="pong-canvas"></t-pong-canvas>
       </t-loading>
-
-      <t-toast id="tournament-won-toast">
-        <strong slot="header">Vitória!</strong>
-        Você venceu o torneio!
-      </t-toast>
   `;
 
   /** @type {PongCanvas} */
@@ -191,7 +186,7 @@ export const Game = ({ params }) => {
    * @param {{tournament: import("../../../services/tournament.mjs").Tournament}} param0
    */
   function onPlayerNotifyTournamentEnd({ tournament }) {
-    page.element.querySelector("#tournament-won-toast")?.open();
+    document.querySelector("#tournament-won-toast")?.open();
   }
 
   PlayerCommunication.Communication.addEventListener(
