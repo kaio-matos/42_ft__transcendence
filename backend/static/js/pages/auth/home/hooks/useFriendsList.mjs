@@ -88,7 +88,7 @@ export function useFriendsList(page) {
         await MatchService.createMatch({
           players_id: [session.player.id, friend.id],
         });
-        t_button_challenge.setLoading(true);
+        t_button_challenge.setLoading(false);
       });
 
       container.append(li.element);

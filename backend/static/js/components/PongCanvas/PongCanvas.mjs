@@ -20,7 +20,7 @@ export class PongCanvas extends HTMLElement {
   }
 
   connectedCallback() {
-    const shadow = this.attachShadow({ mode: "open" });
+    const shadow = this.shadowRoot || this.attachShadow({ mode: "open" });
     attachBootstrap(shadow);
 
     shadow.appendChild(this.#canvas.element);

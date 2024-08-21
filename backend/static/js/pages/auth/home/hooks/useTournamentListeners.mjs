@@ -7,14 +7,20 @@ import { session } from "../../../../state/session.mjs";
  * @param {Component} page
  */
 export function useTournamentListeners(page) {
-  function onTournamentConfirmation() {
+  function getModal(container) {
+    return bootstrap.Modal.getOrCreateInstance(container, {
+      backdrop: "static",
+    });
+  }
+
+  /**
+   * @param {import("../../../../services/tournament.mjs").Tournament} tournament
+   */
+  function onTournamentConfirmation(tournament) {
     const container = page.element.querySelector(
       "#tournament-confirmation-modal",
     );
-    const tournament_confirmation_modal = bootstrap.Modal.getOrCreateInstance(
-      container,
-      { backdrop: "static" },
-    );
+    const tournament_confirmation_modal = getModal(container);
 
     const reject = container.querySelector(
       "#tournament-confirmation-modal-reject-button",
@@ -23,41 +29,47 @@ export function useTournamentListeners(page) {
       "#tournament-confirmation-modal-accept-button",
     );
 
-    reject.button.addEventListener("click", async () => {
+    const players_container = new Component(
+      container.querySelector("#tournament-confirmation-modal-players"),
+    ).class("d-flex gap-2 flex-wrap");
+
+    players_container.clear();
+    players_container.children(
+      tournament.players.map(
+        (p) => new Component("b", { textContent: p.email }),
+      ),
+    );
+
+    reject.button.element.onclick = async () => {
       reject.setLoading(true);
       await TournamentService.rejectTournament();
       reject.setLoading(false);
       tournament_confirmation_modal.hide();
-    });
-    accept.button.addEventListener("click", async () => {
+    };
+    accept.button.element.onclick = async () => {
       accept.setLoading(true);
       await TournamentService.acceptTournament();
       accept.setLoading(false);
       tournament_confirmation_modal.hide();
-    });
+    };
 
     tournament_confirmation_modal.show();
   }
 
   function onTournamentAwaiting() {
     const container = page.element.querySelector("#tournament-awaiting-modal");
-    const tournament_awaiting_modal = bootstrap.Modal.getOrCreateInstance(
-      container,
-      { backdrop: "static" },
-    );
+    const tournament_awaiting_modal = getModal(container);
     tournament_awaiting_modal.show();
   }
 
   function closeTournamentModals() {
-    const tournament_awaiting_modal = bootstrap.Modal.getOrCreateInstance(
+    const tournament_awaiting_modal = getModal(
       page.element.querySelector("#tournament-awaiting-modal"),
-      { backdrop: "static" },
     );
     tournament_awaiting_modal.hide();
 
-    const tournament_confirmation_modal = bootstrap.Modal.getOrCreateInstance(
+    const tournament_confirmation_modal = getModal(
       page.element.querySelector("#tournament-confirmation-modal"),
-      { backdrop: "static" },
     );
     tournament_confirmation_modal.hide();
   }
@@ -94,6 +106,9 @@ export function useTournamentListeners(page) {
   if (session.player.pendencies) {
     if (session.player.pendencies.tournament_to_accept) {
       TournamentService.getTournament().then(onTournamentConfirmation);
+    }
+    if (session.player.pendencies.tournament_to_await) {
+      onTournamentAwaiting();
     }
   }
 }

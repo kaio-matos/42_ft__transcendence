@@ -71,6 +71,14 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
             .exclude(rejected_players__in=players)
         )
 
+    @staticmethod
+    def query_by_awaiting_tournament_accepted_by(players):
+        return (
+            Tournament.objects.filter(players__in=players)
+            .filter(status=Tournament.Status.AWAITING_CONFIRMATION)
+            .filter(accepted_players__in=players)
+        )
+
     ##################################################
     # Computed
     ##################################################
@@ -225,6 +233,7 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
         self.status = Tournament.Status.CANCELLED
         self.save()
         self.cancel_matches()
+        self.notify_players_update()
 
     def onAccept(self, player: Player):
         if self.is_fully_accepted():
@@ -232,9 +241,7 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
         self.notify_players_update()
 
     def onReject(self, player: Player):
-        self.status = Tournament.Status.CANCELLED
-        self.save()
-        self.notify_players_update()
+        self.cancel()
 
     def cancel_matches(self):
         def cancel_match(match: Match):
@@ -269,6 +276,7 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
         r["status"] = self.status
         r["root_match"] = None if not self.root_match else self.root_match.toDict()
         r["champion"] = None if not self.champion else self.champion.toDict()
+        r["players"] = [player.toDict() for player in self.players.all()]
         r["created_at"] = str(self.created_at)
         r["updated_at"] = str(self.updated_at)
 
