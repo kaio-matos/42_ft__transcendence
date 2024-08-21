@@ -1,6 +1,6 @@
 FROM python
 
-RUN apt-get update && apt-get install -y gettext
+RUN apt-get update && apt-get install -y gettext openssl
 
 WORKDIR /usr/src/app
 COPY backend/requirements.txt ./backend/
