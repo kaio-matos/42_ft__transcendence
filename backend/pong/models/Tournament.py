@@ -221,6 +221,11 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
                 "All matches must be finished first before finishing the tournament"
             )
 
+    def cancel(self):
+        self.status = Tournament.Status.CANCELLED
+        self.save()
+        self.cancel_matches()
+
     def onAccept(self, player: Player):
         if self.is_fully_accepted():
             self.begin()
@@ -230,6 +235,12 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
         self.status = Tournament.Status.CANCELLED
         self.save()
         self.notify_players_update()
+
+    def cancel_matches(self):
+        def cancel_match(match: Match):
+            match.cancel()
+
+        self.foreach_match(cancel_match)
 
     def foreach_match(
         self, fn: Callable[[Match], None], start_root: Match | None = None

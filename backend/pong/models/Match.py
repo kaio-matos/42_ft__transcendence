@@ -176,6 +176,13 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
             self.status = Match.Status.IN_PROGRESS
             self.save()
 
+    def cancel(self):
+        self.status = self.Status.CANCELLED
+        self.save()
+        self.broadcast_match(
+            ws.WSResponse(ws.WSEvents.MATCH_END, {"match": self.toDict()})
+        )
+
     def finish(self, winner: Player):
         self.winner = winner
         self.status = self.Status.FINISHED
