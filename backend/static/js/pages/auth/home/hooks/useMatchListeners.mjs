@@ -18,7 +18,9 @@ export function useMatchListeners(page) {
     const container = page.element.querySelector("#match-awaiting-modal");
     const match_awaiting_modal = getModal(container);
     match_awaiting_modal.hide(); // hide awaiting modal
-    router.navigate("/auth/game?match=" + match.id);
+    setTimeout(() => {
+      router.navigate("/auth/game?match=" + match.id);
+    }, 100);
   }
 
   function onMatchAwaiting() {
@@ -52,22 +54,23 @@ export function useMatchListeners(page) {
       container.querySelector("#match-confirmation-modal-players"),
     ).class("d-flex gap-2 flex-wrap");
 
+    players_container.clear();
     players_container.children(
       match.players.map((p) => new Component("b", { textContent: p.email })),
     );
 
-    reject.button.addEventListener("click", async () => {
+    reject.button.element.onclick = async () => {
       reject.setLoading(true);
       await MatchService.rejectMatch();
       reject.setLoading(false);
       match_confirmation_modal.hide();
-    });
-    accept.button.addEventListener("click", async () => {
+    };
+    accept.button.element.onclick = async () => {
       accept.setLoading(true);
       await MatchService.acceptMatch();
       accept.setLoading(false);
       match_confirmation_modal.hide();
-    });
+    };
 
     match_confirmation_modal.show();
   }
@@ -109,6 +112,10 @@ export function useMatchListeners(page) {
 
     if (session.player.pendencies.match_to_accept) {
       MatchService.getMatch().then(onMatchConfirmation);
+    }
+
+    if (session.player.pendencies.match_to_await) {
+      onMatchAwaiting();
     }
   }
 }

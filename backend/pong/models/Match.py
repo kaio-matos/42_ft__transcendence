@@ -2,6 +2,7 @@ from __future__ import annotations
 import uuid
 from asgiref.sync import async_to_sync
 from channels.consumer import get_channel_layer
+from django.apps import apps
 from django.utils.translation import gettext as _
 from django.core import serializers
 from django.db import models
@@ -78,6 +79,14 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
         )
 
     @staticmethod
+    def query_by_awaiting_match_accepted_by(players):
+        return (
+            Match.objects.filter(players__in=players)
+            .filter(status=Match.Status.AWAITING_CONFIRMATION)
+            .filter(accepted_players__in=players)
+        )
+
+    @staticmethod
     def query_by_awaiting_matches_with_pending_confirmation_by(players):
         return (
             Match.objects.filter(players__in=players)
@@ -104,6 +113,9 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
         if self.winner is not None and self.status == self.Status.FINISHED:
             return True
         return False
+
+    def is_cancelled(self):
+        return bool(self.status == self.Status.CANCELLED)
 
     def can_receive_new_players(self):
         return bool(not self.is_full() and not self.has_finished())
@@ -179,6 +191,7 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
     def cancel(self):
         self.status = self.Status.CANCELLED
         self.save()
+        self.notify_players_update()
         self.broadcast_match(
             ws.WSResponse(ws.WSEvents.MATCH_END, {"match": self.toDict()})
         )
@@ -197,9 +210,12 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
         self.notify_players_update()
 
     def onReject(self, player: Player):
-        self.status = Match.Status.CANCELLED
-        self.save()
-        self.notify_players_update()
+        self.cancel()
+        tournament = (
+            apps.get_model("pong.Tournament").query_by_match(self.get_root()).first()
+        )
+        if tournament:
+            tournament.cancel()
 
     ##################################################
     # Resource

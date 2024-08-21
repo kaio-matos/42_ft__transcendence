@@ -117,10 +117,24 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
             .exists()
         )
 
+    def has_pending_match_to_await(self):
+        return (
+            apps.get_model("pong.Match")
+            .query_by_awaiting_match_accepted_by([self])
+            .exists()
+        )
+
     def has_pending_tournament_to_answer(self):
         return (
             apps.get_model("pong.Tournament")
             .query_by_awaiting_tournament_with_pending_confirmation_by([self])
+            .exists()
+        )
+
+    def has_pending_tournament_to_await(self):
+        return (
+            apps.get_model("pong.Tournament")
+            .query_by_awaiting_tournament_accepted_by([self])
             .exists()
         )
 
@@ -162,8 +176,10 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
             "activity_status": self.activity_status,
             "pendencies": {
                 "match_to_accept": self.has_pending_match_to_answer(),
+                "match_to_await": self.has_pending_match_to_await(),
                 "match_to_play": self.has_pending_match_to_play(),
                 "tournament_to_accept": self.has_pending_tournament_to_answer(),
+                "tournament_to_await": self.has_pending_tournament_to_await(),
             },
         }
 

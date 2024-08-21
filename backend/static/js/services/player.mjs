@@ -15,8 +15,10 @@ export const ActivityStatus = Object.freeze({
  *    activity_status: keyof typeof ActivityStatus,
  *    pendencies: {
  *      match_to_play: boolean,
+ *      match_to_await: boolean,
  *      match_to_accept: boolean,
  *      tournament_to_accept: boolean,
+ *      tournament_to_await: boolean,
  *    }
  *  }} Player
  */

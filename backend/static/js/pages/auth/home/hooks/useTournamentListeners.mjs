@@ -33,24 +33,25 @@ export function useTournamentListeners(page) {
       container.querySelector("#tournament-confirmation-modal-players"),
     ).class("d-flex gap-2 flex-wrap");
 
+    players_container.clear();
     players_container.children(
       tournament.players.map(
         (p) => new Component("b", { textContent: p.email }),
       ),
     );
 
-    reject.button.addEventListener("click", async () => {
+    reject.button.element.onclick = async () => {
       reject.setLoading(true);
       await TournamentService.rejectTournament();
       reject.setLoading(false);
       tournament_confirmation_modal.hide();
-    });
-    accept.button.addEventListener("click", async () => {
+    };
+    accept.button.element.onclick = async () => {
       accept.setLoading(true);
       await TournamentService.acceptTournament();
       accept.setLoading(false);
       tournament_confirmation_modal.hide();
-    });
+    };
 
     tournament_confirmation_modal.show();
   }
@@ -105,6 +106,9 @@ export function useTournamentListeners(page) {
   if (session.player.pendencies) {
     if (session.player.pendencies.tournament_to_accept) {
       TournamentService.getTournament().then(onTournamentConfirmation);
+    }
+    if (session.player.pendencies.tournament_to_await) {
+      onTournamentAwaiting();
     }
   }
 }
