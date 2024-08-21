@@ -29,9 +29,6 @@ if settings.DEBUG:
         re_path(r"^static/(?P<path>.*)$", views.serve),
     ]
 
-# TODO: This is not recommended, we should at least use nginx to serve these dynamic files
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
 urlpatterns += [
     path("api/pong/", include("pong.urls")),
     path("admin/", admin.site.urls),
