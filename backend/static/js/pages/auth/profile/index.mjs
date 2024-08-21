@@ -5,6 +5,7 @@ import {
 } from "../../../services/errors.mjs";
 import { PlayerService } from "../../../services/player.mjs";
 import { session } from "../../../state/session.mjs";
+import { useMatchesHistory } from "../hooks/useMatchesHistory.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Profile = () => {
@@ -49,7 +50,31 @@ export const Profile = () => {
         Seu perfil foi atualizado com sucesso!
       </t-toast>
     </div>
+
+    <div class="border border-secondary p-2 rounded d-flex gap-2 mt-3">
+      <div class="border border-secondary p-2 rounded w-100">
+        <h2>Torneios</h2>
+
+        <t-loading id="loading-tournaments" loading="true">
+          <div id="tournaments-container" class="d-flex flex-column gap-2 overflow-auto" style="height: 50vh">
+
+          </div>
+        </t-loading>
+      </div>
+      <div class="border border-secondary p-2 rounded w-100">
+        <h2>Partidas</h2>
+
+        <t-loading id="loading-matches" loading="true">
+          <div id="matches-container" class="d-flex flex-column gap-2 overflow-auto" style="height: 50vh">
+
+          </div>
+        </t-loading>
+      </div>
+    </div>
+
   `;
+
+  useMatchesHistory(page, { from_player: session.player });
 
   const t_input_image_avatar = page.element.querySelector("t-input-image");
   const img_avatar_preview = page.element.querySelector("#avatar-preview");
