@@ -8,6 +8,10 @@ python manage.py makemessages --all
 echo "Apply database migrations"
 python manage.py migrate
 
+# Start gunicorn
+echo "Starting gunicorn server"
+gunicorn -c gunicorn_config.py --reload
+
 # Start server
-echo "Starting server"
-python manage.py runserver 0.0.0.0:8000
+# echo "Starting server"
+# python manage.py runserver 0.0.0.0:8000
