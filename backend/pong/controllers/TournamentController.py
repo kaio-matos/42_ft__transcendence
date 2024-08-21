@@ -5,7 +5,10 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from django.http import HttpRequest, HttpResponse
 from ft_transcendence.http import http
-from pong.forms.TournamentForms import TournamentRegistrationForm
+from pong.forms.TournamentForms import (
+    TournamentGetFilterForm,
+    TournamentRegistrationForm,
+)
 from pong.models import Player, Tournament
 from pong.resources.TournamentResource import TournamentResource
 
@@ -13,8 +16,20 @@ from pong.resources.TournamentResource import TournamentResource
 def index(request: HttpRequest) -> HttpResponse:
     if not request.user.is_authenticated:
         return http.Unauthorized({"message": _("Você não está autenticado")})
-    tournaments = Tournament.objects.all()
-    tournaments = [tournament.toDict() for tournament in tournaments]
+
+    form = TournamentGetFilterForm(request.GET.dict())
+
+    if not form.is_valid():
+        raise ValidationError(form.errors.as_data())
+
+    player = typing.cast(Player, request.user)
+    target_player = Player.objects.filter(public_id=form.data.get("player_id")).first()
+
+    if target_player is None:
+        return http.NotFound({"message": _("Jogador não encontrado")})
+
+    tournaments = Tournament.query_by_player([target_player])
+    tournaments = [TournamentResource(tournament, player) for tournament in tournaments]
 
     return http.OK(tournaments)
 

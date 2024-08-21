@@ -33,12 +33,19 @@ export function useMatchesHistory(page, { from_player }) {
                   : undefined,
               ]),
             new Component("h6", {
-              textContent: `Vencedor: ${match.winner?.name}`,
+              textContent: `Vencedor: ${match.winner?.name ?? ""}`,
             }).class("card-subtitle mb-2 text-body-secondary"),
 
-            new Component("p", {
-              textContent: `Contra: ${match.players.map((p) => p.name).join(" ")}`,
-            }).class("card-text"),
+            new Component("div")
+              .class("card-text d-flex flex-column")
+              .children([
+                new Component("span", {
+                  textContent: `Jogadores: ${match.players.map((p) => p.name).join(" ")}`,
+                }),
+                new Component("span", {
+                  textContent: `Data: ${new Date(match.created_at).toLocaleString("pt-br")}`,
+                }),
+              ]),
           ]),
         ]);
       });

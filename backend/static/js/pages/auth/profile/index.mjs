@@ -6,6 +6,7 @@ import {
 import { PlayerService } from "../../../services/player.mjs";
 import { session } from "../../../state/session.mjs";
 import { useMatchesHistory } from "../hooks/useMatchesHistory.mjs";
+import { useTournamentHistory } from "../hooks/useTournamentHistory.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Profile = () => {
@@ -74,6 +75,7 @@ export const Profile = () => {
 
   `;
 
+  useTournamentHistory(page, { from_player: session.player });
   useMatchesHistory(page, { from_player: session.player });
 
   const t_input_image_avatar = page.element.querySelector("t-input-image");

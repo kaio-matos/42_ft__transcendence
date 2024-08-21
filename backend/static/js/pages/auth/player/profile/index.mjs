@@ -2,6 +2,7 @@ import { Component } from "../../../../components/component.mjs";
 import { PlayerService } from "../../../../services/player.mjs";
 import { NotFound } from "../../../not-found/index.mjs";
 import { useMatchesHistory } from "../../hooks/useMatchesHistory.mjs";
+import { useTournamentHistory } from "../../hooks/useTournamentHistory.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const PlayerProfile = ({ params }) => {
@@ -54,6 +55,7 @@ export const PlayerProfile = ({ params }) => {
     name_placeholder.textContent = player.name;
     email_placeholder.textContent = player.email;
 
+    useTournamentHistory(page, { from_player: player });
     useMatchesHistory(page, { from_player: player });
   });
 

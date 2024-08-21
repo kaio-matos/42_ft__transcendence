@@ -1,15 +1,31 @@
 import { GET, POST } from "./http.mjs";
 
 /**
- * @typedef {{ id: string, name: string, players: import("./player.mjs").Player[] }} Tournament
+ * @typedef {{
+ *    id: string,
+ *    name: string,
+ *    status: string,
+ *    root_match: import("./match.mjs").Match,
+ *    champion: import("./player.mjs").Player | null,
+ *    created_at: string,
+ *    updated_at: string,
+ *    confirmation?: {
+ *      accepted: boolean,
+ *      rejected: boolean,
+ *      pending: boolean
+ *    }
+ *  }} Tournament
  */
 
 export const TournamentService = {
   /**
+   * @param {{ from_player_id: string }} payload
    * @returns {Promise<Tournament[]>}
    */
-  async getTournaments() {
-    const { data } = await GET("/api/pong/tournament");
+  async getTournaments(payload) {
+    const { data } = await GET(
+      "/api/pong/tournament?player_id=" + payload.from_player_id,
+    );
     return data.data;
   },
 
