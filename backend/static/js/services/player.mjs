@@ -52,10 +52,16 @@ export const PlayerService = {
   },
 
   /**
+   * @param {{ activity_status: ActivityStatus[keyof ActivityStatus] }} payload
    * @returns {Promise<Player[]>}
    */
-  async getPlayers() {
-    const { data } = await GET("/api/pong/player");
+  async getPlayers(payload) {
+    const params = new URLSearchParams();
+    Object.entries(payload).forEach(([key, value]) => {
+      params.append(key, value);
+    });
+
+    const { data } = await GET("/api/pong/player?" + params.toString());
     return data.data;
   },
 

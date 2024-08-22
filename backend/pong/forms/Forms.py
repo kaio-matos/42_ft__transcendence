@@ -21,13 +21,13 @@ class ArrayUUIDsField(forms.Field):
         if not isinstance(ids, collections.abc.Sequence):
             raise ValidationError(_("Este campo deve ser uma lista"), code="array")
 
-        if len(ids) < self.min:
+        if self.min and len(ids) < self.min:
             raise ValidationError(
-                _("Esta lista deve ser maior do que " + str(self.min)), code="min"
+                _("Esta lista deve ser maior ou igual à " + str(self.min)), code="min"
             )
         if self.max and len(ids) > self.max:
             raise ValidationError(
-                _("Esta lista deve ser menor do que " + str(self.max)), code="max"
+                _("Esta lista deve ser menor ou igual à " + str(self.max)), code="max"
             )
 
         if self.is_even and (len(ids) % 2 != 0):

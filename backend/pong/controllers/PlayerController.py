@@ -10,6 +10,7 @@ from django.contrib import auth
 from pong.forms.PlayerForms import (
     PlayerAddFriendForm,
     PlayerAvatarForm,
+    PlayerGetFilterForm,
     PlayerLoginForm,
     PlayerRegistrationForm,
     PlayerUpdateForm,
@@ -88,7 +89,12 @@ def index(request: HttpRequest) -> HttpResponse:
     if not request.user.is_authenticated:
         return http.Unauthorized({"message": _("Você não está autenticado")})
 
-    players = Player.objects.all()
+    form = PlayerGetFilterForm(request.GET.dict())
+
+    if not form.is_valid():
+        raise ValidationError(form.errors.as_data())
+
+    players = Player.objects.filter(activity_status=form.data.get("activity_status"))
     players = [player.toDict() for player in players]
 
     return http.OK(players)
