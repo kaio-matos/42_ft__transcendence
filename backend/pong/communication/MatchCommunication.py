@@ -35,8 +35,7 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
     def receive_json(self, content, **kwargs):
         player = typing.cast(Player, self.scope["user"])
         game = games.get(self.match_group_id)
-
-        if self.match.has_finished():
+        if self.match.status == Match.Status.FINISHED:
             return
 
         match content["command"]:
@@ -53,11 +52,8 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                 game = Game(self.match, screen)
                 games[self.match_group_id] = game
                 game.start_game()
-
-                # Adicione logs para debug
                 print(f"Game created for match {self.match_group_id}")
                 print(f"Sending MATCH_START event")
-
                 self.match.broadcast_match(
                     ws.WSResponse(ws.WSEvents.MATCH_START, game.toDict()),
                 )
@@ -66,18 +62,23 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                     return
                 direction = content["payload"]["direction"]
                 game.handleKeyPress(player, GameDirection(direction))
-
-                if game.hasFinished():
-                    self.match.finish(game.winner)
-                    tournament = Tournament.query_by_match(
-                        self.match.get_root()
-                    ).first()
+                
+                if game.check_game_end() and game.game_running:
+                    game.end_game()
+                    del games[self.match_group_id]  # Remove o jogo da memória
+                    
+                    tournament = Tournament.query_by_match(self.match.get_root()).first()
                     if tournament:
                         try:
                             tournament.finish()
-                        except:
-                            pass
-
+                        except Exception as e:
+                            print(f"Error finishing tournament: {e}")
+                    
+                    # Envia uma notificação final do fim do jogo
+                    self.match.broadcast_match(
+                        ws.WSResponse(ws.WSEvents.MATCH_END, game.toDict()),
+                    )
+                            
     def send_event(self, event):
         self.send_json(event["event"])
 
