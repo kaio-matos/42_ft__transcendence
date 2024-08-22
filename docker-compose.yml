@@ -6,8 +6,8 @@ services:
         ports:
             - ${API_PORT}:8000
         volumes:
-            - static-data:/usr/src/app/backend/static
-            - media-data:/usr/src/app/backend/media
+            - ./backend/static/:/var/www/static
+            - ./backend/media/:/var/www/media
             - .:/usr/src/app # TODO: if we are not supposed to do bind mounts, what should we use?
             - ./backend/certs:/usr/src/app/backend/certs
         networks:
@@ -46,8 +46,8 @@ services:
         ports:
             - "443:443"
         volumes:
-            - static-data:/var/www/static
-            - media-data:/var/www/media
+            - ./backend/static/:/var/www/static
+            - ./backend/media/:/var/www/media
             - ./.docker/nginx/nginx.conf:/etc/nginx/nginx.conf
             - ./backend/certs:/etc/nginx/certs
         restart: on-failure:5
@@ -59,6 +59,3 @@ networks:
     name: transcendence
     driver: bridge
 
-volumes:
-  static-data:
-  media-data:
