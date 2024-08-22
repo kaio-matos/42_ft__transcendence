@@ -1,4 +1,6 @@
 import { ChatCommunication } from "../communication/chat.mjs";
+import { ChatService } from "../services/chat.mjs";
+import { RequestFailedError } from "../services/errors.mjs";
 import { session } from "../state/session.mjs";
 import { Button } from "./Button.mjs";
 import { attachBootstrap, Component } from "./component.mjs";
@@ -69,23 +71,32 @@ export class TChat extends HTMLElement {
       this.container.element.querySelector("#chat"),
     );
 
-    this.form.addEventListener("submit", () => {
+    this.form.addEventListener("submit", async () => {
       if (!ChatCommunication.Communication.isOpen()) return;
+      const t_button = this.form.element.querySelector("t-button");
       this.t_input.clearErrors();
 
       const message = this.t_input.value;
       if (!message) return;
 
       this.t_input.value = "";
-      ChatCommunication.Communication.send(
-        ChatCommunication.Commands.CHAT_SEND_MESSAGE,
-        { sender_id: session.player.id, text: message },
-        (error) => {
-          this.t_input.addErrors(error.text);
+      try {
+        t_button.setLoading(true);
+        await ChatService.sendMessage({
+          chat_id: this.chat.id,
+          sender_id: session.player.id,
+          text: message,
+        });
+        this.t_input.focus();
+      } catch (error) {
+        if (error instanceof RequestFailedError) {
+          this.t_input.addErrors(error.data?.error?.message);
           this.t_input.value = message;
-        },
-      );
-      this.t_input.focus();
+          this.t_input.focus();
+        }
+      } finally {
+        t_button.setLoading(false);
+      }
     });
   }
 
