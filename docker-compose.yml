@@ -3,8 +3,8 @@ services:
         build:
             context: .
             dockerfile: ./.docker/api/Dockerfile
-        ports:
-            - ${API_PORT}:8000
+        expose:
+            - "${API_PORT}"
         volumes:
             - ./backend/static/:/var/www/static
             - ./backend/media/:/var/www/media
@@ -23,20 +23,24 @@ services:
         restart: always
         networks:
             - transcendence
-        ports:
-            - "${DATABASE_PORT}:5432"
+        expose:
+            - "${DATABASE_PORT}"
         environment:
             - POSTGRES_DB=${DATABASE_NAME}
             - POSTGRES_PASSWORD=${DATABASE_PASS}
             - POSTGRES_USER=${DATABASE_USER}
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
 
     redis:
         image: redis
         restart: always
         networks:
             - transcendence
-        ports:
-            - "${REDIS_PORT}:6379"
+        expose:
+            - "${REDIS_PORT}"
+        volumes:
+            - redis_data:/data
 
     nginx:
         container_name: nginx
@@ -59,3 +63,6 @@ networks:
     name: transcendence
     driver: bridge
 
+volumes:
+    postgres_data:
+    redis_data:
