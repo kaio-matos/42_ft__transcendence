@@ -49,8 +49,6 @@ def matchmaking(request: HttpRequest) -> HttpResponse:
 
     player = typing.cast(Player, request.user)
 
-    # TODO: the challenged player should be someone that is Online
-
     # first we try to find someone that its not his friend
     challenged_player = (
         player.query_by_not_friends()
