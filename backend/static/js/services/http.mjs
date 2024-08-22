@@ -1,4 +1,5 @@
 import { router } from "../index.mjs";
+import { session } from "../state/session.mjs";
 import { RequestFailedError, UnprocessableEntityError } from "./errors.mjs";
 
 export const HTTPStatus = Object.freeze({

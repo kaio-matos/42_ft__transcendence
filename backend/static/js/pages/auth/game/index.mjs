@@ -5,6 +5,7 @@ import { CanvasBall } from "../../../components/PongCanvas/canvas-components/Can
 import { CanvasPaddle } from "../../../components/PongCanvas/canvas-components/CanvasPaddle.mjs";
 import { PongCanvas } from "../../../components/PongCanvas/PongCanvas.mjs";
 import { router } from "../../../index.mjs";
+import { session } from "../../../state/session.mjs";
 import { NotFound } from "../../not-found/index.mjs";
 
 /**
@@ -12,41 +13,50 @@ import { NotFound } from "../../not-found/index.mjs";
  *   match: import("../../../services/match.mjs").Match,
  *   screen: { width: number, height: number },
  *   game: {
- *      players: { placement: number, position: { x: number, y: number }, data: import("../../../services/player.mjs").Player }[],
+ *      players: {
+ *        placement: number,
+ *        position: { x: number, y: number },
+ *        data: import("../../../services/player.mjs").Player,
+ *        paddle: { size: { width: number, height: number } }
+ *      }[],
  *      ball: { size: {width: number, height: number} ,position: { x: number, y: number} },
- *      paddle: {size: {width: number, height: number}},
  *      is_running: boolean
  *   },
  * }} Game
  */
 
-/** @typedef {{ up: string, down: string }} PlayerControlKeys */
+/** @typedef {{ up: string, down: string, left: string, right: string }} PlayerControlKeys */
 
 /**
- * @param {PlayerControlKeys & { onKeyPressUp: () => void, onKeyPressDown: () => void }} options
+ * @param {PlayerControlKeys & { onKeyPressUp: () => void, onKeyPressDown: () => void, onKeyPressLeft: () => void, onKeyPressRight: () => void }} options
  */
 function onKeysPressed(options) {
   let pressedKey = "";
+  const keys = [options.up, options.down, options.left, options.right];
 
   document.addEventListener("keydown", (event) => {
     // TODO: Cleanup this listener
-    if ([options.up, options.down].includes(event.key)) {
+    if (keys.includes(event.key)) {
       pressedKey = event.key;
     }
   });
 
   document.addEventListener("keyup", (event) => {
     // TODO: Cleanup this listener
-    if ([options.up, options.down].includes(event.key)) {
+    if (keys.includes(event.key)) {
       pressedKey = "";
     }
   });
 
   const onKeyPress = () => {
     if (pressedKey == options.up) {
-      options.onKeyPressUp();
+      options?.onKeyPressUp();
     } else if (pressedKey == options.down) {
-      options.onKeyPressDown();
+      options?.onKeyPressDown();
+    } else if (pressedKey == options.left) {
+      options?.onKeyPressLeft();
+    } else if (pressedKey == options.right) {
+      options?.onKeyPressRight();
     }
     window.requestAnimationFrame(onKeyPress);
   };
@@ -107,54 +117,78 @@ export const Game = ({ params }) => {
       .pos(canvas.VCW(game.ball.position.x), canvas.VCH(game.ball.position.y))
       .translate(0, 0);
 
-    const players = game.players.map(({ placement, position, data }) => {
-      const paddle = new CanvasPaddle(
-        canvas.VCW(game.paddle.size.width),
-        canvas.VCH(game.paddle.size.height),
-      ).pos(canvas.VCW(position.x), canvas.VCH(position.y));
+    const players = game.players.map(
+      ({ placement, position, data, paddle: p }) => {
+        const paddle = new CanvasPaddle(
+          canvas.VCW(p.size.width),
+          canvas.VCH(p.size.height),
+        ).pos(canvas.VCW(position.x), canvas.VCH(position.y));
 
-      switch (placement) {
-        case 1:
-          paddle.translate(0, 0);
-          break;
-        case 2:
-          paddle.translate(0, 0);
-          break;
-        case 3:
-          paddle.translate(0, 0);
-          break;
-        case 4:
-          paddle.translate(0, 0);
-          break;
-      }
+        switch (placement) {
+          case 1:
+            paddle.translate(0, 0);
+            break;
+          case 2:
+            paddle.translate(0, 0);
+            break;
+          case 3:
+            paddle.translate(0, 0);
+            break;
+          case 4:
+            paddle.translate(0, 0);
+            break;
+        }
 
-      return {
-        paddle,
-        data,
-      };
-    });
+        return {
+          paddle,
+          data,
+        };
+      },
+    );
+    const game_player = game.players.find(
+      (p) => p.data.id === session.player.id,
+    );
 
     players.forEach((p) => canvas.addCanvasElement(p.paddle));
     canvas.addCanvasElement(ball);
 
     canvas.render();
 
-    onKeysPressed({
-      up: "ArrowUp",
-      down: "ArrowDown",
-      onKeyPressUp() {
-        MatchCommunication.Communication.send(
-          MatchCommunication.Commands.KEY_PRESS,
-          { direction: "UP" },
-        );
-      },
-      onKeyPressDown() {
-        MatchCommunication.Communication.send(
-          MatchCommunication.Commands.KEY_PRESS,
-          { direction: "DOWN" },
-        );
-      },
-    });
+    if (game_player.placement === 1 || game_player.placement === 2) {
+      onKeysPressed({
+        up: "ArrowUp",
+        down: "ArrowDown",
+        onKeyPressUp() {
+          MatchCommunication.Communication.send(
+            MatchCommunication.Commands.KEY_PRESS,
+            { direction: "UP" },
+          );
+        },
+        onKeyPressDown() {
+          MatchCommunication.Communication.send(
+            MatchCommunication.Commands.KEY_PRESS,
+            { direction: "DOWN" },
+          );
+        },
+      });
+    } else {
+      onKeysPressed({
+        left: "ArrowLeft",
+        right: "ArrowRight",
+        onKeyPressLeft() {
+          MatchCommunication.Communication.send(
+            MatchCommunication.Commands.KEY_PRESS,
+            { direction: "LEFT" },
+          );
+        },
+        onKeyPressRight() {
+          MatchCommunication.Communication.send(
+            MatchCommunication.Commands.KEY_PRESS,
+            { direction: "RIGHT" },
+          );
+        },
+      });
+    }
 
     /**
      * @param {Game} param0
