@@ -14,7 +14,6 @@ class WSEvents(Enum):
     CHAT_MESSAGE = "onChatMessage"
     ERROR = "onError"
     FRIEND_ACTIVITY_STATUS = "onFriendActivityStatusChange"
-    CHECK_PLAYER_STATUS = "onCheckPlayerStatus"
 
 
 # Commands are requests from the frontend to the backend

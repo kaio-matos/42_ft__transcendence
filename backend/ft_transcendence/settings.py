@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 from dotenv import load_dotenv
 from django.utils.translation import gettext_lazy as _
-from celery.schedules import schedule
 
 load_dotenv()
 
@@ -147,20 +146,3 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR + "/media"
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-
-
-# backend/settings.py
-
-# Configurações do Celery
-CELERY_BROKER_URL = 'redis://redis:6379/0'  # URL do broker Redis
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'  # Backend para armazenar resultados
-CELERY_ACCEPT_CONTENT = ['json']  # Conteúdo aceito
-CELERY_TASK_SERIALIZER = 'json'  # Serializer para tasks
-CELERY_RESULT_SERIALIZER = 'json'  # Serializer para resultados
-CELERY_TIMEZONE = 'UTC'  # Timezone para o Celery
-CELERY_BEAT_SCHEDULE = {
-    'check-player-status-every-5-seconds': {
-        'task': 'myapp.tasks.check_player_status_task',
-        'schedule': schedule(5.0),  # Intervalo de 5 segundos
-    },
-}

@@ -4,6 +4,5 @@ psycopg2==2.9.3
 channels-redis
 python-dotenv
 django-stubs
-celery
 Pillow==10.4.0
 gunicorn==21.2.0

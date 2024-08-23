@@ -9,7 +9,6 @@ import { useFindMatch } from "./hooks/useFindMatch.mjs";
 import { useMatchListeners } from "./hooks/useMatchListeners.mjs";
 import { useTournamentListeners } from "./hooks/useTournamentListeners.mjs";
 import { useCreateMatch } from "./hooks/useCreateMatch.mjs";
-import { useCheckStatusListeners } from "./hooks/useCheckStatusListeners.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Home = () => {
@@ -173,7 +172,6 @@ export const Home = () => {
   useFindMatch(page);
   useMatchListeners(page);
   useTournamentListeners(page);
-  useCheckStatusListeners();
 
   const t_logout_button = page.element.querySelector("#logout-button");
 

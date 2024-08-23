@@ -1,12 +1,10 @@
 from __future__ import annotations
 import os, uuid
-from datetime import timedelta
 from asgiref.sync import async_to_sync
 from channels.consumer import get_channel_layer
 from django.contrib.auth.base_user import BaseUserManager
 from django.core import serializers
 from django.utils.translation import gettext as _
-from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.apps import apps
@@ -267,47 +265,3 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
             ],
         )
     
-    def send_ping(self):
-        """
-        Envia um ping ao jogador via WebSocket para verificar se está online.
-        """
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"player_{self.public_id}",
-            ws.WSResponse(ws.WSEvents.CHECK_PLAYER_STATUS, {}),
-        )
-
-    def mark_as_offline(self):
-        """
-        Marca o jogador como offline se não houver resposta ao ping.
-        """
-        self.set_activity_status(self.ActivityStatus.OFFLINE)
-
-    def handle_pong_response(self):
-        """
-        Marca o jogador como online quando uma resposta pong é recebida.
-        """
-        self.set_activity_status(self.ActivityStatus.ONLINE)
-        self.last_login = timezone.now()
-        self.save()
-
-    @staticmethod
-    def check_all_players_status():
-        """
-        Verifica o status de todos os jogadores que estão marcados como online.
-        Se não houver resposta ao ping, marca o jogador como offline.
-        """
-        online_players = Player.objects.filter(activity_status=Player.ActivityStatus.ONLINE)
-        for player in online_players:
-            if player.is_ping_timeout():
-                player.mark_as_offline()
-            else:
-                player.send_ping()
-
-    def is_ping_timeout(self):
-        """
-        Verifica se o tempo limite para o ping expirou.
-        """
-        if self.last_login is None:
-            return True
-        return timezone.now() - self.last_login > timedelta(seconds=5)
