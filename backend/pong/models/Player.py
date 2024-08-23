@@ -12,6 +12,7 @@ from django.apps import apps
 from ft_transcendence.http import ws
 from pong.models.mixins.TimestampMixin import TimestampMixin
 
+
 # Gerenciador personalizado para o modelo de usuário
 class CustomUserManager(BaseUserManager):
     """
@@ -46,6 +47,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError(_("Superusuário deve ter is_superuser=True."))
         return self.create_user(email, password, **extra_fields)
 
+
 # Função para definir o caminho de upload do avatar do jogador
 def playerAvatarPath(player, filename: str):
     """
@@ -53,6 +55,7 @@ def playerAvatarPath(player, filename: str):
     """
     _, extension = os.path.splitext(filename)
     return f"player/avatar/{player.public_id}{extension}"
+
 
 # Modelo principal do Jogador
 class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
@@ -84,7 +87,6 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
     friends = models.ManyToManyField("self", blank=True)
     blocked_chats = models.ManyToManyField("Chat")
 
-
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
@@ -105,26 +107,35 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
         Retorna todos os jogadores que não são amigos deste jogador.
         """
         return self.query_exclude_self().exclude(id__in=self.friends.all())
-    
 
     ##################################################
     # Computed
     ##################################################
-    
+
     def total_play_time(self):
-        matches = apps.get_model("pong.Match").query_by_finished().filter(players__in=[self]).all()
+        matches = (
+            apps.get_model("pong.Match")
+            .query_by_finished()
+            .filter(players__in=[self])
+            .all()
+        )
         total_time = 0
         for match in matches:
             total_time += match.game_duration()
-        return total_time 
+        return total_time
 
     def total_score(self):
-        matches = apps.get_model("pong.Match").query_by_finished().filter(players__in=[self]).all()
+        matches = (
+            apps.get_model("pong.Match")
+            .query_by_finished()
+            .filter(players__in=[self])
+            .all()
+        )
         scores = 0
         for match in matches:
             if match.scores:
                 scores += match.scores[str(self.public_id)]
-        return scores 
+        return scores
 
     def is_chat_blocked(self, chat):
         """
@@ -228,8 +239,6 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
             ws.WSResponse(ws.WSEvents.FRIEND_ACTIVITY_STATUS, self.toDict())
         )
 
-
-
     ##################################################
     # Resource
     ##################################################
@@ -244,8 +253,10 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
             "email": self.email,
             "avatar": None if not self.avatar else self.avatar.url,
             "activity_status": self.activity_status,
-            "total_play_time": self.total_play_time(),
-            "total_score": self.total_score(),
+            "stats": {
+                "total_play_time": self.total_play_time(),
+                "total_score": self.total_score(),
+            },
             "pendencies": {
                 "match_to_accept": self.has_pending_match_to_answer(),
                 "match_to_await": self.has_pending_match_to_await(),
@@ -265,3 +276,4 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
                 self,
             ],
         )
+
