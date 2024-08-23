@@ -6,6 +6,7 @@ export const PlayerCommunication = {
     PLAYER_NOTIFY_TOURNAMENT_UPDATE: "onPlayerNotifyTournamentUpdate",
     PLAYER_NOTIFY_TOURNAMENT_END: "onPlayerNotifyTournamentEnd",
     FRIEND_ACTIVITY_STATUS: "onFriendActivityStatusChange",
+    CHECK_PLAYER_STATUS: "onCheckPlayerStatus",
   }),
   Commands: Object.freeze({}),
 
