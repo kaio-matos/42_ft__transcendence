@@ -6,7 +6,7 @@ export class PongCanvas extends HTMLElement {
   #canvas;
   /** @type {CanvasRenderingContext2D} */
   #ctx;
-  width = 1000;
+  width = 500;
   height = 500;
   /** @type {CanvasElement[]} */
   elements = [];
@@ -20,7 +20,7 @@ export class PongCanvas extends HTMLElement {
   }
 
   connectedCallback() {
-    const shadow = this.attachShadow({ mode: "open" });
+    const shadow = this.shadowRoot || this.attachShadow({ mode: "open" });
     attachBootstrap(shadow);
 
     shadow.appendChild(this.#canvas.element);

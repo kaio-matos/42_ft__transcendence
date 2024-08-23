@@ -5,6 +5,8 @@ import {
 } from "../../../services/errors.mjs";
 import { PlayerService } from "../../../services/player.mjs";
 import { session } from "../../../state/session.mjs";
+import { useMatchesHistory } from "../hooks/useMatchesHistory.mjs";
+import { useTournamentHistory } from "../hooks/useTournamentHistory.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Profile = () => {
@@ -13,7 +15,11 @@ export const Profile = () => {
   page.element.innerHTML = `
     <div class="border border-secondary p-2 rounded">
       <div class="d-flex justify-content-between">
-        <h1>Perfil</h1>
+        <div class="d-flex flex-column">
+          <h1>Perfil</h1>
+          <span>Pontuação Total: ${session.player.stats.total_score}</span>
+          <span>Tempo Jogado: ${session.player.stats.total_play_time}s</span>
+        </div>
 
         <div class="d-flex flex-column gap-2" style="width: 200px">
           <t-input-image theme="none" class="position-relative w-100 profile_avatar_edit_container">
@@ -49,7 +55,32 @@ export const Profile = () => {
         Seu perfil foi atualizado com sucesso!
       </t-toast>
     </div>
+
+    <div class="border border-secondary p-2 rounded d-flex gap-2 mt-3">
+      <div class="border border-secondary p-2 rounded w-100">
+        <h2>Torneios</h2>
+
+        <t-loading id="loading-tournaments" loading="true">
+          <div id="tournaments-container" class="d-flex flex-column gap-2 overflow-auto" style="height: 50vh">
+
+          </div>
+        </t-loading>
+      </div>
+      <div class="border border-secondary p-2 rounded w-100">
+        <h2>Partidas</h2>
+
+        <t-loading id="loading-matches" loading="true">
+          <div id="matches-container" class="d-flex flex-column gap-2 overflow-auto" style="height: 50vh">
+
+          </div>
+        </t-loading>
+      </div>
+    </div>
+
   `;
+
+  useTournamentHistory(page, { from_player: session.player });
+  useMatchesHistory(page, { from_player: session.player });
 
   const t_input_image_avatar = page.element.querySelector("t-input-image");
   const img_avatar_preview = page.element.querySelector("#avatar-preview");

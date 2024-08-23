@@ -6,6 +6,16 @@ export class CanvasPaddle extends CanvasElement {
   __color = "white";
 
   /**
+   * @param {number} width
+   * @param {number} height
+   */
+  constructor(width, height) {
+    super();
+    this.__width = width;
+    this.__height = height;
+  }
+
+  /**
    * @param {string} color
    */
   color(color) {

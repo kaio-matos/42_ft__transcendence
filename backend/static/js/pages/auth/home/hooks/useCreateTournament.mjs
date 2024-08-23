@@ -1,6 +1,6 @@
 import { Component } from "../../../../components/component.mjs";
 import { UnprocessableEntityError } from "../../../../services/errors.mjs";
-import { PlayerService } from "../../../../services/player.mjs";
+import { ActivityStatus, PlayerService } from "../../../../services/player.mjs";
 import { TournamentService } from "../../../../services/tournament.mjs";
 
 /**
@@ -24,7 +24,9 @@ export function useCreateTournament(page) {
 
     modal.show();
 
-    const players = await PlayerService.getPlayers();
+    const players = await PlayerService.getPlayers({
+      activity_status: ActivityStatus.ONLINE,
+    });
     const options = players.map((p) => ({ label: p.name, value: p.id }));
 
     t_multiple_select.addOptions(options);

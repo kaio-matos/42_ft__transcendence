@@ -21,8 +21,6 @@ class WSEvents(Enum):
 class WSCommands(Enum):
     MATCH_JOIN = "MATCH_JOIN"
     KEY_PRESS = "KEY_PRESS"
-    CHAT_JOIN = "CHAT_JOIN"
-    CHAT_SEND_MESSAGE = "CHAT_SEND_MESSAGE"
 
 
 def WSResponse(event: WSEvents, data: dict) -> dict:

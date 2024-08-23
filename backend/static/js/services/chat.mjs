@@ -36,6 +36,18 @@ export const ChatService = {
   },
 
   /**
+   * @param {{ chat_id: string, sender_id: string, text: string }} payload
+   * @returns {Promise<Chat>}
+   */
+  async sendMessage({ chat_id, ...payload }) {
+    const { data } = await POST(
+      "/api/pong/chat/" + chat_id + "/message",
+      payload,
+    );
+    return data.data;
+  },
+
+  /**
    * @param {{ chat_id: string }} player
    * @returns {Promise<Chat>}
    */

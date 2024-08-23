@@ -57,7 +57,7 @@ export class InputImage extends HTMLElement {
   }
 
   connectedCallback() {
-    const shadow = this.attachShadow({ mode: "open" });
+    const shadow = this.shadowRoot || this.attachShadow({ mode: "open" });
     shadow.innerHTML = "<style>:host { display: block; }</style>";
     attachBootstrap(shadow);
 

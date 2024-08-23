@@ -3,7 +3,7 @@ from channels.generic.websocket import JsonWebsocketConsumer
 from channels.http import async_to_sync
 
 from ft_transcendence.http import ws
-from pong.game.game import Game, GameDirection, GameScreen
+from pong.game.game import Game, GameDirection
 from pong.models import Player, Match, Tournament
 
 # TODO: We MUST find some way to do this without creating this variable, and probably without saving into the postgresql
@@ -34,34 +34,22 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
 
     def receive_json(self, content, **kwargs):
         player = typing.cast(Player, self.scope["user"])
-        if self.match.has_finished():
+        game = games.get(self.match_group_id)
+        if self.match.status == Match.Status.FINISHED:
             return
 
         match content["command"]:
             case ws.WSCommands.MATCH_JOIN.value:
-                screen = GameScreen(
-                    content["payload"]["screen"]["width"],
-                    content["payload"]["screen"]["height"],
-                )
-                games[self.match_group_id] = Game(self.match, screen)
-                game = games[self.match_group_id]
-
-                # TODO: This code is assuming both players are ready to begint the match, we should add some way to check if both are ready
-                self.match.broadcast_match(
-                    ws.WSResponse(ws.WSEvents.MATCH_START, game.toDict()),
-                )
-
-            case ws.WSCommands.KEY_PRESS.value:
-                if self.match is None:
+                if game:
+                    self.match.broadcast_match(
+                        ws.WSResponse(ws.WSEvents.MATCH_START, game.toDict()),
+                    )
                     return
-                game = games[self.match_group_id]
-                if game is None:
-                    return
-                direction = content["payload"]["direction"]
-                game.handleKeyPress(player, direction)
 
-                if game.hasFinished():
-                    self.match.finish(game.winner)
+                def on_game_end():
+                    # TODO:
+                    # del games[self.match_group_id]
+
                     tournament = Tournament.query_by_match(
                         self.match.get_root()
                     ).first()
@@ -71,11 +59,19 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                         except:
                             pass
 
+                game = Game(self.match, on_game_end)
+                games[self.match_group_id] = game
+                game.start_game()
+                print(f"Game created for match {self.match_group_id}")
+                print(f"Sending MATCH_START event")
                 self.match.broadcast_match(
-                    ws.WSResponse(ws.WSEvents.MATCH_UPDATE, game.toDict()),
+                    ws.WSResponse(ws.WSEvents.MATCH_START, game.toDict()),
                 )
+            case ws.WSCommands.KEY_PRESS.value:
+                if self.match is None or game is None:
+                    return
+                direction = content["payload"]["direction"]
+                game.handleKeyPress(player, GameDirection(direction))
 
     def send_event(self, event):
         self.send_json(event["event"])
-
-    pass

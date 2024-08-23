@@ -18,10 +18,13 @@ import { GET, POST } from "./http.mjs";
 
 export const MatchService = {
   /**
+   * @param {{ from_player_id: string }} payload
    * @returns {Promise<Match[]>}
    */
-  async getMatches() {
-    const { data } = await GET("/api/pong/match");
+  async getMatches(payload) {
+    const { data } = await GET(
+      "/api/pong/match?player_id=" + payload.from_player_id,
+    );
     return data.data;
   },
 
@@ -61,7 +64,7 @@ export const MatchService = {
   },
 
   /**
-   * @param {{ challenged_player_id: string }} payload
+   * @param {{ players_id: string[] }} payload
    * @returns {Promise<Match>}
    */
   async createMatch(payload) {

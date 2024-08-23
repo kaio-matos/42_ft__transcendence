@@ -13,10 +13,16 @@ export const ActivityStatus = Object.freeze({
  *    avatar: string,
  *    blocked_chats: import("./chat.mjs").Chat[],
  *    activity_status: keyof typeof ActivityStatus,
+ *    stats: {
+ *      total_play_time: number,
+ *      total_score: number,
+ *    },
  *    pendencies: {
  *      match_to_play: boolean,
+ *      match_to_await: boolean,
  *      match_to_accept: boolean,
  *      tournament_to_accept: boolean,
+ *      tournament_to_await: boolean,
  *    }
  *  }} Player
  */
@@ -50,10 +56,16 @@ export const PlayerService = {
   },
 
   /**
+   * @param {{ activity_status: ActivityStatus[keyof ActivityStatus] }} payload
    * @returns {Promise<Player[]>}
    */
-  async getPlayers() {
-    const { data } = await GET("/api/pong/player");
+  async getPlayers(payload) {
+    const params = new URLSearchParams();
+    Object.entries(payload).forEach(([key, value]) => {
+      params.append(key, value);
+    });
+
+    const { data } = await GET("/api/pong/player?" + params.toString());
     return data.data;
   },
 

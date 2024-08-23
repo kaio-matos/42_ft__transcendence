@@ -1,9 +1,12 @@
 from __future__ import annotations
 import uuid
+from channels.consumer import get_channel_layer
+from channels.generic.websocket import async_to_sync
 from django.utils.translation import gettext as _
 from django.core import serializers
 from django.db import models
 
+from ft_transcendence.http import ws
 from pong.models.Message import Message
 from pong.models.Player import Player
 from pong.models.mixins.TimestampMixin import TimestampMixin
@@ -31,9 +34,33 @@ class Chat(TimestampMixin):
     # Notification
     ##################################################
 
+    def channel_name(self, participant: Player):
+        return str(self.public_id) + "__" + str(participant.public_id)
+
+    def broadcast(self, ws_response):
+        channel_layer = get_channel_layer()
+        participants = self.players.all()
+
+        for participant in participants:
+            if not participant.can_receive_messages_from(self):
+                continue
+
+            async_to_sync(channel_layer.group_send)(
+                self.channel_name(participant), ws_response
+            )
+
     ##################################################
     # Logic
     ##################################################
+
+    def message(self, sender: Player, text: str):
+        is_sender_in_chat = self.players.filter(public_id=sender.public_id).exists()
+        if not sender.can_send_messages_to(self) or not is_sender_in_chat:
+            return
+        print("should be creating ")
+        message = Message.objects.create(sender=sender, text=text)
+        self.messages.add(message)
+        self.broadcast(ws.WSResponse(ws.WSEvents.CHAT_MESSAGE, message.toDict()))
 
     ##################################################
     # Resource

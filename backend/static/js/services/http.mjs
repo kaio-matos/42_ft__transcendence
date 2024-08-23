@@ -1,4 +1,5 @@
 import { router } from "../index.mjs";
+import { session } from "../state/session.mjs";
 import { RequestFailedError, UnprocessableEntityError } from "./errors.mjs";
 
 export const HTTPStatus = Object.freeze({
@@ -36,7 +37,10 @@ export async function http(path, options) {
   if (response.status >= HTTPStatus.BAD_REQUEST) {
     const { data } = await response.json();
 
-    if (response.status === HTTPStatus.UNAUTHORIZED) {
+    if (
+      router.current.path !== "/login" &&
+      response.status === HTTPStatus.UNAUTHORIZED
+    ) {
       router.navigate("/login");
       session.player = null;
     }

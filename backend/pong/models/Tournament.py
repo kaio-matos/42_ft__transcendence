@@ -48,6 +48,10 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
     ##################################################
 
     @staticmethod
+    def query_by_player(players):
+        return Tournament.objects.filter(players__in=players)
+
+    @staticmethod
     def query_by_match(match: Match):
         return Tournament.objects.filter(root_match=match)
 
@@ -65,6 +69,14 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
             .filter(status=Tournament.Status.AWAITING_CONFIRMATION)
             .exclude(accepted_players__in=players)
             .exclude(rejected_players__in=players)
+        )
+
+    @staticmethod
+    def query_by_awaiting_tournament_accepted_by(players):
+        return (
+            Tournament.objects.filter(players__in=players)
+            .filter(status=Tournament.Status.AWAITING_CONFIRMATION)
+            .filter(accepted_players__in=players)
         )
 
     ##################################################
@@ -217,15 +229,25 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
                 "All matches must be finished first before finishing the tournament"
             )
 
+    def cancel(self):
+        self.status = Tournament.Status.CANCELLED
+        self.save()
+        self.cancel_matches()
+        self.notify_players_update()
+
     def onAccept(self, player: Player):
         if self.is_fully_accepted():
             self.begin()
         self.notify_players_update()
 
     def onReject(self, player: Player):
-        self.status = Tournament.Status.CANCELLED
-        self.save()
-        self.notify_players_update()
+        self.cancel()
+
+    def cancel_matches(self):
+        def cancel_match(match: Match):
+            match.cancel()
+
+        self.foreach_match(cancel_match)
 
     def foreach_match(
         self, fn: Callable[[Match], None], start_root: Match | None = None
@@ -254,6 +276,7 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
         r["status"] = self.status
         r["root_match"] = None if not self.root_match else self.root_match.toDict()
         r["champion"] = None if not self.champion else self.champion.toDict()
+        r["players"] = [player.toDict() for player in self.players.all()]
         r["created_at"] = str(self.created_at)
         r["updated_at"] = str(self.updated_at)
 

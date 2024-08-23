@@ -8,6 +8,7 @@ import { useCreateTournament } from "./hooks/useCreateTournament.mjs";
 import { useFindMatch } from "./hooks/useFindMatch.mjs";
 import { useMatchListeners } from "./hooks/useMatchListeners.mjs";
 import { useTournamentListeners } from "./hooks/useTournamentListeners.mjs";
+import { useCreateMatch } from "./hooks/useCreateMatch.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Home = () => {
@@ -61,6 +62,24 @@ export const Home = () => {
         </div>
       </div>
 
+      <div id="match-create-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Criar Partida</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+              <t-multiple-select class="mt-2"></t-multiple-select>
+            </div>
+            <div class="modal-footer">
+              <t-button data-bs-dismiss="modal" theme="secondary">Fechar</t-button>
+              <t-button id="match-create-modal-create-button">Criar</t-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="match-confirmation-modal" class="modal fade" tabindex="-1">
         <div class="modal-dialog">
           <div class="modal-content">
@@ -69,6 +88,9 @@ export const Home = () => {
             </div>
             <div class="modal-body">
               <p>Você aceita a partida?</p>
+
+              <span class="d-block">Jogadores:</span>
+              <div id="match-confirmation-modal-players"></div>
             </div>
             <div class="modal-footer">
               <t-button id="match-confirmation-modal-reject-button" theme="danger">Rejeitar</t-button>
@@ -101,6 +123,8 @@ export const Home = () => {
             <div class="modal-body">
               <p>Você aceita o torneio?</p>
 
+              <span class="d-block">Jogadores:</span>
+              <div id="tournament-confirmation-modal-players"></div>
             </div>
             <div class="modal-footer">
               <t-button id="tournament-confirmation-modal-reject-button" theme="danger">Rejeitar</t-button>
@@ -124,6 +148,10 @@ export const Home = () => {
         </div>
       </div>
 
+      <div class="border border-secondary p-2 mt-auto rounded">
+        <t-button id="match-create-open-modal-button" class="d-block" btn-class="w-100">Criar Partida</t-button>
+      </div>
+
 
       <div class="border border-secondary p-2 mt-auto rounded">
         <t-button id="tournament-create-open-modal-button" class="d-block" btn-class="w-100">Criar Torneio</t-button>
@@ -139,6 +167,7 @@ export const Home = () => {
 
   const { updateFriendsList } = useFriendsList(page);
   useAddFriend(page, { updateFriendsList });
+  useCreateMatch(page);
   useCreateTournament(page);
   useFindMatch(page);
   useMatchListeners(page);

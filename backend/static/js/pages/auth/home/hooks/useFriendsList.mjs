@@ -86,9 +86,9 @@ export function useFriendsList(page) {
       t_button_challenge.button.addEventListener("click", async (event) => {
         t_button_challenge.setLoading(true);
         await MatchService.createMatch({
-          challenged_player_id: friend.id,
+          players_id: [session.player.id, friend.id],
         });
-        t_button_challenge.setLoading(true);
+        t_button_challenge.setLoading(false);
       });
 
       container.append(li.element);

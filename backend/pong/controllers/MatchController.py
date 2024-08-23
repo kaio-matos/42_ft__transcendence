@@ -5,7 +5,7 @@ from django.utils.translation import gettext as _
 from django.http import HttpRequest, HttpResponse
 from ft_transcendence.http import http
 from ft_transcendence.http import ws
-from pong.forms.MatchForms import MatchRegistrationForm
+from pong.forms.MatchForms import MatchGetFilterForm, MatchRegistrationForm
 from pong.models import Player, Match
 from pong.resources.MatchResource import MatchResource
 
@@ -13,8 +13,19 @@ from pong.resources.MatchResource import MatchResource
 def index(request: HttpRequest) -> HttpResponse:
     if not request.user.is_authenticated:
         return http.Unauthorized({"message": _("Você não está autenticado")})
+
+    form = MatchGetFilterForm(request.GET.dict())
+
+    if not form.is_valid():
+        raise ValidationError(form.errors.as_data())
+
     player = typing.cast(Player, request.user)
-    matches = Match.objects.all()
+    target_player = Player.objects.filter(public_id=form.data.get("player_id")).first()
+
+    if target_player is None:
+        return http.NotFound({"message": _("Jogador não encontrado")})
+
+    matches = Match.query_by_player([target_player])
     matches = [MatchResource(match, player) for match in matches]
 
     return http.OK(matches)
@@ -37,8 +48,6 @@ def matchmaking(request: HttpRequest) -> HttpResponse:
         return http.Unauthorized({"message": _("Você não está autenticado")})
 
     player = typing.cast(Player, request.user)
-
-    # TODO: the challenged player should be someone that is Online
 
     # first we try to find someone that its not his friend
     challenged_player = (
@@ -76,21 +85,16 @@ def create(request: HttpRequest) -> HttpResponse:
     if not form.is_valid():
         raise ValidationError(form.errors.as_data())
 
-    challenged_player_id: str | None = form.data.get("challenged_player_id")
     player = typing.cast(Player, request.user)
+    players_id: list[UUID] = form.data.get("players_id")
+    players = Player.objects.filter(public_id__in=players_id).all()
 
-    if not challenged_player_id:
-        return http.NotFound({"message": _("Jogador não existe")})
-
-    challenged_player = Player.objects.filter(public_id=challenged_player_id).first()
-
-    if not challenged_player:
-        return http.NotFound({"message": _("Jogador não existe")})
+    if not players:
+        return http.NotFound({"message": _("Jogadores não encontrados")})
 
     match = Match(name="Partida de Pong")
     match.save()
-    match.players.add(player)
-    match.players.add(challenged_player)
+    match.players.add(*players)
 
     match.begin()
 

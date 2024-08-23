@@ -5,8 +5,9 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 from django.http import HttpRequest, HttpResponse
 from ft_transcendence.http import http, ws
-from pong.forms.ChatForms import ChatCreationForm
+from pong.forms.ChatForms import ChatCreationForm, ChatSendMessageForm
 from pong.models import Chat, Player
+from pong.models.Message import Message
 from pong.resources.ChatResource import ChatResource
 
 
@@ -54,6 +55,24 @@ def create(request: HttpRequest) -> HttpResponse:
     chat.players.add(player)
     chat.players.add(*players)
 
+    return http.Created(ChatResource(chat, player))
+
+
+def message(request: HttpRequest, public_id: str) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return http.Unauthorized({"message": _("Você não está autenticado")})
+    player = typing.cast(Player, request.user)
+    chat = Chat.objects.filter(public_id=public_id).first()
+
+    if chat is None:
+        return http.NotFound({"message": _("Conversa não encontrada")})
+
+    form = ChatSendMessageForm(json.loads(request.body))
+
+    if not form.is_valid():
+        raise ValidationError(form.errors.as_data())
+
+    chat.message(player, form.data.get("text"))
     return http.Created(ChatResource(chat, player))
 
 
