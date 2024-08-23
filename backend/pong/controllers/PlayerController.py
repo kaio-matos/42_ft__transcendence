@@ -145,6 +145,9 @@ def addFriend(request: HttpRequest) -> HttpResponse:
     if email == player.email:
         raise ValueError({"email": _("Você não pode adicionar a si mesmo como amigo")})
 
+    if player.friends.filter(email=email).exists():
+        raise ValueError({"email": _("Você já é amigo deste jogador")})
+
     friend = Player.objects.filter(email=email).first()
 
     if not friend:
