@@ -108,6 +108,7 @@ export const Game = ({ params }) => {
 
   let has_started_running = false;
 
+  let has_rendered_players = false;
   function renderPlayersData(players) {
     const player_data_containers =
       page.element.querySelectorAll(".player-data");
@@ -118,18 +119,31 @@ export const Game = ({ params }) => {
 
       const player = players.find((p) => p.placement === Number(placement));
       if (!player) continue;
-
       const c = new Component(container);
+
+      if (has_rendered_players) {
+        const score = c.element.querySelector(".score");
+        score.textContent = player.score ? player.score : "0";
+        continue;
+      }
+
       c.clear();
-      c.class("d-flex flex-column gap-2").children([
+      c.class("d-flex flex-column").children([
+        new Component("img")
+          .attributes({
+            src: player.data.avatar,
+          })
+          .styles({ width: "80px", aspectRatio: 1 })
+          .class("object-fit-cover rounded-circle mx-auto"),
         new Component("strong", { textContent: player.data.name }).class(
-          "fs-3 text-center text-truncate",
+          "fs-4 text-center text-truncate",
         ),
         new Component("strong", {
           textContent: player.score ? player.score : "0",
-        }).class("fs-3 text-center"),
+        }).class("score fs-3 text-center"),
       ]);
     }
+    has_rendered_players = true;
   }
 
   /**
@@ -225,7 +239,6 @@ export const Game = ({ params }) => {
     }
 
     let start = 0;
-    let rendered = false;
     /**
      * @param {Game} param0
      */
