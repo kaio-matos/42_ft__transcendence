@@ -11,7 +11,6 @@ import { NotFound } from "../../not-found/index.mjs";
 /**
  * @typedef {{
  *   match: import("../../../services/match.mjs").Match,
- *   screen: { width: number, height: number },
  *   game: {
  *      players: {
  *        placement: number,
@@ -98,12 +97,7 @@ export const Game = ({ params }) => {
   MatchCommunication.Communication.connect(() => {
     MatchCommunication.Communication.send(
       MatchCommunication.Commands.MATCH_JOIN, // We tell the server that we want to begin the match
-      {
-        screen: {
-          width: canvas.width,
-          height: canvas.height,
-        },
-      },
+      undefined,
     );
   });
 
