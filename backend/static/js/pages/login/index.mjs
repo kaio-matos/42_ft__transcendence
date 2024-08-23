@@ -11,7 +11,7 @@ export const Login = () => {
 
   page.element.innerHTML = `
     <div class="top-image">
-        <img src="media/default/front/banner.jpg" alt="Banner">
+        <img src="/media/default/front/banner.jpg" alt="Banner">
       </div>
 
     <form id="login-form" class="d-flex flex-column gap-3">
