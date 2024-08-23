@@ -13,6 +13,10 @@ export const ActivityStatus = Object.freeze({
  *    avatar: string,
  *    blocked_chats: import("./chat.mjs").Chat[],
  *    activity_status: keyof typeof ActivityStatus,
+ *    stats: {
+ *      total_play_time: number,
+ *      total_score: number,
+ *    },
  *    pendencies: {
  *      match_to_play: boolean,
  *      match_to_await: boolean,

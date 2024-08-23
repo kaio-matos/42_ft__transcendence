@@ -6,7 +6,7 @@ export class PongCanvas extends HTMLElement {
   #canvas;
   /** @type {CanvasRenderingContext2D} */
   #ctx;
-  width = 1000;
+  width = 500;
   height = 500;
   /** @type {CanvasElement[]} */
   elements = [];

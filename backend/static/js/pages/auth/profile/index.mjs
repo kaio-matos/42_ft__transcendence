@@ -15,7 +15,11 @@ export const Profile = () => {
   page.element.innerHTML = `
     <div class="border border-secondary p-2 rounded">
       <div class="d-flex justify-content-between">
-        <h1>Perfil</h1>
+        <div class="d-flex flex-column">
+          <h1>Perfil</h1>
+          <span>Pontuação Total: ${session.player.stats.total_score}</span>
+          <span>Tempo Jogado: ${session.player.stats.total_play_time}s</span>
+        </div>
 
         <div class="d-flex flex-column gap-2" style="width: 200px">
           <t-input-image theme="none" class="position-relative w-100 profile_avatar_edit_container">

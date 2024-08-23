@@ -8,7 +8,7 @@ class GamePlayer:
         self.position = position
         self.data = data
 
-    def toDict(self) -> dict:
+    def toDict(self, scores: dict) -> dict:
         paddle_size = {}
         if self.placement in [GamePlayerPlacement.LEFT, GamePlayerPlacement.RIGHT]:
             paddle_size = {"width": 1, "height": 20}
@@ -20,4 +20,5 @@ class GamePlayer:
             "position": self.position.toDict(),
             "data": self.data,
             "paddle": {"size": paddle_size},
+            "score": scores[self.data["id"]],
         }

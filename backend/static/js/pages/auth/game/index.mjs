@@ -17,7 +17,8 @@ import { NotFound } from "../../not-found/index.mjs";
  *        placement: number,
  *        position: { x: number, y: number },
  *        data: import("../../../services/player.mjs").Player,
- *        paddle: { size: { width: number, height: number } }
+ *        paddle: { size: { width: number, height: number } },
+ *        score: number
  *      }[],
  *      ball: { size: {width: number, height: number} ,position: { x: number, y: number} },
  *      is_running: boolean
@@ -74,7 +75,19 @@ export const Game = ({ params }) => {
   const page = new Component("div").class("container mx-auto");
   page.element.innerHTML = `
       <t-loading id="loading-match" loading="true">
-        <t-pong-canvas id="pong-canvas"></t-pong-canvas>
+        <section class="d-flex flex-column position-relative">
+          <h1 id="match-name-title" class="text-center"></h1>
+          <span id="ping" class="position-absolute top-0 end-0"></span>
+          <section class="mx-auto border border-secondary rounded p-2">
+            <div class="player-data" data-placement="3"></div>
+            <div class="gap-2" style="display: grid; grid-template-columns: 7rem 1fr 7rem">
+              <div class="player-data" data-placement="1"></div>
+              <t-pong-canvas id="pong-canvas" class="border border-secondary rounded"></t-pong-canvas>
+              <div class="player-data" data-placement="2"></div>
+            </div>
+            <div class="player-data" data-placement="4"></div>
+          </section>
+        </section>
       </t-loading>
   `;
 
@@ -101,6 +114,30 @@ export const Game = ({ params }) => {
 
   let has_started_running = false;
 
+  function renderPlayersData(players) {
+    const player_data_containers =
+      page.element.querySelectorAll(".player-data");
+
+    for (const container of player_data_containers) {
+      const placement = container.dataset.placement;
+      if (!placement) continue;
+
+      const player = players.find((p) => p.placement === Number(placement));
+      if (!player) continue;
+
+      const c = new Component(container);
+      c.clear();
+      c.class("d-flex flex-column gap-2").children([
+        new Component("strong", { textContent: player.data.name }).class(
+          "fs-3 text-center text-truncate",
+        ),
+        new Component("strong", {
+          textContent: player.score ? player.score : "0",
+        }).class("fs-3 text-center"),
+      ]);
+    }
+  }
+
   /**
    * @param {Game} param0
    */
@@ -108,6 +145,7 @@ export const Game = ({ params }) => {
     if (game.is_running && has_started_running) {
       return;
     }
+    page.element.querySelector("#match-name-title").textContent = match.name;
     page.element.querySelector("#loading-match").setLoading(false);
 
     const ball = new CanvasBall(
@@ -154,6 +192,8 @@ export const Game = ({ params }) => {
 
     canvas.render();
 
+    renderPlayersData(game.players);
+
     if (game_player.placement === 1 || game_player.placement === 2) {
       onKeysPressed({
         up: "ArrowUp",
@@ -190,6 +230,8 @@ export const Game = ({ params }) => {
       });
     }
 
+    let start = 0;
+    let rendered = false;
     /**
      * @param {Game} param0
      */
@@ -207,6 +249,13 @@ export const Game = ({ params }) => {
       );
 
       canvas.render();
+
+      setTimeout(() => {
+        page.element.querySelector("#ping").textContent =
+          new Date().getMilliseconds() - start + " ms";
+        renderPlayersData(game.players);
+        start = new Date().getMilliseconds();
+      });
     }
 
     MatchCommunication.Communication.addEventListener(
