@@ -58,8 +58,10 @@ def matchmaking(request: HttpRequest) -> HttpResponse:
     )
 
     if not challenged_player:
-        # if there is no one available we try to match him with some friend
-        challenged_player = player.friends.order_by("?").first()
+        # if there is no one available we try to match him with some friend that is online
+        challenged_player = player.friends.order_by("?").filter(
+            activity_status=Player.ActivityStatus.ONLINE
+        ).first()
         # TODO: If currently there is no one to accept the match, should we wait for someone to show up or just return that there is no player?
         if not challenged_player:
             return http.NotFound(

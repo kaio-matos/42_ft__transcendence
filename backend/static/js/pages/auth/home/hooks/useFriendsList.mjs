@@ -36,7 +36,8 @@ export function useFriendsList(page) {
           <t-button id="profile-button">Perfil</t-button>
           <t-button id="chat-button" disabled="${chat.is_blocked}">Conversar</t-button>
           <t-button id="toggle-block-button" theme="danger">${chat.is_blocked ? "Desbloquear" : "Bloquear"}</t-button>
-          <t-button id="challenge-button">Desafiar</t-button>
+          <t-button id="challenge-button" disabled="${friend.activity_status === "OFFLINE"}"
+          >Desafiar</t-button>
         </div>
       `;
 
