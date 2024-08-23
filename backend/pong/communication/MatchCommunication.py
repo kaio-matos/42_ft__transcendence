@@ -3,7 +3,7 @@ from channels.generic.websocket import JsonWebsocketConsumer
 from channels.http import async_to_sync
 
 from ft_transcendence.http import ws
-from pong.game.game import Game, GameDirection, GameScreen
+from pong.game.game import Game, GameDirection
 from pong.models import Player, Match, Tournament
 
 # TODO: We MUST find some way to do this without creating this variable, and probably without saving into the postgresql
@@ -59,11 +59,7 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                         except:
                             pass
 
-                screen = GameScreen(
-                    content["payload"]["screen"]["width"],
-                    content["payload"]["screen"]["height"],
-                )
-                game = Game(self.match, screen, on_game_end)
+                game = Game(self.match, on_game_end)
                 games[self.match_group_id] = game
                 game.start_game()
                 print(f"Game created for match {self.match_group_id}")

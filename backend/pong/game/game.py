@@ -7,7 +7,6 @@ from typing import Callable
 from .constants import GamePlayerPlacement, GameDirection, CANVAS_WIDTH, CANVAS_HEIGHT
 from ft_transcendence.http import ws
 from .position import Position
-from .gamescreen import GameScreen
 from .player import GamePlayer
 from .ball import Ball
 from .paddle import Paddle
@@ -21,9 +20,13 @@ class Game:
     horizontal_paddle_size = {"width": 20, "height": 1}
     max_score = 3
 
-    def __init__(self, match: Match, screen: GameScreen, on_game_end: Callable):
+    def __init__(self, match: Match, on_game_end: Callable):
+        self.cache = (
+            {  # cache stuff from the database to avoid hitting it during the game
+                "match": match.toDict(),
+            }
+        )
         self.match = match
-        self.screen = screen
         self.players = {}
         self.paddle_sizes = {}
         self.ball = Ball()
@@ -280,8 +283,7 @@ class Game:
 
     def toDict(self) -> dict:
         return {
-            "match": self.match.toDict(),
-            "screen": self.screen.toDict(),
+            "match": self.cache["match"],
             "game": {
                 "players": [
                     player.toDict(self.scores) for player in self.players.values()
@@ -293,4 +295,3 @@ class Game:
                 "winner": None if self.winner is None else self.winner.toDict(),
             },
         }
-
