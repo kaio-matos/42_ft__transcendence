@@ -14,6 +14,7 @@ from pong.models.mixins.PlayersAcceptRejectMixin import PlayersAcceptRejectMixin
 from pong.models.mixins.TimestampMixin import TimestampMixin
 from pong.resources.MatchResource import MatchResource
 
+
 # A classe Match representa uma partida do jogo Pong.
 # Ela herda de PlayersAcceptRejectMixin, que provavelmente fornece métodos para os jogadores aceitarem ou rejeitarem a partida.
 # Também herda de TimestampMixin, que adiciona campos de data de criação e atualização automaticamente.
@@ -22,7 +23,9 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
     # Usar TextChoices permite definir tanto o valor armazenado no banco de dados quanto o texto de exibição.
     class Status(models.TextChoices):
         CREATED = "CREATED", _("Criado")  # Estado inicial quando a partida é criada
-        AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION", _("Aguardando Confirmação")  # Esperando jogadores confirmarem participação
+        AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION", _(
+            "Aguardando Confirmação"
+        )  # Esperando jogadores confirmarem participação
         IN_PROGRESS = "IN_PROGRESS", _("Em Progresso")  # Partida em andamento
         FINISHED = "FINISHED", _("Finalizado")  # Partida concluída
         CANCELLED = "CANCELLED", _("Cancelado")  # Partida cancelada
@@ -124,14 +127,14 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
 
     # Métodos que calculam propriedades baseadas no estado atual da partida
     # Estes métodos ajudam a determinar o estado do jogo e as ações possíveis
-    
+
     def game_duration(self):
-        
+
         if self.finished_at is None or self.started_at is None:
             return 0
         return (self.finished_at - self.started_at).seconds
 
-    def get_player_score(self, player:Player):
+    def get_player_score(self, player: Player):
         return self.scores[player.public_id]
 
     def is_full(self):
@@ -210,7 +213,6 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(str(self.public_id), ws_response)
 
-
     def notify_players_update(self):
         # Notifica todos os jogadores sobre uma atualização na partida
         players = self.players.all()
@@ -249,11 +251,11 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
         self.broadcast_match(
             ws.WSResponse(ws.WSEvents.MATCH_END, {"match": self.toDict()})
         )
-        
+
     def update_game_stats(self, play_time: float, goals: int):
         """
         Atualiza as estatísticas do jogador após uma partida.
-        
+
         :param play_time: Duração da partida em segundos
         :param goals: Número de gols marcados na partida
         """
@@ -270,9 +272,7 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
         self.save()
 
         # Notifica os jogadores sobre o fim da partida
-        self.broadcast_match(
-            ws.WSResponse(ws.WSEvents.MATCH_END, self.toDict())
-        )
+        self.broadcast_match(ws.WSResponse(ws.WSEvents.MATCH_END, self.toDict()))
 
     def onAccept(self, player: Player):
         # Lida com a aceitação de um jogador, possivelmente iniciando a partida
@@ -312,7 +312,6 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
 
         return r
 
-
     def __str__(self):
         # Representação em string da partida, útil para debugging
         return serializers.serialize(
@@ -321,3 +320,4 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
                 self,
             ],
         )
+
