@@ -10,6 +10,10 @@ export const Login = () => {
   const page = new Component("div").class("container mx-auto");
 
   page.element.innerHTML = `
+    <div class="top-image">
+        <img src="media/default/front/banner.jpg" alt="Banner">
+      </div>
+
     <form id="login-form" class="d-flex flex-column gap-3">
       <t-input id="input-email" label="Email" type="email"></t-input>
       <t-input id="input-password" label="Senha" type="password"></t-input>

@@ -6,7 +6,7 @@
 #    By: macarval <macarval@student.42sp.org.br>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/19 16:33:22 by macarval          #+#    #+#              #
-#    Updated: 2024/08/16 08:20:58 by macarval         ###   ########.fr        #
+#    Updated: 2024/08/23 17:56:57 by macarval         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,6 +33,7 @@ BRANCH_FILE	= .branch_name
 MAIN_BRANCH	= main
 
 all:
+			clear
 			docker compose up -d --build
 
 new-branch:
