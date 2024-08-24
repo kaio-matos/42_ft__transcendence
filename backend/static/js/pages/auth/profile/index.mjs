@@ -13,71 +13,91 @@ export const Profile = () => {
   const page = new Component("div").class("container mx-auto");
 
   page.element.innerHTML = `
-    <div class="border border-secondary p-2 rounded">
-      <div class="d-flex justify-content-between">
-        <div class="d-flex flex-column">
-          <h1>Perfil</h1>
-          <span>Pontuação Total: ${session.player.stats.total_score}</span>
-          <span>Tempo Jogado: ${session.player.stats.total_play_time}s</span>
-        </div>
-
-        <div class="d-flex flex-column gap-2" style="width: 200px">
-          <t-input-image theme="none" class="position-relative w-100 profile_avatar_edit_container">
-            <img id="avatar-preview" style="max-width: 100%; max-height: 200px" />
-            <span class="position-absolute top-50 start-50 translate-middle h-100 w-100 profile_avatar_edit_overlay"> 
-              <span class="position-absolute top-50 start-50 translate-middle">Editar</span>
-            </span>
-          </t-input-image>
-          <t-button id="avatar-save-button" class="d-block" btn-class="w-100">
-            Salvar
-          </t-button>
-        </div>
+  <div class="border border-secondary p-2 rounded">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex flex-column">
+        <h1>Perfil</h1>
+        <span>Pontuação Total: ${session.player.stats.total_score}</span>
+        <span>Tempo Jogado: ${session.player.stats.total_play_time}s</span>
       </div>
 
-      <form id="update-form">
-        <div class="mb-3">
-          <strong>Email:</strong>
-          <span id="email-placeholder"></span>
-        </div>
-
-        <t-input id="input-name" label="Nome"></t-input>
-
-        <t-errors id="update-form-errors"></t-errors>
-        <t-button id="save-button" class="d-block mt-3" btn-class="w-100">Salvar</t-button>
-      </form>
-
-      <t-toast id="update-avatar-toast-success">
-        <strong slot="header">Sucesso!</strong>
-        Seu avatar foi atualizado com sucesso!
-      </t-toast>
-      <t-toast id="update-form-toast-success">
-        <strong slot="header">Sucesso!</strong>
-        Seu perfil foi atualizado com sucesso!
-      </t-toast>
-    </div>
-
-    <div class="border border-secondary p-2 rounded d-flex gap-2 mt-3">
-      <div class="border border-secondary p-2 rounded w-100">
-        <h2>Torneios</h2>
-
-        <t-loading id="loading-tournaments" loading="true">
-          <div id="tournaments-container" class="d-flex flex-column gap-2 overflow-auto" style="height: 50vh">
-
-          </div>
-        </t-loading>
-      </div>
-      <div class="border border-secondary p-2 rounded w-100">
-        <h2>Partidas</h2>
-
-        <t-loading id="loading-matches" loading="true">
-          <div id="matches-container" class="d-flex flex-column gap-2 overflow-auto" style="height: 50vh">
-
-          </div>
-        </t-loading>
+      <div class="d-flex flex-column gap-2 avatar-container" style="max-width: 200px">
+        <t-input-image theme="none" class="position-relative w-100 profile_avatar_edit_container">
+          <img id="avatar-preview" class="avatar" />
+          <span class="position-absolute top-50 start-50 translate-middle h-100 w-100 profile_avatar_edit_overlay"> 
+            <span class="position-absolute top-50 start-50 translate-middle">Editar</span>
+          </span>
+        </t-input-image>
+        <t-button id="avatar-save-button" class="d-block" btn-class="w-100">
+          Salvar
+        </t-button>
       </div>
     </div>
 
-  `;
+    <form id="update-form">
+      <div class="mb-3">
+        <strong>Email:</strong>
+        <span id="email-placeholder"></span>
+      </div>
+
+      <t-input id="input-name" label="Nome"></t-input>
+
+      <t-errors id="update-form-errors"></t-errors>
+      <t-button id="save-button" class="d-block mt-3" btn-class="w-100">Salvar</t-button>
+    </form>
+
+    <t-toast id="update-avatar-toast-success">
+      <strong slot="header">Sucesso!</strong>
+      Seu avatar foi atualizado com sucesso!
+    </t-toast>
+    <t-toast id="update-form-toast-success">
+      <strong slot="header">Sucesso!</strong>
+      Seu perfil foi atualizado com sucesso!
+    </t-toast>
+  </div>
+
+  <div class="border border-secondary p-2 rounded d-flex gap-2 mt-3">
+    <div class="border border-secondary p-2 rounded w-100">
+      <h2>Torneios</h2>
+
+      <t-loading id="loading-tournaments" loading="true">
+        <div id="tournaments-container" class="d-flex flex-column gap-2 overflow-auto" style="height: 50vh">
+
+        </div>
+      </t-loading>
+    </div>
+    <div class="border border-secondary p-2 rounded w-100">
+      <h2>Partidas</h2>
+
+      <t-loading id="loading-matches" loading="true">
+        <div id="matches-container" class="d-flex flex-column gap-2 overflow-auto" style="height: 50vh">
+
+        </div>
+      </t-loading>
+    </div>
+  </div>
+`;
+
+const style = document.createElement('style');
+style.innerHTML = `
+  .avatar-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .avatar {
+    max-height: 200px;
+    width: auto;
+    object-fit: cover;
+    border-radius: 50%;
+    overflow: hidden;
+    aspect-ratio: 1 / 1; /* Mantém a imagem em formato quadrado */
+  }
+`;
+
+document.head.appendChild(style);
+
 
   useTournamentHistory(page, { from_player: session.player });
   useMatchesHistory(page, { from_player: session.player });
