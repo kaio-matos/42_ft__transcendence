@@ -50,7 +50,12 @@ class Game:
         ]
 
         players = [
-            {"id": str(p.public_id), "name": p.name, "is_local_player": False}
+            {
+                "id": str(p.public_id),
+                "name": p.name,
+                "is_local_player": False,
+                "avatar": p.avatar,
+            }
             for p in self.match.players.all()
         ]
         if self.match.is_multiplayer_local():
@@ -59,6 +64,7 @@ class Game:
                     "id": str(uuid.uuid4()),
                     "name": players[0]["name"] + " (2)",
                     "is_local_player": True,
+                    "avatar": players[0]["avatar"],
                 }
             )
         for i, player in enumerate(players):
@@ -71,6 +77,7 @@ class Game:
                 player["name"],
                 player["id"],
                 player["is_local_player"],
+                player["avatar"],
             )
             self.paddle_sizes[player["id"]] = paddle_size
             self.scores[player["id"]] = 0
