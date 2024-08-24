@@ -20,7 +20,10 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
             return
         player = typing.cast(Player, player)
         self.match_group_id = self.scope["url_route"]["kwargs"]["match_id"]
-        self.match = Match.objects.get(public_id=self.match_group_id)
+        match = Match.query_by_active_match_from([player]).first()
+        if match is None:
+            return
+        self.match = match
         self.accept()
         async_to_sync(self.channel_layer.group_add)(
             self.match_group_id, self.channel_name

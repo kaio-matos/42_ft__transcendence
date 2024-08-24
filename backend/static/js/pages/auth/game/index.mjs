@@ -68,6 +68,7 @@ export const Game = ({ params }) => {
   const match_id = params.match;
 
   if (!match_id) {
+    router.navigate("/not-found");
     return NotFound({ params });
   }
 
@@ -100,6 +101,9 @@ export const Game = ({ params }) => {
       undefined,
     );
   });
+  MatchCommunication.Communication.socket.onclose = () => {
+    router.navigate("/not-found");
+  };
 
   MatchCommunication.Communication.addEventListener(
     MatchCommunication.Events.MATCH_START, // and then as soon as the server tell us that we can start we setup the canvas and stop loading
