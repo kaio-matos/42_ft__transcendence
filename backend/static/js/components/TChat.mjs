@@ -192,4 +192,25 @@ export class TChat extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {}
+
+  async closeChat() {
+    if (this.chat) {
+      this.t_loading.setLoading(true);
+      try {
+        ChatCommunication.Communication.disconnect();
+        this.chat = null;
+
+        this.t_conditional_show_chat.setCondition(false);
+        this.messages_container.clear();
+        this.t_chat_title_button.textContent = "Nenhuma conversa selecionada";
+        this.t_input.value = "";
+
+      } catch (error) {
+        console.error('Erro ao fechar o chat:', error);
+      } finally {
+        this.t_loading.setLoading(false);
+      }
+    }
+  }
+
 }

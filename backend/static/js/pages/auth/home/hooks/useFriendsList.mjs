@@ -72,6 +72,7 @@ export function useFriendsList(page) {
         } else {
           chat = await ChatService.blockChat({ chat_id: chat.id });
           t_button_chat.setDisabled(true);
+          t_chat.closeChat();
           btn_text = "Desbloquear";
         }
 
