@@ -19,8 +19,6 @@ from pong.resources.MatchResource import MatchResource
 # Ela herda de PlayersAcceptRejectMixin, que provavelmente fornece métodos para os jogadores aceitarem ou rejeitarem a partida.
 # Também herda de TimestampMixin, que adiciona campos de data de criação e atualização automaticamente.
 class Match(PlayersAcceptRejectMixin, TimestampMixin):
-    # Esta classe interna define os possíveis estados de uma partida.
-    # Usar TextChoices permite definir tanto o valor armazenado no banco de dados quanto o texto de exibição.
     class Status(models.TextChoices):
         CREATED = "CREATED", _("Criado")  # Estado inicial quando a partida é criada
         AWAITING_CONFIRMATION = "AWAITING_CONFIRMATION", _(
@@ -30,7 +28,10 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
         FINISHED = "FINISHED", _("Finalizado")  # Partida concluída
         CANCELLED = "CANCELLED", _("Cancelado")  # Partida cancelada
 
-    # Campos do modelo Django para armazenar informações da partida
+    class Type(models.TextChoices):
+        MULTIPLAYER_ONLINE = "MULTIPLAYER_ONLINE", _("Multijogador Online")
+        MULTIPLAYER_LOCAL = "MULTIPLAYER_LOCAL", _("Multijogador Local")
+
     id = models.AutoField(primary_key=True)  # Chave primária autoincremental
     public_id = models.UUIDField(
         unique=True, db_index=True, default=uuid.uuid4, editable=False
@@ -45,7 +46,10 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
     )  # Referência ao jogador vencedor, pode ser nulo
     status = models.CharField(
         max_length=100, choices=Status.choices, default=Status.CREATED
-    )  # Estado atual da partida
+    )
+    type = models.CharField(
+        max_length=100, choices=Status.choices, default=Type.MULTIPLAYER_ONLINE
+    )
     child_upper = models.ForeignKey(
         "self",
         default=None,
@@ -140,6 +144,12 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
     def is_full(self):
         # Verifica se a partida atingiu o número máximo de jogadores
         return bool(self.players.count() >= self.max)
+
+    def is_multiplayer_local(self):
+        return bool(self.type == self.Type.MULTIPLAYER_LOCAL)
+
+    def is_multiplayer_online(self):
+        return bool(self.type == self.Type.MULTIPLAYER_ONLINE)
 
     def has_players_in_another_match(self):
         # Verifica se algum jogador desta partida está em outra partida ativa
@@ -302,6 +312,7 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
         r["id"] = str(self.public_id)
         r["name"] = self.name
         r["status"] = self.status
+        r["type"] = self.type
         r["players"] = [player.toDict() for player in self.players.all()]
         r["child_upper"] = None if not self.child_upper else self.child_upper.toDict()
         r["child_lower"] = None if not self.child_lower else self.child_lower.toDict()
@@ -320,4 +331,3 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
                 self,
             ],
         )
-

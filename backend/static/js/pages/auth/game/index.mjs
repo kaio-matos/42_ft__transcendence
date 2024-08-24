@@ -5,6 +5,7 @@ import { CanvasBall } from "../../../components/PongCanvas/canvas-components/Can
 import { CanvasPaddle } from "../../../components/PongCanvas/canvas-components/CanvasPaddle.mjs";
 import { PongCanvas } from "../../../components/PongCanvas/PongCanvas.mjs";
 import { router } from "../../../index.mjs";
+import { MatchType } from "../../../services/match.mjs";
 import { session } from "../../../state/session.mjs";
 import { NotFound } from "../../not-found/index.mjs";
 
@@ -15,7 +16,9 @@ import { NotFound } from "../../not-found/index.mjs";
  *      players: {
  *        placement: number,
  *        position: { x: number, y: number },
- *        data: import("../../../services/player.mjs").Player,
+ *        id: string,
+ *        name: string,
+ *        is_local_player: boolean,
  *        paddle: { size: { width: number, height: number } },
  *        score: number
  *      }[],
@@ -61,6 +64,44 @@ function onKeysPressed(options) {
     window.requestAnimationFrame(onKeyPress);
   };
   onKeyPress();
+}
+
+function setupKeyboardListenersFor(player, keys) {
+  if (player.placement === 1 || player.placement === 2) {
+    onKeysPressed({
+      up: keys.up,
+      down: keys.down,
+      onKeyPressUp() {
+        MatchCommunication.Communication.send(
+          MatchCommunication.Commands.KEY_PRESS,
+          { direction: "UP", id: player.id },
+        );
+      },
+      onKeyPressDown() {
+        MatchCommunication.Communication.send(
+          MatchCommunication.Commands.KEY_PRESS,
+          { direction: "DOWN", id: player.id },
+        );
+      },
+    });
+  } else {
+    onKeysPressed({
+      left: keys.left,
+      right: keys.right,
+      onKeyPressLeft() {
+        MatchCommunication.Communication.send(
+          MatchCommunication.Commands.KEY_PRESS,
+          { direction: "LEFT", id: player.id },
+        );
+      },
+      onKeyPressRight() {
+        MatchCommunication.Communication.send(
+          MatchCommunication.Commands.KEY_PRESS,
+          { direction: "RIGHT", id: player.id },
+        );
+      },
+    });
+  }
 }
 
 /** @type {import("../../../router/router.mjs").Page} */
@@ -131,11 +172,11 @@ export const Game = ({ params }) => {
       c.class("d-flex flex-column").children([
         new Component("img")
           .attributes({
-            src: player.data.avatar,
+            src: player.avatar,
           })
           .styles({ width: "80px", aspectRatio: 1 })
           .class("object-fit-cover rounded-circle mx-auto"),
-        new Component("strong", { textContent: player.data.name }).class(
+        new Component("strong", { textContent: player.name }).class(
           "fs-4 text-center text-truncate",
         ),
         new Component("strong", {
@@ -163,37 +204,14 @@ export const Game = ({ params }) => {
       .pos(canvas.VCW(game.ball.position.x), canvas.VCH(game.ball.position.y))
       .translate(0, 0);
 
-    const players = game.players.map(
-      ({ placement, position, data, paddle: p }) => {
-        const paddle = new CanvasPaddle(
-          canvas.VCW(p.size.width),
-          canvas.VCH(p.size.height),
-        ).pos(canvas.VCW(position.x), canvas.VCH(position.y));
+    const players = game.players.map(({ position, paddle: p }) => {
+      const paddle = new CanvasPaddle(
+        canvas.VCW(p.size.width),
+        canvas.VCH(p.size.height),
+      ).pos(canvas.VCW(position.x), canvas.VCH(position.y));
 
-        switch (placement) {
-          case 1:
-            paddle.translate(0, 0);
-            break;
-          case 2:
-            paddle.translate(0, 0);
-            break;
-          case 3:
-            paddle.translate(0, 0);
-            break;
-          case 4:
-            paddle.translate(0, 0);
-            break;
-        }
-
-        return {
-          paddle,
-          data,
-        };
-      },
-    );
-    const game_player = game.players.find(
-      (p) => p.data.id === session.player.id,
-    );
+      return { paddle };
+    });
 
     players.forEach((p) => canvas.addCanvasElement(p.paddle));
     canvas.addCanvasElement(ball);
@@ -202,41 +220,22 @@ export const Game = ({ params }) => {
 
     renderPlayersData(game.players);
 
-    if (game_player.placement === 1 || game_player.placement === 2) {
-      onKeysPressed({
-        up: "ArrowUp",
-        down: "ArrowDown",
-        onKeyPressUp() {
-          MatchCommunication.Communication.send(
-            MatchCommunication.Commands.KEY_PRESS,
-            { direction: "UP" },
-          );
-        },
-        onKeyPressDown() {
-          MatchCommunication.Communication.send(
-            MatchCommunication.Commands.KEY_PRESS,
-            { direction: "DOWN" },
-          );
-        },
-      });
-    } else {
-      onKeysPressed({
-        left: "ArrowLeft",
-        right: "ArrowRight",
-        onKeyPressLeft() {
-          MatchCommunication.Communication.send(
-            MatchCommunication.Commands.KEY_PRESS,
-            { direction: "LEFT" },
-          );
-        },
-        onKeyPressRight() {
-          MatchCommunication.Communication.send(
-            MatchCommunication.Commands.KEY_PRESS,
-            { direction: "RIGHT" },
-          );
-        },
-      });
-    }
+    game.players.forEach((p) => {
+      if (p.is_local_player)
+        setupKeyboardListenersFor(p, {
+          up: "w",
+          down: "s",
+          left: "a",
+          right: "d",
+        });
+      else if ((p.id = session.player.id))
+        setupKeyboardListenersFor(p, {
+          up: "ArrowUp",
+          down: "ArrowDown",
+          left: "ArrowLeft",
+          right: "ArrowRight",
+        });
+    });
 
     let start = 0;
     /**

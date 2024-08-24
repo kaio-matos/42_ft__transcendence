@@ -149,6 +149,10 @@ export const Home = () => {
       </div>
 
       <div class="border border-secondary p-2 mt-auto rounded">
+        <t-button id="local-match-create-button" class="d-block" btn-class="w-100">Criar Partida Local</t-button>
+      </div>
+
+      <div class="border border-secondary p-2 mt-auto rounded">
         <t-button id="match-create-open-modal-button" class="d-block" btn-class="w-100">Criar Partida</t-button>
       </div>
 

@@ -1,7 +1,8 @@
 import { Component } from "../../../../components/component.mjs";
 import { UnprocessableEntityError } from "../../../../services/errors.mjs";
-import { MatchService } from "../../../../services/match.mjs";
+import { MatchService, MatchType } from "../../../../services/match.mjs";
 import { ActivityStatus, PlayerService } from "../../../../services/player.mjs";
+import { session } from "../../../../state/session.mjs";
 
 /**
  * @param {Component} page
@@ -13,6 +14,10 @@ export function useCreateMatch(page) {
   const t_button_tournament_create_modal_create = page.element.querySelector(
     "#match-create-modal-create-button",
   );
+  const t_button_local_match_create = page.element.querySelector(
+    "#local-match-create-button",
+  );
+
   t_button_tournament_open_modal.button.addEventListener("click", async () => {
     const container = page.element.querySelector("#match-create-modal");
     const t_multiple_select = container.querySelector("t-multiple-select");
@@ -43,6 +48,7 @@ export function useCreateMatch(page) {
       try {
         await MatchService.createMatch({
           players_id: t_multiple_select.getSelectedOptions(),
+          type: MatchType.MULTIPLAYER_ONLINE,
         });
         modal.hide();
       } catch (error) {
@@ -56,4 +62,18 @@ export function useCreateMatch(page) {
       }
     },
   );
+
+  t_button_local_match_create.button.addEventListener("click", async () => {
+    t_button_local_match_create.setLoading(true);
+
+    try {
+      await MatchService.createMatch({
+        players_id: [session.player.id],
+        type: MatchType.MULTIPLAYER_LOCAL,
+      });
+    } catch (error) {
+    } finally {
+      t_button_local_match_create.setLoading(false);
+    }
+  });
 }

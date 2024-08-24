@@ -1,6 +1,7 @@
 from django import forms
 
 from pong.forms.Forms import ArrayUUIDsField
+from pong.models.Match import Match
 
 
 class MatchGetFilterForm(forms.Form):
@@ -8,4 +9,5 @@ class MatchGetFilterForm(forms.Form):
 
 
 class MatchRegistrationForm(forms.Form):
-    players_id = ArrayUUIDsField(min=2, max=4, is_even=True)
+    players_id = ArrayUUIDsField(min=1, max=4)
+    type = forms.ChoiceField(choices=Match.Type.choices, required=False)

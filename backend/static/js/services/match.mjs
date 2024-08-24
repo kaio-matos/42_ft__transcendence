@@ -1,10 +1,16 @@
 import { GET, POST } from "./http.mjs";
 
+export const MatchType = Object.freeze({
+  MULTIPLAYER_ONLINE: "MULTIPLAYER_ONLINE",
+  MULTIPLAYER_LOCAL: "MULTIPLAYER_LOCAL",
+});
+
 /**
  * @typedef {{
  *   id: string,
  *   name: string,
  *   status: string,
+ *   type: typeof MatchType[keyof MatchType],
  *   players: import("./player.mjs").Player[],
  *   child_upper: Match,
  *   child_lower: Match,
@@ -64,7 +70,7 @@ export const MatchService = {
   },
 
   /**
-   * @param {{ players_id: string[] }} payload
+   * @param {{ players_id: string[], type: Match['type'] }} payload
    * @returns {Promise<Match>}
    */
   async createMatch(payload) {
