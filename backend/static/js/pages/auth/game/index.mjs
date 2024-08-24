@@ -19,6 +19,7 @@ import { NotFound } from "../../not-found/index.mjs";
  *        id: string,
  *        name: string,
  *        is_local_player: boolean,
+ *        avatar: string
  *        paddle: { size: { width: number, height: number } },
  *        score: number
  *      }[],
@@ -283,11 +284,14 @@ export const Game = ({ params }) => {
     onPlayerNotifyTournamentEnd,
   );
 
-  // TODO: add toast to notify the user that he has won/lose the match
-  // NOTE: This logic can also be done in MATCH_UPDATE event by checking match.status property
   MatchCommunication.Communication.addEventListener(
     MatchCommunication.Events.MATCH_END,
-    () => router.navigate("/auth"),
+    (match) => {
+      if (match?.winner?.id === session.player.id) {
+        document.querySelector("#match-won-toast").open();
+      }
+      router.navigate("/auth");
+    },
   );
 
   return page;
