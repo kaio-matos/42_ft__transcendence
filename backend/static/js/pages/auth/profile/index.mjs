@@ -88,11 +88,11 @@ style.innerHTML = `
 
   .avatar {
     max-height: 200px;
-    width: auto;
+    max-width: 200px;
     object-fit: cover;
     border-radius: 50%;
     overflow: hidden;
-    aspect-ratio: 1 / 1; /* Mantém a imagem em formato quadrado */
+    aspect-ratio: 1 / 1;
   }
 `;
 

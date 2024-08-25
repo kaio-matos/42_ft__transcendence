@@ -24,7 +24,7 @@ export const PlayerProfile = ({ params }) => {
           <span id="total-score"></span>
           <span id="email-placeholder" class="mt-2"></span>
         </div>
-        <div class="avatar-container">
+        <div class="d-flex flex-column gap-2 position-relative w-100 avatar-container" style="max-width: 200px">
           <img id="avatar-preview" class="avatar" />
         </div>
       </div>
@@ -63,15 +63,15 @@ style.innerHTML = `
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    flex-shrink: 0;
   }
 
   .avatar {
     max-height: 200px;
-    width: 200px; 
+    max-width: 200px;
     object-fit: cover;
     border-radius: 50%;
     overflow: hidden;
+    aspect-ratio: 1 / 1;
   }
 `;
 

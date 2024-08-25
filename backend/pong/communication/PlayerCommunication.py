@@ -19,15 +19,13 @@ class PlayerCommunicationConsumer(JsonWebsocketConsumer):
         self.accept()
         async_to_sync(self.channel_layer.group_add)(self.player_id, self.channel_name)
         player.set_activity_status(Player.ActivityStatus.ONLINE)
-        player.last_login = timezone.now()  # Inicializa last_login na conexão
-        player.save()
 
     def disconnect(self, code):
-        player = self.scope["user"]
         if self.player_id:
             async_to_sync(self.channel_layer.group_discard)(
                 self.player_id, self.channel_name
             )
+            player = Player.objects.get(public_id=self.player_id)
             player.set_activity_status(Player.ActivityStatus.OFFLINE)
 
     def send_event(self, event):
