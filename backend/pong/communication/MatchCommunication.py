@@ -65,16 +65,16 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                 game = Game(self.match, on_game_end)
                 games[self.match_group_id] = game
                 game.start_game()
-                print(f"Game created for match {self.match_group_id}")
-                print(f"Sending MATCH_START event")
+
                 self.match.broadcast_match(
                     ws.WSResponse(ws.WSEvents.MATCH_START, game.toDict()),
                 )
             case ws.WSCommands.KEY_PRESS.value:
                 if self.match is None or game is None:
                     return
+                id = content["payload"]["id"]
                 direction = content["payload"]["direction"]
-                game.handleKeyPress(player, GameDirection(direction))
+                game.handleKeyPress(id, GameDirection(direction))
 
     def send_event(self, event):
         self.send_json(event["event"])

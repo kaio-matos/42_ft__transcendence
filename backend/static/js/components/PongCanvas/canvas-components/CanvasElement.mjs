@@ -5,9 +5,9 @@ export class CanvasElement {
   __height;
 
   /** @type {number} */
-  __translate_w;
+  __translate_w = 0;
   /** @type {number} */
-  __translate_h;
+  __translate_h = 0;
 
   /** @type {import("../types.mjs").VCW} */
   #x;

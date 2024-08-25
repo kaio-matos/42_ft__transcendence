@@ -4,6 +4,7 @@ import threading
 import random
 from datetime import datetime
 from typing import Callable
+import uuid
 from .constants import GamePlayerPlacement, GameDirection, CANVAS_WIDTH, CANVAS_HEIGHT
 from ft_transcendence.http import ws
 from .position import Position
@@ -27,7 +28,11 @@ class Game:
             }
         )
         self.match = match
-        self.players = {}
+        self.on_game_end = on_game_end
+        self.reset()
+
+    def reset(self):
+        self.players: dict[str, GamePlayer] = {}
         self.paddle_sizes = {}
         self.ball = Ball()
         self.game_running = False
@@ -35,10 +40,7 @@ class Game:
         self.last_paddle_hit = None
         self.scores = {}
         self.start_time = None
-        self.on_game_end = on_game_end
-        self.reset()
 
-    def reset(self):
         self.paddle_velocity = 1.5
         placements = [
             GamePlayerPlacement.LEFT,
@@ -46,15 +48,39 @@ class Game:
             GamePlayerPlacement.TOP,
             GamePlayerPlacement.BOTTOM,
         ]
-        for i, player in enumerate(self.match.players.all()):
+
+        players = [
+            {
+                "id": str(p.public_id),
+                "name": p.name,
+                "is_local_player": False,
+                "avatar": p.avatar,
+            }
+            for p in self.match.players.all()
+        ]
+        if self.match.is_multiplayer_local():
+            players.append(
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": players[0]["name"] + " (2)",
+                    "is_local_player": True,
+                    "avatar": players[0]["avatar"],
+                }
+            )
+        for i, player in enumerate(players):
             placement = placements[i]
             paddle_size = self.get_paddle_size(placement)
             position = self.get_initial_position(placement, paddle_size)
-            self.players[str(player.public_id)] = GamePlayer(
-                placement, position, player.toDict()
+            self.players[player["id"]] = GamePlayer(
+                placement,
+                position,
+                player["name"],
+                player["id"],
+                player["is_local_player"],
+                player["avatar"],
             )
-            self.paddle_sizes[str(player.public_id)] = paddle_size
-            self.scores[str(player.public_id)] = 0
+            self.paddle_sizes[player["id"]] = paddle_size
+            self.scores[player["id"]] = 0
         self.reset_ball()
 
     def reset_ball(self):
@@ -216,9 +242,15 @@ class Game:
                 return True
         return False
 
-    def end_game(self, winner_id):
+    def end_game(self, game_winner_id):
         self.game_running = False
-        self.winner = Player.objects.get(public_id=winner_id)
+        game_player = self.players.get(game_winner_id)
+        if game_player and game_player.is_local_player:
+            # if is some local player we just set that the host himself won the match
+            self.winner = self.match.players.first()
+        else:
+            self.winner = self.match.players.get(public_id=game_winner_id)
+
         self.match.finished_at = datetime.now()
         self.match.scores = self.scores
         self.match.save()
@@ -228,10 +260,10 @@ class Game:
         self.match.broadcast_match(ws.WSResponse(ws.WSEvents.MATCH_END, self.toDict()))
         self.on_game_end()
 
-    def handleKeyPress(self, player: Player, direction: GameDirection):
-        game_player = self.players.get(str(player.public_id))
+    def handleKeyPress(self, game_player_id: str, direction: GameDirection):
+        game_player = self.players.get(game_player_id)
         if game_player:
-            paddle_size = self.paddle_sizes[str(player.public_id)]
+            paddle_size = self.paddle_sizes[game_player_id]
             if game_player.placement in [
                 GamePlayerPlacement.LEFT,
                 GamePlayerPlacement.RIGHT,

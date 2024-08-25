@@ -57,7 +57,6 @@ class Chat(TimestampMixin):
         is_sender_in_chat = self.players.filter(public_id=sender.public_id).exists()
         if not sender.can_send_messages_to(self) or not is_sender_in_chat:
             return
-        print("should be creating ")
         message = Message.objects.create(sender=sender, text=text)
         self.messages.add(message)
         self.broadcast(ws.WSResponse(ws.WSEvents.CHAT_MESSAGE, message.toDict()))

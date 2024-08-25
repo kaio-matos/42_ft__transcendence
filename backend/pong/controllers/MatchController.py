@@ -1,4 +1,5 @@
 import typing
+from uuid import UUID
 from channels.generic.websocket import json
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
@@ -59,9 +60,11 @@ def matchmaking(request: HttpRequest) -> HttpResponse:
 
     if not challenged_player:
         # if there is no one available we try to match him with some friend that is online
-        challenged_player = player.friends.order_by("?").filter(
-            activity_status=Player.ActivityStatus.ONLINE
-        ).first()
+        challenged_player = (
+            player.friends.order_by("?")
+            .filter(activity_status=Player.ActivityStatus.ONLINE)
+            .first()
+        )
         # TODO: If currently there is no one to accept the match, should we wait for someone to show up or just return that there is no player?
         if not challenged_player:
             return http.NotFound(
@@ -94,7 +97,12 @@ def create(request: HttpRequest) -> HttpResponse:
     if not players:
         return http.NotFound({"message": _("Jogadores não encontrados")})
 
-    match = Match(name="Partida de Pong")
+    if form.data.get("type") == Match.Type.MULTIPLAYER_LOCAL.value:
+        match = Match(name="Partida de Pong", max=1)
+    else:
+        match = Match(name="Partida de Pong")
+    if form.data.get("type"):
+        match.type = form.data.get("type")
     match.save()
     match.players.add(*players)
 
