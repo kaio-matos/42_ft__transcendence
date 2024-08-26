@@ -179,9 +179,7 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
             if parent.can_receive_new_players():
                 parent.players.add(match.winner)
             if parent.can_accept_or_reject() or parent.can_begin():
-                # TODO: this will delay the start of the next match of the tournament in 10 seconds,
-                # this is not shown on the frontend
-                Timer(10, parent.begin).start()
+                parent.begin()
 
         self.foreach_match(it)
 
