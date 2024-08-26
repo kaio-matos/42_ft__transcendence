@@ -76,10 +76,14 @@ export function useTournamentListeners(page) {
 
     players_container.clear();
     players_container.children(
-      tournament.players.map(
-        (p) => new Component("b", { textContent: p.email }),
-      ),
-    );
+        tournament.players.flatMap((p, index) => {
+          const elements = [new Component("b", { textContent: p.email })];
+          if (index < tournament.players.length - 1) {
+            elements.push(document.createTextNode(" "));
+          }
+          return elements;
+        }),
+      );
 
     reject.button.element.onclick = async () => {
       reject.setLoading(true);

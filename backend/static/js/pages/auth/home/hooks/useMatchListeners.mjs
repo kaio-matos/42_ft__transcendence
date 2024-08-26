@@ -79,16 +79,20 @@ export function useMatchListeners(page) {
       "#match-confirmation-modal-accept-button",
     );
 
-    const playersContainer = container.querySelector(
-      "#match-confirmation-modal-players",
-    );
-    playersContainer.innerHTML = "";
+    const players_container = new Component(
+      container.querySelector("#match-confirmation-modal-players"),
+    ).class("d-flex gap-2 flex-wrap");
 
-    match.players.forEach((player) => {
-      const playerElement = document.createElement("b");
-      playerElement.textContent = player.email;
-      playersContainer.appendChild(playerElement);
-    });
+    players_container.clear();
+    players_container.children(
+        match.players.flatMap((p, index) => {
+          const elements = [new Component("b", { textContent: p.email })];
+          if (index < match.players.length - 1) {
+            elements.push(document.createTextNode(" "));
+          }
+          return elements;
+        }),
+      );
 
     rejectButton.onclick = async () => {
       rejectButton.disabled = true;
