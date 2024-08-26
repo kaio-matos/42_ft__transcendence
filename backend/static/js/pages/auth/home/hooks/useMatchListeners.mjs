@@ -119,8 +119,6 @@ export function useMatchListeners(page) {
 
   function setupMatchUpdateListener() {
     const matchUpdateListener = ({ match }) => {
-
-
       switch (match.status) {
         case "IN_PROGRESS":
           onMatchStart(match);
