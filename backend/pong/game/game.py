@@ -237,6 +237,8 @@ class Game:
                 self.end_game(scorer_id)
 
     def check_game_end(self):
+        if self.winner is not None:
+            return False
         for player_id, score in self.scores.items():
             if score >= self.max_score:
                 return True
@@ -257,6 +259,7 @@ class Game:
 
         self.match.finish(self.winner)
 
+        self.cache["match"] = self.match.toDict()
         self.match.broadcast_match(ws.WSResponse(ws.WSEvents.MATCH_END, self.toDict()))
         self.on_game_end()
 

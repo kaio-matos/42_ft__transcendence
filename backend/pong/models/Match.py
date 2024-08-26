@@ -262,17 +262,6 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
             ws.WSResponse(ws.WSEvents.MATCH_END, {"match": self.toDict()})
         )
 
-    def update_game_stats(self, play_time: float, goals: int):
-        """
-        Atualiza as estatísticas do jogador após uma partida.
-
-        :param play_time: Duração da partida em segundos
-        :param goals: Número de gols marcados na partida
-        """
-        # self.total_play_time += play_time
-        # self.total_goals += goals
-        self.save()
-
     def finish(self, winner: Player):
         if self.status == self.Status.FINISHED:
             return  # Evita finalizar a partida mais de uma vez
@@ -280,9 +269,6 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
         self.winner = winner
         self.status = self.Status.FINISHED
         self.save()
-
-        # Notifica os jogadores sobre o fim da partida
-        self.broadcast_match(ws.WSResponse(ws.WSEvents.MATCH_END, self.toDict()))
 
     def onAccept(self, player: Player):
         # Lida com a aceitação de um jogador, possivelmente iniciando a partida

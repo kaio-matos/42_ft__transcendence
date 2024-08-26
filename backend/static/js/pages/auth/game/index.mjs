@@ -290,7 +290,7 @@ export const Game = ({ params }) => {
 
   MatchCommunication.Communication.addEventListener(
     MatchCommunication.Events.MATCH_END,
-    (match) => {
+    ({ match }) => {
       if (match?.winner?.id === session.player.id) {
         document.querySelector("#match-won-toast").open();
       }
