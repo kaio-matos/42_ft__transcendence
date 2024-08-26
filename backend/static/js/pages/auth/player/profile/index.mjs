@@ -15,8 +15,23 @@ export const PlayerProfile = ({ params }) => {
   const page = new Component("div").class("container mx-auto");
 
   page.element.innerHTML = `
-  <t-loading loading="true">
-    <div class="d-flex flex-column border border-secondary p-2 rounded">
+    <t-loading loading="true">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border border-secondary rounded rounded-3">
+      <div class="container">
+          <a class="navbar-brand" href="/auth/">Transcendence</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav ms-auto"> 
+                  <li class="nav-item">
+                      <a class="nav-link" href="/auth/profile">Perfil</a>
+                  </li>
+              </ul>
+          </div>
+      </div>
+    </nav>
+    <div class="d-flex flex-column border border-secondary p-2 rounded mt-2">
       <div class="d-flex justify-content-between align-items-center">
         <div class="info-container">
           <h1 id="name-placeholder">Perfil</h1>

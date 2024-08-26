@@ -11,9 +11,11 @@ import { session } from "./state/session.mjs";
 import { Profile } from "./pages/auth/profile/index.mjs";
 import { PlayerProfile } from "./pages/auth/player/profile/index.mjs";
 import { PlayerService } from "./services/player.mjs";
+import { HomePage } from "./HomePage.mjs";
 
 export const router = new Router(
   [
+    new Route("/", HomePage),
     new Route("/login", Login),
     new Route("/register", Registration),
     new Route("/auth/", Home),

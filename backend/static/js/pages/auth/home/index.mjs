@@ -13,10 +13,26 @@ import { useCreateMatch } from "./hooks/useCreateMatch.mjs";
 /** @type {import("../../router/router.mjs").Page} */
 export const Home = () => {
   const page = new Component("div")
-    .class("container mx-auto row")
+    .class("container mx-auto")
     .styles({ maxHeight: "80vh" });
 
   page.element.innerHTML = `
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark border border-secondary rounded rounded-3">
+    <div class="container">
+        <a class="navbar-brand" href="/auth/">Transcendence</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto"> 
+                <li class="nav-item">
+                    <a class="nav-link" href="/auth/profile">Perfil</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+  </nav>
+  <div class="container mt-2 row ">
     <t-chat class="col-8"></t-chat>
     <div class="d-flex flex-column border border-secondary p-2 rounded col-4">
       <div class="d-flex gap-1 mb-2">
@@ -166,6 +182,7 @@ export const Home = () => {
         <t-button id="find-match-button" class="d-block" btn-class="w-100">Encontrar Partida</t-button>
         <t-errors id="find-match-errors" class="mt-2"></t-errors>
       </div>
+    </div>
     </div>
   `;
 
