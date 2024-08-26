@@ -1,16 +1,17 @@
-export class ServerCommunication {
+import { EventBus } from "../utils/EventBus.mjs";
+
+export class ServerCommunication extends EventBus {
   /** @type {string} */
   path;
   /** @type {WebSocket | undefined} */
   socket;
-  /** @type {Map<string, Set<(data: Record<string, any>) => void>} */
-  events = new Map();
 
   /**
    * @param {string} path
    * @param {boolean} immediate
    */
   constructor(path = "", immediate = false) {
+    super();
     this.path = path;
     if (immediate) {
       this.connect();
@@ -56,11 +57,7 @@ export class ServerCommunication {
         response = JSON.parse(event.data);
       } catch (err) {}
 
-      this.events.forEach((listeners, key) => {
-        if (key === response.event) {
-          listeners.forEach((listener) => listener(response.data));
-        }
-      });
+      this.fireEvent(response.event, response.data);
     };
     return this;
   }
@@ -71,37 +68,14 @@ export class ServerCommunication {
   disconnect(onClose) {
     if (this.isClosed()) {
       onClose?.();
+      this.clearEvents();
       return this;
     }
     this.socket.onclose = onClose;
     this.socket.close();
     this.socket.onmessage = () => {};
     this.events.clear();
-    return this;
-  }
-
-  /**
-   * @param {string} event
-   * @param {(data: Record<string, any>) => void} callback
-   */
-  addEventListener(event, callback) {
-    let listeners = this.events.get(event);
-    if (!listeners) {
-      listeners = new Set();
-      this.events.set(event, listeners);
-    }
-    listeners.add(callback);
-    return this;
-  }
-
-  /**
-   * @param {string} event
-   * @param {(data: Record<string, any>) => void} callback
-   */
-  removeEventListener(event, callback) {
-    const listeners = this.events.get(event);
-    if (!listeners) return this;
-    listeners.delete(callback);
+    this.clearEvents();
     return this;
   }
 
@@ -110,7 +84,8 @@ export class ServerCommunication {
    * @param {object} payload
    * @param {undefined | (Record<string, any>) => void} onError
    */
-  send(command, payload, onError) {
+  send(command, payload) {
+    if (!this.isOpen()) return this;
     const timestamp = new Date().toISOString();
 
     this.socket.send(
@@ -120,20 +95,7 @@ export class ServerCommunication {
         timestamp,
       }),
     );
-    if (onError) {
-      const handleError = (data) => {
-        if (
-          command === data.caused_by_command &&
-          timestamp === data.timestamp
-        ) {
-          onError(data.error);
-          this.removeEventListener("onError", handleError); // after handling the error we dont need it anymore
-        }
-      };
-      this.addEventListener("onError", handleError);
-    } else {
-      console.warn("Missing error handling for command: " + command);
-    }
+
     return this;
   }
 }

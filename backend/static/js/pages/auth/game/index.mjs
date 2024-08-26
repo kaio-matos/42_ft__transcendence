@@ -283,11 +283,6 @@ export const Game = ({ params }) => {
     document.querySelector("#tournament-won-toast")?.open();
   }
 
-  PlayerCommunication.Communication.addEventListener(
-    PlayerCommunication.Events.PLAYER_NOTIFY_TOURNAMENT_END,
-    onPlayerNotifyTournamentEnd,
-  );
-
   MatchCommunication.Communication.addEventListener(
     MatchCommunication.Events.MATCH_END,
     ({ match }) => {
@@ -297,6 +292,18 @@ export const Game = ({ params }) => {
       router.navigate("/auth");
     },
   );
+
+  router.addEventListener(
+    "onBeforePageChange",
+    PlayerCommunication.Communication.addEventListener(
+      PlayerCommunication.Events.PLAYER_NOTIFY_TOURNAMENT_END,
+      onPlayerNotifyTournamentEnd,
+    ),
+  );
+
+  router.addEventListener("onBeforePageChange", () => {
+    MatchCommunication.Communication.disconnect();
+  });
 
   return page;
 };

@@ -28,7 +28,7 @@ export function useMatchListeners(page) {
 
   function getOrCreateModal(
     containerSelector,
-    options = { backdrop: "static" }
+    options = { backdrop: "static" },
   ) {
     const container = document.querySelector(containerSelector);
     if (!container) {
@@ -64,7 +64,7 @@ export function useMatchListeners(page) {
    */
   function onMatchConfirmation(match) {
     const matchConfirmationModal = getOrCreateModal(
-      "#match-confirmation-modal"
+      "#match-confirmation-modal",
     );
     if (!matchConfirmationModal) {
       return;
@@ -73,14 +73,14 @@ export function useMatchListeners(page) {
     const container = document.querySelector("#match-confirmation-modal");
 
     const rejectButton = container.querySelector(
-      "#match-confirmation-modal-reject-button"
+      "#match-confirmation-modal-reject-button",
     );
     const acceptButton = container.querySelector(
-      "#match-confirmation-modal-accept-button"
+      "#match-confirmation-modal-accept-button",
     );
 
     const playersContainer = container.querySelector(
-      "#match-confirmation-modal-players"
+      "#match-confirmation-modal-players",
     );
     playersContainer.innerHTML = "";
 
@@ -117,41 +117,31 @@ export function useMatchListeners(page) {
     matchConfirmationModal.show();
   }
 
-  function setupMatchUpdateListener() {
-    const matchUpdateListener = ({ match }) => {
-      switch (match.status) {
-        case "IN_PROGRESS":
-          onMatchStart(match);
-          break;
-        case "AWAITING_CONFIRMATION":
-          if (match.confirmation.pending) {
-            onMatchConfirmation(match);
-          } else if (match.confirmation.accepted) {
-            onMatchAwaiting();
-          }
-          break;
-        case "CANCELLED":
-          onMatchCancelled();
-          break;
-        default:
-          console.warn("Unknown match status:", match.status);
-      }
-    };
-
+  router.addEventListener(
+    "onBeforePageChange",
     PlayerCommunication.Communication.addEventListener(
       PlayerCommunication.Events.PLAYER_NOTIFY_MATCH_UPDATE,
-      matchUpdateListener
-    );
-
-    return () => {
-      PlayerCommunication.Communication.removeEventListener(
-        PlayerCommunication.Events.PLAYER_NOTIFY_MATCH_UPDATE,
-        matchUpdateListener
-      );
-    };
-  }
-
-  setupMatchUpdateListener();
+      ({ match }) => {
+        switch (match.status) {
+          case "IN_PROGRESS":
+            onMatchStart(match);
+            break;
+          case "AWAITING_CONFIRMATION":
+            if (match.confirmation.pending) {
+              onMatchConfirmation(match);
+            } else if (match.confirmation.accepted) {
+              onMatchAwaiting();
+            }
+            break;
+          case "CANCELLED":
+            onMatchCancelled();
+            break;
+          default:
+            console.warn("Unknown match status:", match.status);
+        }
+      },
+    ),
+  );
 
   // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
   if (session.player.pendencies) {

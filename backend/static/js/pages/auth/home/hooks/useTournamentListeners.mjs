@@ -1,5 +1,6 @@
 import { PlayerCommunication } from "../../../../communication/player.mjs";
 import { Component } from "../../../../components/component.mjs";
+import { router } from "../../../../index.mjs";
 import { TournamentService } from "../../../../services/tournament.mjs";
 import { session } from "../../../../state/session.mjs";
 
@@ -14,20 +15,9 @@ export function useTournamentListeners(page) {
     });
   }
 
-  function closeAllModals() {
-    const openModals = document.querySelectorAll(".modal.show");
-    openModals.forEach((modalElement) => {
-      const modalInstance = bootstrap.Modal.getInstance(modalElement);
-      if (modalInstance) {
-        modalInstance.hide();
-      }
-    });
-    removeModalBackdrop();
-  }
-
   function getOrCreateModal(
     containerSelector,
-    options = { backdrop: "static" }
+    options = { backdrop: "static" },
   ) {
     const container = document.querySelector(containerSelector);
     if (!container) {
@@ -38,7 +28,7 @@ export function useTournamentListeners(page) {
 
   function onTournamentAwaiting() {
     const tournamentAwaitingModal = getOrCreateModal(
-      "#tournament-awaiting-modal"
+      "#tournament-awaiting-modal",
     );
     if (tournamentAwaitingModal) {
       tournamentAwaitingModal.show();
@@ -46,15 +36,14 @@ export function useTournamentListeners(page) {
   }
 
   function closeTournamentModals() {
-    // closeAllModals();
     removeModalBackdrop();
     const tournament_awaiting_modal = getOrCreateModal(
-      "#tournament-awaiting-modal"
+      "#tournament-awaiting-modal",
     );
     tournament_awaiting_modal.hide();
 
     const tournament_confirmation_modal = getOrCreateModal(
-      "#tournament-confirmation-modal"
+      "#tournament-confirmation-modal",
     );
     tournament_confirmation_modal.hide();
   }
@@ -64,32 +53,32 @@ export function useTournamentListeners(page) {
    */
   function onTournamentConfirmation(tournament) {
     const tournament_awaiting_modal = getOrCreateModal(
-      "#tournament-confirmation-modal"
+      "#tournament-confirmation-modal",
     );
     if (!tournament_awaiting_modal) {
       return;
     }
 
     const container = page.element.querySelector(
-      "#tournament-confirmation-modal"
+      "#tournament-confirmation-modal",
     );
 
     const reject = container.querySelector(
-      "#tournament-confirmation-modal-reject-button"
+      "#tournament-confirmation-modal-reject-button",
     );
     const accept = container.querySelector(
-      "#tournament-confirmation-modal-accept-button"
+      "#tournament-confirmation-modal-accept-button",
     );
 
     const players_container = new Component(
-      container.querySelector("#tournament-confirmation-modal-players")
+      container.querySelector("#tournament-confirmation-modal-players"),
     ).class("d-flex gap-2 flex-wrap");
 
     players_container.clear();
     players_container.children(
       tournament.players.map(
-        (p) => new Component("b", { textContent: p.email })
-      )
+        (p) => new Component("b", { textContent: p.email }),
+      ),
     );
 
     reject.button.element.onclick = async () => {
@@ -108,40 +97,29 @@ export function useTournamentListeners(page) {
     tournament_awaiting_modal.show();
   }
 
-  function setupMatchUpdateListener() {
-    console.log("setupMatchUpdateListener");
-    const matchUpdateListener = ({ tournament }) => {
-      console.log(tournament);
-      switch (tournament.status) {
-        case "IN_PROGRESS":
-          closeTournamentModals();
-          break;
-        case "AWAITING_CONFIRMATION":
-          if (tournament.confirmation.pending) {
-            onTournamentConfirmation(tournament);
-          } else if (tournament.confirmation.accepted) {
-            onTournamentAwaiting();
-          }
-          break;
-        case "CANCELLED":
-          closeTournamentModals();
-          break;
-      }
-    };
-
+  router.addEventListener(
+    "onBeforePageChange",
     PlayerCommunication.Communication.addEventListener(
       PlayerCommunication.Events.PLAYER_NOTIFY_TOURNAMENT_UPDATE,
-      matchUpdateListener
-    );
-
-    return () => {
-      PlayerCommunication.Communication.removeEventListener(
-        PlayerCommunication.Events.PLAYER_NOTIFY_TOURNAMENT_UPDATE,
-        matchUpdateListener
-      );
-    };
-  }
-  setupMatchUpdateListener();
+      ({ tournament }) => {
+        switch (tournament.status) {
+          case "IN_PROGRESS":
+            closeTournamentModals();
+            break;
+          case "AWAITING_CONFIRMATION":
+            if (tournament.confirmation.pending) {
+              onTournamentConfirmation(tournament);
+            } else if (tournament.confirmation.accepted) {
+              onTournamentAwaiting();
+            }
+            break;
+          case "CANCELLED":
+            closeTournamentModals();
+            break;
+        }
+      },
+    ),
+  );
 
   // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
   if (session.player.pendencies) {

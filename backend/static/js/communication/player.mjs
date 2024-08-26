@@ -1,3 +1,4 @@
+import { session } from "../state/session.mjs";
 import { ServerCommunication } from "./ServerCommunication.mjs";
 
 export const PlayerCommunication = {
@@ -11,4 +12,6 @@ export const PlayerCommunication = {
 
   Communication: new ServerCommunication("/ws/player/"),
 };
-PlayerCommunication.Communication.connect();
+if (session.player) {
+  PlayerCommunication.Communication.connect();
+}

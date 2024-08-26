@@ -99,9 +99,12 @@ export function useFriendsList(page) {
 
   updateFriendsList();
 
-  PlayerCommunication.Communication.addEventListener(
-    PlayerCommunication.Events.FRIEND_ACTIVITY_STATUS,
-    updateFriendsList,
+  router.addEventListener(
+    "onBeforePageChange",
+    PlayerCommunication.Communication.addEventListener(
+      PlayerCommunication.Events.FRIEND_ACTIVITY_STATUS,
+      updateFriendsList,
+    ),
   );
 
   return { updateFriendsList };
