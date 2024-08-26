@@ -1,4 +1,5 @@
 import { Component } from "../components/component.mjs";
+import { EventBus } from "../utils/EventBus.mjs";
 
 /** @typedef {Record<string, string | undefined} Params */
 /** @typedef {(props: { params: Params }) => Component} Page */
@@ -19,7 +20,7 @@ export class Route {
   }
 }
 
-export class Router {
+export class Router extends EventBus {
   root_id = "app";
   /** @type {Route[]} */
   routes;
@@ -31,6 +32,7 @@ export class Router {
    * @param {{ NotFoundPage: import("../components/component.mjs").FunctionalComponent }} fallback
    */
   constructor(routes, fallback) {
+    super();
     this.routes = [...routes, new Route("/not-found", fallback.NotFoundPage)];
     this.NotFoundPage = fallback.NotFoundPage;
   }
@@ -66,6 +68,10 @@ export class Router {
   render() {
     if (!this.root) return;
     const params = this.#getUrlParams(window.location.search);
+
+    this.fireEvent("onBeforePageChange", { route: this.current, params });
+    this.removeEventListenersFor("onBeforePageChange");
+
     if (!this.current) {
       this.root.innerHTML = "";
       this.root.appendChild(this.NotFoundPage({ params }).element);
@@ -73,6 +79,8 @@ export class Router {
     }
     this.root.innerHTML = "";
     this.root.appendChild(this.current.page({ params }).element);
+    this.fireEvent("onAfterPageChange", { route: this.current, params });
+    this.removeEventListenersFor("onAfterPageChange");
   }
 
   /**

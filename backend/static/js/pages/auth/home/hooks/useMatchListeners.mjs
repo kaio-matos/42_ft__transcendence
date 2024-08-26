@@ -8,99 +8,139 @@ import { session } from "../../../../state/session.mjs";
  * @param {Component} page
  */
 export function useMatchListeners(page) {
-  function getModal(container) {
-    return bootstrap.Modal.getOrCreateInstance(container, {
-      backdrop: "static",
+  function removeModalBackdrop() {
+    const backdrops = document.querySelectorAll(".modal-backdrop");
+    backdrops.forEach((backdrop) => {
+      backdrop.parentNode.removeChild(backdrop);
     });
   }
 
+  function closeAllModals() {
+    const openModals = document.querySelectorAll(".modal.show");
+    openModals.forEach((modalElement) => {
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
+    });
+    removeModalBackdrop();
+  }
+
+  function getOrCreateModal(
+    containerSelector,
+    options = { backdrop: "static" },
+  ) {
+    const container = document.querySelector(containerSelector);
+    if (!container) {
+      return null;
+    }
+    return bootstrap.Modal.getOrCreateInstance(container, options);
+  }
+
   function onMatchStart(match) {
-    const container = page.element.querySelector("#match-awaiting-modal");
-    const match_awaiting_modal = getModal(container);
-    match_awaiting_modal.hide(); // hide awaiting modal
+    const matchAwaitingModal = getOrCreateModal("#match-awaiting-modal");
+    if (matchAwaitingModal) {
+      matchAwaitingModal.hide();
+    }
     setTimeout(() => {
       router.navigate("/auth/game?match=" + match.id);
     }, 100);
   }
 
   function onMatchAwaiting() {
-    const container = page.element.querySelector("#match-awaiting-modal");
-    const match_awaiting_modal = getModal(container);
-    match_awaiting_modal.show();
+    const matchAwaitingModal = getOrCreateModal("#match-awaiting-modal");
+    if (matchAwaitingModal) {
+      matchAwaitingModal.show();
+    }
   }
 
   function onMatchCancelled() {
-    getModal(page.element.querySelector("#match-awaiting-modal")).hide();
-    getModal(page.element.querySelector("#match-confirmation-modal"), {
-      backdrop: "static",
-    }).hide();
+    closeAllModals();
+    removeModalBackdrop();
   }
 
   /**
    * @param {import("../../../../services/match.mjs").Match} match
    */
   function onMatchConfirmation(match) {
-    const container = page.element.querySelector("#match-confirmation-modal");
-    const match_confirmation_modal = getModal(container);
+    const matchConfirmationModal = getOrCreateModal(
+      "#match-confirmation-modal",
+    );
+    if (!matchConfirmationModal) {
+      return;
+    }
 
-    const reject = container.querySelector(
+    const container = document.querySelector("#match-confirmation-modal");
+
+    const rejectButton = container.querySelector(
       "#match-confirmation-modal-reject-button",
     );
-    const accept = container.querySelector(
+    const acceptButton = container.querySelector(
       "#match-confirmation-modal-accept-button",
     );
 
-    const players_container = new Component(
-      container.querySelector("#match-confirmation-modal-players"),
-    ).class("d-flex gap-2 flex-wrap");
-
-    players_container.clear();
-    players_container.children(
-      match.players.map((p) => new Component("b", { textContent: p.email })),
+    const playersContainer = container.querySelector(
+      "#match-confirmation-modal-players",
     );
+    playersContainer.innerHTML = "";
 
-    reject.button.element.onclick = async () => {
-      reject.setLoading(true);
-      await MatchService.rejectMatch();
-      reject.setLoading(false);
-      match_confirmation_modal.hide();
-    };
-    accept.button.element.onclick = async () => {
-      accept.setLoading(true);
-      await MatchService.acceptMatch();
-      accept.setLoading(false);
-      match_confirmation_modal.hide();
+    match.players.forEach((player) => {
+      const playerElement = document.createElement("b");
+      playerElement.textContent = player.email;
+      playersContainer.appendChild(playerElement);
+    });
+
+    rejectButton.onclick = async () => {
+      rejectButton.disabled = true;
+      try {
+        await MatchService.rejectMatch();
+        matchConfirmationModal.hide();
+      } catch (error) {
+        console.error("Error rejecting match:", error);
+      } finally {
+        rejectButton.disabled = false;
+      }
     };
 
-    match_confirmation_modal.show();
+    acceptButton.onclick = async () => {
+      acceptButton.disabled = true;
+      try {
+        await MatchService.acceptMatch();
+        matchConfirmationModal.hide();
+      } catch (error) {
+        console.error("Error accepting match:", error);
+      } finally {
+        acceptButton.disabled = false;
+      }
+    };
+
+    matchConfirmationModal.show();
   }
 
-  // TODO: Remove this listener after page change
-  PlayerCommunication.Communication.addEventListener(
-    PlayerCommunication.Events.PLAYER_NOTIFY_MATCH_UPDATE,
-    ({ match }) => {
-      if (match.status === "IN_PROGRESS") {
-        onMatchStart(match);
-        return;
-      }
-      if (
-        match.status === "AWAITING_CONFIRMATION" &&
-        match.confirmation.pending
-      ) {
-        onMatchConfirmation(match);
-        return;
-      }
-      if (
-        match.status === "AWAITING_CONFIRMATION" &&
-        match.confirmation.accepted
-      ) {
-        onMatchAwaiting();
-        return;
-      }
-      if (match.status === "CANCELLED") {
-        onMatchCancelled();
-      }
-    },
+  router.addEventListener(
+    "onBeforePageChange",
+    PlayerCommunication.Communication.addEventListener(
+      PlayerCommunication.Events.PLAYER_NOTIFY_MATCH_UPDATE,
+      ({ match }) => {
+        switch (match.status) {
+          case "IN_PROGRESS":
+            onMatchStart(match);
+            break;
+          case "AWAITING_CONFIRMATION":
+            if (match.confirmation.pending) {
+              onMatchConfirmation(match);
+            } else if (match.confirmation.accepted) {
+              onMatchAwaiting();
+            }
+            break;
+          case "CANCELLED":
+            onMatchCancelled();
+            break;
+          default:
+            console.warn("Unknown match status:", match.status);
+        }
+      },
+    ),
   );
 
   // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
