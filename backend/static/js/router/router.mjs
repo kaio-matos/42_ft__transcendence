@@ -1,6 +1,6 @@
 import { Component } from "../components/component.mjs";
 
-/** @typedef {Record<string, string | undefined} Params */
+/** @typedef {Record<string, string | undefined>} Params */
 /** @typedef {(props: { params: Params }) => Component} Page */
 
 export class Route {
@@ -33,35 +33,37 @@ export class Router {
   constructor(routes, fallback) {
     this.routes = [...routes, new Route("/not-found", fallback.NotFoundPage)];
     this.NotFoundPage = fallback.NotFoundPage;
+
+    window.addEventListener("popstate", () => this.render());
   }
 
   get current() {
     const pathname = window.location.pathname;
     const removeSlashes = (str) => str.replace(/\//g, "");
 
-    const matchedRoutes = this.routes.find((route) => {
+    const matchedRoute = this.routes.find((route) => {
       const pathnameWithoutSlashes = removeSlashes(pathname);
       const routePathWithoutSlashes = removeSlashes(route.path);
-      return pathnameWithoutSlashes == routePathWithoutSlashes;
+      return pathnameWithoutSlashes === routePathWithoutSlashes;
     });
 
-    return matchedRoutes;
+    return matchedRoute;
   }
 
   get root() {
     return document.getElementById(this.root_id);
   }
 
-  previous() {}
-
   /**
    * @param {string} path
    * @param {any} state
    */
   navigate(path, state) {
-    history.pushState(state, "", path);
+    if (window.location.pathname !== path) {
+      history.pushState(state, "", path);
+      this.render();
+    }
   }
-  next() {}
 
   render() {
     if (!this.root) return;

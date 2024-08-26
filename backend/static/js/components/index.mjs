@@ -8,6 +8,7 @@ import { PongCanvas } from "./PongCanvas/PongCanvas.mjs";
 import { Toast } from "./Toast.mjs";
 import { TConditional } from "./TConditional.mjs";
 import { TMultipleSelect } from "./TMultipleSelect.mjs";
+import { Navbar } from "./Navbar.mjs";
 
 customElements.define("t-button", Button);
 customElements.define("t-input", Input);
@@ -19,3 +20,4 @@ customElements.define("t-input-image", InputImage);
 customElements.define("t-chat", TChat);
 customElements.define("t-conditional", TConditional);
 customElements.define("t-multiple-select", TMultipleSelect);
+customElements.define("t-navbar", Navbar);
