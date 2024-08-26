@@ -79,6 +79,12 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
             .filter(accepted_players__in=players)
         )
 
+    @staticmethod
+    def query_by_in_progress_tournament_from(players):
+        return Tournament.objects.filter(players__in=players).filter(
+            status=Tournament.Status.IN_PROGRESS
+        )
+
     ##################################################
     # Computed
     ##################################################
@@ -180,6 +186,7 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
                 parent.players.add(match.winner)
             if parent.can_accept_or_reject() or parent.can_begin():
                 parent.begin()
+                self.notify_players_update()
 
         self.foreach_match(it)
 
@@ -200,19 +207,17 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
             self.notify_players_update()
 
     def finish(self):
-        has_finished = False
+        has_not_finished: list[bool] = []
 
         def it(match: Match):
-            nonlocal has_finished
-            if match.has_finished():
-                has_finished = True
-            else:
-                has_finished = False
+            nonlocal has_not_finished
+            if not match.has_finished():
+                has_not_finished.append(True)
 
         self.foreach_match(it)
         self.update_matches_tree()
 
-        if has_finished:
+        if len(has_not_finished) == 0:
             self.status = self.Status.FINISHED
             self.champion = self.root_match.winner
             self.save()
@@ -222,6 +227,7 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
                     {"tournament": self.toDict()},
                 )
             )
+            self.notify_players_update()
         else:
             raise ValueError(
                 "All matches must be finished first before finishing the tournament"

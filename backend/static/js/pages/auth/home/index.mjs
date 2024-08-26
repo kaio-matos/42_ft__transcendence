@@ -102,6 +102,20 @@ export const Home = () => {
         </div>
       </div>
 
+      <div id="tournament-in-progress-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Torneio</h5>
+            </div>
+            <div class="modal-body">
+              <p>Por favor aguarde pelo término das outras partidas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
       <div id="match-awaiting-modal" class="modal fade" tabindex="-1">
         <div class="modal-dialog">
           <div class="modal-content">

@@ -17,9 +17,9 @@ export function useTournamentListeners(page) {
 
   function getOrCreateModal(
     containerSelector,
-    options = { backdrop: "static" },
+    options = { backdrop: "static", focus: false },
   ) {
-    const container = document.querySelector(containerSelector);
+    const container = page.element.querySelector(containerSelector);
     if (!container) {
       return null;
     }
@@ -37,15 +37,28 @@ export function useTournamentListeners(page) {
 
   function closeTournamentModals() {
     removeModalBackdrop();
+    const tournament_in_progress_modal = getOrCreateModal(
+      "#tournament-in-progress-modal",
+    );
+
+    const modal_container = page.element.querySelector(
+      "#tournament-in-progress-modal",
+    );
+    modal_container.style.display = "none";
+    document.body.style.overflow = "visible";
+    document.body.style.paddingRight = "auto";
+
+    tournament_in_progress_modal?.hide?.();
+
     const tournament_awaiting_modal = getOrCreateModal(
       "#tournament-awaiting-modal",
     );
-    tournament_awaiting_modal.hide();
+    tournament_awaiting_modal?.hide?.();
 
     const tournament_confirmation_modal = getOrCreateModal(
       "#tournament-confirmation-modal",
     );
-    tournament_confirmation_modal.hide();
+    tournament_confirmation_modal?.hide?.();
   }
 
   /**
@@ -101,6 +114,17 @@ export function useTournamentListeners(page) {
     tournament_awaiting_modal.show();
   }
 
+  function onTournamentInProgress() {
+    const tournament_in_progress_modal = getOrCreateModal(
+      "#tournament-in-progress-modal",
+    );
+
+    if (tournament_in_progress_modal) {
+      console.log("show progres modal");
+      tournament_in_progress_modal.show();
+    }
+  }
+
   router.addEventListener(
     "onBeforePageChange",
     PlayerCommunication.Communication.addEventListener(
@@ -109,6 +133,9 @@ export function useTournamentListeners(page) {
         switch (tournament.status) {
           case "IN_PROGRESS":
             closeTournamentModals();
+            if (tournament.await_next_match) {
+              onTournamentInProgress();
+            }
             break;
           case "AWAITING_CONFIRMATION":
             if (tournament.confirmation.pending) {
@@ -116,6 +143,9 @@ export function useTournamentListeners(page) {
             } else if (tournament.confirmation.accepted) {
               onTournamentAwaiting();
             }
+            break;
+          case "FINISHED":
+            closeTournamentModals();
             break;
           case "CANCELLED":
             closeTournamentModals();
@@ -132,6 +162,12 @@ export function useTournamentListeners(page) {
     }
     if (session.player.pendencies.tournament_to_await) {
       onTournamentAwaiting();
+    }
+    if (
+      session.player.pendencies.tournament_in_progress &&
+      !session.player.pendencies.match_to_accept
+    ) {
+      onTournamentInProgress();
     }
   }
 }

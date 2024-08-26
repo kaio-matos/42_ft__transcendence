@@ -11,7 +11,9 @@ def TournamentResource(tournament, player):
             "accepted": accepted,
             "rejected": rejected,
             "pending": pending,
-        }
+        },
+        "await_next_match": player.has_pending_tournament_in_progress()
+        and not player.has_pending_match_to_answer(),
     }
 
     return r | tournament.toDict()

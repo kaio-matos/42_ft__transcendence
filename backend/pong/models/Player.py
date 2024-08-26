@@ -205,6 +205,13 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
             .exists()
         )
 
+    def has_pending_tournament_in_progress(self):
+        return (
+            apps.get_model("pong.Tournament")
+            .query_by_in_progress_tournament_from([self])
+            .exists()
+        )
+
     ##################################################
     # Notification
     ##################################################
@@ -263,6 +270,7 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
                 "match_to_play": self.has_pending_match_to_play(),
                 "tournament_to_accept": self.has_pending_tournament_to_answer(),
                 "tournament_to_await": self.has_pending_tournament_to_await(),
+                "tournament_in_progress": self.has_pending_tournament_in_progress(),
             },
         }
 
@@ -276,4 +284,3 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
                 self,
             ],
         )
-

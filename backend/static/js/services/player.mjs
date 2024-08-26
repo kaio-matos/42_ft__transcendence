@@ -23,6 +23,7 @@ export const ActivityStatus = Object.freeze({
  *      match_to_accept: boolean,
  *      tournament_to_accept: boolean,
  *      tournament_to_await: boolean,
+ *      tournament_in_progress: boolean,
  *    }
  *  }} Player
  */

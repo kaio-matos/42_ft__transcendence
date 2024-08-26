@@ -14,7 +14,8 @@ import { GET, POST } from "./http.mjs";
  *      accepted: boolean,
  *      rejected: boolean,
  *      pending: boolean
- *    }
+ *    },
+ *    await_next_match?: boolean
  *  }} Tournament
  */
 
