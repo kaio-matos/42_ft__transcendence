@@ -56,8 +56,14 @@ export function useMatchListeners(page) {
 
     players_container.clear();
     players_container.children(
-      match.players.map((p) => new Component("b", { textContent: p.email })),
-    );
+        match.players.flatMap((p, index) => {
+          const elements = [new Component("b", { textContent: p.email })];
+          if (index < match.players.length - 1) {
+            elements.push(document.createTextNode(" "));
+          }
+          return elements;
+        }),
+      );
 
     reject.button.element.onclick = async () => {
       reject.setLoading(true);
