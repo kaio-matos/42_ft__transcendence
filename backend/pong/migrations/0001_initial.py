@@ -61,8 +61,8 @@ class Migration(migrations.Migration):
                 (
                     "activity_status",
                     models.CharField(
-                        choices=[("ONLINE", "Online"), ("OFFLINE", "Offline")],
-                        default="OFFLINE",
+                        choices=[("ONLINE🟢", "Online"), ("OFFLINE🔴", "Offline")],
+                        default="OFFLINE🔴",
                         max_length=20,
                     ),
                 ),

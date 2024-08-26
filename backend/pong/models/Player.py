@@ -66,8 +66,8 @@ class Player(AbstractBaseUser, PermissionsMixin, TimestampMixin):
 
     # Define os possíveis status de atividade do jogador
     class ActivityStatus(models.TextChoices):
-        ONLINE = "ONLINE", _("Online")
-        OFFLINE = "OFFLINE", _("Offline")
+        ONLINE = "ONLINE🟢", _("Online")
+        OFFLINE = "OFFLINE🔴", _("Offline")
 
     # Campos do modelo
     id = models.AutoField(primary_key=True)

@@ -1,8 +1,8 @@
 import { GET, POST, PUT } from "./http.mjs";
 
 export const ActivityStatus = Object.freeze({
-  ONLINE: "ONLINE",
-  OFFLINE: "OFFLINE",
+  ONLINE: "ONLINE🟢",
+  OFFLINE: "OFFLINE🔴",
 });
 
 /**
