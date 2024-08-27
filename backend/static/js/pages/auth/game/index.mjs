@@ -38,19 +38,19 @@ function onKeysPressed(options) {
   let pressedKey = "";
   const keys = [options.up, options.down, options.left, options.right];
 
-  document.addEventListener("keydown", (event) => {
-    // TODO: Cleanup this listener
+  function handleKeyDown(event) {
     if (keys.includes(event.key)) {
       pressedKey = event.key;
     }
-  });
-
-  document.addEventListener("keyup", (event) => {
-    // TODO: Cleanup this listener
+  }
+  function handleKeyUp(event) {
     if (keys.includes(event.key)) {
       pressedKey = "";
     }
-  });
+  }
+
+  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("keyup", handleKeyUp);
 
   const onKeyPress = () => {
     if (pressedKey == options.up) {
@@ -65,44 +65,50 @@ function onKeysPressed(options) {
     window.requestAnimationFrame(onKeyPress);
   };
   onKeyPress();
+  return () => {
+    document.removeEventListener("keyup", handleKeyUp);
+    document.removeEventListener("keydown", handleKeyDown);
+  }
 }
 
 function setupKeyboardListenersFor(player, keys) {
+  let keyPressClear;
   if (player.placement === 1 || player.placement === 2) {
-    onKeysPressed({
+    keyPressClear = onKeysPressed({
       up: keys.up,
       down: keys.down,
       onKeyPressUp() {
         MatchCommunication.Communication.send(
           MatchCommunication.Commands.KEY_PRESS,
-          { direction: "UP", id: player.id },
+          { direction: "UP", id: player.id }
         );
       },
       onKeyPressDown() {
         MatchCommunication.Communication.send(
           MatchCommunication.Commands.KEY_PRESS,
-          { direction: "DOWN", id: player.id },
+          { direction: "DOWN", id: player.id }
         );
       },
     });
   } else {
-    onKeysPressed({
+    keyPressClear = onKeysPressed({
       left: keys.left,
       right: keys.right,
       onKeyPressLeft() {
         MatchCommunication.Communication.send(
           MatchCommunication.Commands.KEY_PRESS,
-          { direction: "LEFT", id: player.id },
+          { direction: "LEFT", id: player.id }
         );
       },
       onKeyPressRight() {
         MatchCommunication.Communication.send(
           MatchCommunication.Commands.KEY_PRESS,
-          { direction: "RIGHT", id: player.id },
+          { direction: "RIGHT", id: player.id }
         );
       },
     });
   }
+  router.addEventListener("onBeforePageChange", keyPressClear);
 }
 
 /** @type {import("../../../router/router.mjs").Page} */
@@ -140,7 +146,7 @@ export const Game = ({ params }) => {
   MatchCommunication.Communication.connect(() => {
     MatchCommunication.Communication.send(
       MatchCommunication.Commands.MATCH_JOIN, // We tell the server that we want to begin the match
-      undefined,
+      undefined
     );
   });
   MatchCommunication.Communication.socket.onclose = () => {
@@ -149,7 +155,7 @@ export const Game = ({ params }) => {
 
   MatchCommunication.Communication.addEventListener(
     MatchCommunication.Events.MATCH_START, // and then as soon as the server tell us that we can start we setup the canvas and stop loading
-    onMatchStart,
+    onMatchStart
   );
 
   let has_started_running = false;
@@ -182,7 +188,7 @@ export const Game = ({ params }) => {
           .styles({ width: "80px", aspectRatio: 1 })
           .class("object-fit-cover rounded-circle mx-auto"),
         new Component("strong", { textContent: player.name }).class(
-          "fs-4 text-center text-truncate",
+          "fs-4 text-center text-truncate"
         ),
         new Component("strong", {
           textContent: player.score ? player.score : "0",
@@ -204,7 +210,7 @@ export const Game = ({ params }) => {
 
     const ball = new CanvasBall(
       canvas.VCW(game.ball.size.width),
-      canvas.VCH(game.ball.size.height),
+      canvas.VCH(game.ball.size.height)
     )
       .pos(canvas.VCW(game.ball.position.x), canvas.VCH(game.ball.position.y))
       .translate(0, 0);
@@ -212,7 +218,7 @@ export const Game = ({ params }) => {
     const players = game.players.map(({ position, paddle: p }) => {
       const paddle = new CanvasPaddle(
         canvas.VCW(p.size.width),
-        canvas.VCH(p.size.height),
+        canvas.VCH(p.size.height)
       ).pos(canvas.VCW(position.x), canvas.VCH(position.y));
 
       return { paddle };
@@ -250,13 +256,13 @@ export const Game = ({ params }) => {
       players.forEach((p, i) =>
         p.paddle.pos(
           canvas.VCW(game.players[i].position.x),
-          canvas.VCH(game.players[i].position.y),
-        ),
+          canvas.VCH(game.players[i].position.y)
+        )
       );
 
       ball.pos(
         canvas.VCW(game.ball.position.x),
-        canvas.VCH(game.ball.position.y),
+        canvas.VCH(game.ball.position.y)
       );
 
       canvas.render();
@@ -271,7 +277,7 @@ export const Game = ({ params }) => {
 
     MatchCommunication.Communication.addEventListener(
       MatchCommunication.Events.MATCH_UPDATE,
-      onMatchUpdate,
+      onMatchUpdate
     );
     has_started_running = true;
   }
@@ -290,15 +296,15 @@ export const Game = ({ params }) => {
         document.querySelector("#match-won-toast").open();
       }
       router.navigate("/auth");
-    },
+    }
   );
 
   router.addEventListener(
     "onBeforePageChange",
     PlayerCommunication.Communication.addEventListener(
       PlayerCommunication.Events.PLAYER_NOTIFY_TOURNAMENT_END,
-      onPlayerNotifyTournamentEnd,
-    ),
+      onPlayerNotifyTournamentEnd
+    )
   );
 
   router.addEventListener("onBeforePageChange", () => {
