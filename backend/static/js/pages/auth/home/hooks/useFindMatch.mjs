@@ -16,10 +16,8 @@ export function useFindMatch(page) {
       await MatchService.findMatch();
     } catch (error) {
       if (error instanceof RequestFailedError) {
-        t_errors_find_match.addErrors([
-          ...error.data?.message,
-          ...error.data?.error?._errors,
-        ]);
+        t_errors_find_match.addErrors(error.data?.message);
+        t_errors_find_match.addErrors(error.data?.error?._errors);
       }
     } finally {
       t_button_find_match.setLoading(false);
