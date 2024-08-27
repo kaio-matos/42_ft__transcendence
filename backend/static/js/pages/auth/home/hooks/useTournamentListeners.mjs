@@ -89,14 +89,14 @@ export function useTournamentListeners(page) {
 
     players_container.clear();
     players_container.children(
-        tournament.players.flatMap((p, index) => {
-          const elements = [new Component("b", { textContent: p.email })];
-          if (index < tournament.players.length - 1) {
-            elements.push(document.createTextNode(" "));
-          }
-          return elements;
-        }),
-      );
+      tournament.players.flatMap((p, index) => {
+        const elements = [new Component("b", { textContent: p.email })];
+        if (index < tournament.players.length - 1) {
+          elements.push(document.createTextNode(" "));
+        }
+        return elements;
+      }),
+    );
 
     reject.button.element.onclick = async () => {
       reject.setLoading(true);
@@ -120,7 +120,6 @@ export function useTournamentListeners(page) {
     );
 
     if (tournament_in_progress_modal) {
-      console.log("show progres modal");
       tournament_in_progress_modal.show();
     }
   }
@@ -155,19 +154,21 @@ export function useTournamentListeners(page) {
     ),
   );
 
-  // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
-  if (session.player.pendencies) {
-    if (session.player.pendencies.tournament_to_accept) {
-      TournamentService.getTournament().then(onTournamentConfirmation);
+  try {
+    // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
+    if (session.player.pendencies) {
+      if (session.player.pendencies.tournament_to_accept) {
+        TournamentService.getTournament().then(onTournamentConfirmation);
+      }
+      if (session.player.pendencies.tournament_to_await) {
+        onTournamentAwaiting();
+      }
+      if (
+        session.player.pendencies.tournament_in_progress &&
+        !session.player.pendencies.match_to_accept
+      ) {
+        onTournamentInProgress();
+      }
     }
-    if (session.player.pendencies.tournament_to_await) {
-      onTournamentAwaiting();
-    }
-    if (
-      session.player.pendencies.tournament_in_progress &&
-      !session.player.pendencies.match_to_accept
-    ) {
-      onTournamentInProgress();
-    }
-  }
+  } catch {}
 }

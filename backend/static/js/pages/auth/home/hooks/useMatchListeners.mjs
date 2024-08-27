@@ -85,36 +85,36 @@ export function useMatchListeners(page) {
 
     players_container.clear();
     players_container.children(
-        match.players.flatMap((p, index) => {
-          const elements = [new Component("b", { textContent: p.email })];
-          if (index < match.players.length - 1) {
-            elements.push(document.createTextNode(" "));
-          }
-          return elements;
-        }),
-      );
+      match.players.flatMap((p, index) => {
+        const elements = [new Component("b", { textContent: p.email })];
+        if (index < match.players.length - 1) {
+          elements.push(document.createTextNode(" "));
+        }
+        return elements;
+      }),
+    );
 
-    rejectButton.onclick = async () => {
-      rejectButton.disabled = true;
+    rejectButton.button.element.onclick = async () => {
+      rejectButton.setLoading(true);
       try {
         await MatchService.rejectMatch();
         matchConfirmationModal.hide();
       } catch (error) {
         console.error("Error rejecting match:", error);
       } finally {
-        rejectButton.disabled = false;
+        rejectButton.setLoading(false);
       }
     };
 
-    acceptButton.onclick = async () => {
-      acceptButton.disabled = true;
+    acceptButton.button.element.onclick = async () => {
+      acceptButton.setLoading(true);
       try {
         await MatchService.acceptMatch();
         matchConfirmationModal.hide();
       } catch (error) {
         console.error("Error accepting match:", error);
       } finally {
-        acceptButton.disabled = false;
+        acceptButton.setLoading(false);
       }
     };
 
@@ -147,19 +147,21 @@ export function useMatchListeners(page) {
     ),
   );
 
-  // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
-  if (session.player.pendencies) {
-    if (session.player.pendencies.match_to_play) {
-      // TODO: Handle loading and move it to a proper place
-      MatchService.getMatch().then(onMatchStart);
-    }
+  try {
+    // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
+    if (session.player.pendencies) {
+      if (session.player.pendencies.match_to_play) {
+        // TODO: Handle loading and move it to a proper place
+        MatchService.getMatch().then(onMatchStart);
+      }
 
-    if (session.player.pendencies.match_to_accept) {
-      MatchService.getMatch().then(onMatchConfirmation);
-    }
+      if (session.player.pendencies.match_to_accept) {
+        MatchService.getMatch().then(onMatchConfirmation);
+      }
 
-    if (session.player.pendencies.match_to_await) {
-      onMatchAwaiting();
+      if (session.player.pendencies.match_to_await) {
+        onMatchAwaiting();
+      }
     }
-  }
+  } catch {}
 }
