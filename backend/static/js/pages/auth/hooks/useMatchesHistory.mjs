@@ -17,38 +17,38 @@ export function useMatchesHistory(page, { from_player }) {
       container.clear();
       const matches_components = matches.map((match) => {
         const hasWonMatch = from_player.id === match.winner?.id;
-          return new Component("div").class("card p-3").children([
-            new Component("card-body").children([
-              new Component("h5", { textContent: match.name })
-                .class("card-title d-flex justify-content-between")
-                .children([
-                  match.winner
-                    ? new Component("span", {
-                        textContent: hasWonMatch ? "Vitória" : "Derrota",
-                      })
-                        .class("p-2 rounded fs-6 text-center")
-                        .styles({ width: "5rem" })
-                        .class(hasWonMatch ? "text-bg-success" : "text-bg-danger")
-                    : undefined,
-                ]),
-              new Component("h6", {
-                textContent: `Vencedor: ${match.winner?.name ?? ""}`,
-              }).class("card-subtitle mb-2 text-body-secondary"),
+        return new Component("div").class("card p-3").children([
+          new Component("card-body").children([
+            new Component("h5", { textContent: match.name })
+              .class("card-title d-flex justify-content-between text-break")
+              .children([
+                match.winner
+                  ? new Component("span", {
+                      textContent: hasWonMatch ? "Vitória" : "Derrota",
+                    })
+                      .class("p-2 rounded fs-6 text-center")
+                      .styles({ width: "5rem" })
+                      .class(hasWonMatch ? "text-bg-success" : "text-bg-danger")
+                  : undefined,
+              ]),
+            new Component("h6", {
+              textContent: `Vencedor: ${match.winner?.name ?? ""}`,
+            }).class("card-subtitle mb-2 text-body-secondary"),
 
-              new Component("div")
-                .class("card-text d-flex flex-column")
-                .children([
-                  new Component("span", {
-                    textContent: `Jogadores: ${match.players.map((p) => p.name).join(" ")}`,
-                  }),
-                  new Component("span", {
-                    textContent: `Data: ${new Date(match.created_at).toLocaleString("pt-br")}`,
-                  }),
-                ]),
-            ]),
-          ]);
+            new Component("div")
+              .class("card-text d-flex flex-column")
+              .children([
+                new Component("span", {
+                  textContent: `Jogadores: ${match.players.map((p) => p.name).join(" ")}`,
+                }),
+                new Component("span", {
+                  textContent: `Data: ${new Date(match.created_at).toLocaleString("pt-br")}`,
+                }),
+              ]),
+          ]),
+        ]);
       });
-      
+
       container.children(matches_components);
     },
   );
