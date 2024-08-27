@@ -10,6 +10,7 @@ from pong.forms.TournamentForms import (
     TournamentRegistrationForm,
 )
 from pong.models import Player, Tournament
+from pong.models.Match import Match
 from pong.resources.TournamentResource import TournamentResource
 
 
@@ -62,6 +63,13 @@ def create(request: HttpRequest) -> HttpResponse:
 
     if not players:
         return http.NotFound({"message": _("Jogadores não encontrados")})
+
+    active_match = Match.query_by_active_match_from(players)
+    active_tournament = Tournament.query_by_active_tournament_from(players)
+    if active_match.exists() or active_tournament.exists():
+        raise ValidationError(
+            {"players_id": [_("Os jogadores selecionados já estão em partidas ativas")]}
+        )
 
     tournament = Tournament(name=name)
     tournament.save()
