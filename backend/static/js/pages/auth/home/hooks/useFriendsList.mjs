@@ -2,6 +2,7 @@ import { PlayerCommunication } from "../../../../communication/player.mjs";
 import { Component } from "../../../../components/component.mjs";
 import { router } from "../../../../index.mjs";
 import { ChatService } from "../../../../services/chat.mjs";
+import { UnprocessableEntityError } from "../../../../services/errors.mjs";
 import { MatchService } from "../../../../services/match.mjs";
 import { PlayerService } from "../../../../services/player.mjs";
 import { session } from "../../../../state/session.mjs";
@@ -39,6 +40,7 @@ export function useFriendsList(page) {
           <t-button id="challenge-button" disabled="${friend.activity_status === "OFFLINE"}"
           >Desafiar</t-button>
         </div>
+        <t-errors id="challenge-error"></t-errors>
       `;
 
       li.element.querySelector("span").textContent =
@@ -49,6 +51,7 @@ export function useFriendsList(page) {
         "#toggle-block-button",
       );
       const t_button_challenge = li.element.querySelector("#challenge-button");
+      const challenge_errors = li.element.querySelector("#challenge-error");
 
       t_button_profile.button.addEventListener("click", () => {
         router.navigate("/auth/player/profile?player=" + friend.id);
@@ -87,10 +90,21 @@ export function useFriendsList(page) {
 
       t_button_challenge.button.addEventListener("click", async (event) => {
         t_button_challenge.setLoading(true);
-        await MatchService.createMatch({
-          players_id: [session.player.id, friend.id],
-        });
-        t_button_challenge.setLoading(false);
+
+        challenge_errors.clearErrors()
+        try {
+          await MatchService.createMatch({
+            players_id: [session.player.id, friend.id],
+          });
+        } catch (error) {
+          if (error instanceof UnprocessableEntityError) {
+            challenge_errors.addErrors(error.data?.error?.players_id)
+          }
+        }
+        finally {
+          t_button_challenge.setLoading(false);
+        }
+
       });
 
       container.append(li.element);
