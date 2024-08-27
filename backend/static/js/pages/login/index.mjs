@@ -7,12 +7,12 @@ import { session } from "../../state/session.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Login = () => {
-  const page = new Component("div").class("container mx-auto");
+  const page = new Component("div").class("container-lg mx-auto");
 
   page.element.innerHTML = `
     <t-navbar></t-navbar>
-    <div class="container mx-auto mt-3 border border-secondary p-5 rounded rounded-3">
-    <div class="top-image mt-3">
+    <div class="mx-auto mt-3 border border-secondary p-5 rounded rounded-3">
+      <div class="top-image mt-3">
             <img src="/media/default/front/banner.jpg" alt="Banner" class="rounded rounded-5 w-50">
         </div>
       <form id="login-form" class="d-flex flex-column gap-3">

@@ -12,7 +12,7 @@ import { useTournamentListeners } from "../hooks/useTournamentListeners.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Profile = () => {
-  const page = new Component("div").class("container mx-auto");
+  const page = new Component("div").class("container-lg mx-auto");
 
   page.element.innerHTML = `
   <t-navbar></t-navbar>

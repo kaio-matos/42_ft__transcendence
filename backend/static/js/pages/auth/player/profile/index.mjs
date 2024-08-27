@@ -14,7 +14,7 @@ export const PlayerProfile = ({ params }) => {
     return NotFound({ params });
   }
 
-  const page = new Component("div").class("container mx-auto");
+  const page = new Component("div").class("container-lg mx-auto");
 
   page.element.innerHTML = `
     <t-loading loading="true">

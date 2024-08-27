@@ -16,7 +16,7 @@ export class Navbar extends HTMLElement {
     const isAuthenticated = !!session.player;
     const navbarContent = `
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark border border-secondary rounded rounded-3">
-                <div class="container">
+                <div class="container-lg">
                     <t-button to="${isAuthenticated ? "/auth/" : "/"}" theme="dark" btn-class="navbar-brand">Transcendence</t-button>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
@@ -69,4 +69,3 @@ export class Navbar extends HTMLElement {
     }
   }
 }
-

@@ -13,12 +13,12 @@ import { useTournamentListeners } from "../hooks/useTournamentListeners.mjs";
 /** @type {import("../../router/router.mjs").Page} */
 export const Home = () => {
   const page = new Component("div")
-    .class("container mx-auto")
+    .class("container-lg mx-auto")
     .styles({ maxHeight: "80vh" });
 
   page.element.innerHTML = `
   <t-navbar></t-navbar>
-  <div class="container mt-2 row ">
+  <div class="mt-2 row">
     <t-chat class="col-8"></t-chat>
     <div class="d-flex flex-column border border-secondary p-2 rounded col-4">
       <div class="d-flex gap-1 mb-2">
