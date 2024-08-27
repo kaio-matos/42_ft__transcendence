@@ -100,7 +100,13 @@ def create(request: HttpRequest) -> HttpResponse:
     if form.data.get("type") == Match.Type.MULTIPLAYER_LOCAL.value:
         match = Match(name="Partida de Pong", max=1)
     else:
+        if len(players) != 2 and len(players) != 4:
+            raise ValidationError(
+                {"players_id": [_("O número de jogadores deve ser 2 ou 4")]}
+            )
+
         match = Match(name="Partida de Pong")
+
     if form.data.get("type"):
         match.type = form.data.get("type")
     match.save()

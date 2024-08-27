@@ -8,9 +8,18 @@ from django.utils.translation import gettext as _
 
 class ArrayUUIDsField(forms.Field):
 
-    def __init__(self, *args, min=1, max: None | int = None, is_even=False, **kwargs):
+    def __init__(
+        self,
+        *args,
+        min=1,
+        exact: None | int = None,
+        max: None | int = None,
+        is_even=False,
+        **kwargs
+    ):
         self.min = min
         self.max = max
+        self.exact = exact
         self.is_even = is_even
 
         super().__init__(*args, **kwargs)
@@ -21,14 +30,21 @@ class ArrayUUIDsField(forms.Field):
         if not isinstance(ids, collections.abc.Sequence):
             raise ValidationError(_("Este campo deve ser uma lista"), code="array")
 
-        if self.min and len(ids) < self.min:
+        if self.exact and len(ids) != self.exact:
             raise ValidationError(
-                _("Esta lista deve ser maior ou igual à " + str(self.min)), code="min"
+                _("Esta lista deve ser igual à " + str(self.exact)), code="exact"
             )
-        if self.max and len(ids) > self.max:
-            raise ValidationError(
-                _("Esta lista deve ser menor ou igual à " + str(self.max)), code="max"
-            )
+        else:
+            if self.min and len(ids) < self.min:
+                raise ValidationError(
+                    _("Esta lista deve ser maior ou igual à " + str(self.min)),
+                    code="min",
+                )
+            if self.max and len(ids) > self.max:
+                raise ValidationError(
+                    _("Esta lista deve ser menor ou igual à " + str(self.max)),
+                    code="max",
+                )
 
         if self.is_even and (len(ids) % 2 != 0):
             raise ValidationError(_("Esta lista deve ser par"), code="is_even")

@@ -49,7 +49,9 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
 
     @staticmethod
     def query_by_player(players):
-        return Tournament.objects.filter(players__in=players).exclude(status=Tournament.Status.CANCELLED)
+        return Tournament.objects.filter(players__in=players).exclude(
+            status=Tournament.Status.CANCELLED
+        )
 
     @staticmethod
     def query_by_match(match: Match):
@@ -140,11 +142,8 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
 
         matches_n = players_n // 2
 
-        if matches_n == 1:
-            return
-
-        if matches_n % 2 != 0:
-            raise ValueError("Number of players should be multiple of 4")
+        if players_n != 4:
+            raise ValueError(_("Número de jogadores deve ser 4"))
 
         def generate_children(match: Match, n: int):
             if n <= 0:

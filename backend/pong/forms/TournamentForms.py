@@ -10,4 +10,4 @@ class TournamentGetFilterForm(forms.Form):
 
 class TournamentRegistrationForm(forms.Form):
     name = forms.CharField(max_length=100)
-    players_id = ArrayUUIDsField(min=4, is_even=True)
+    players_id = ArrayUUIDsField(exact=4)
