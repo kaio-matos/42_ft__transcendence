@@ -83,8 +83,8 @@ class Match(PlayersAcceptRejectMixin, TimestampMixin):
 
     @staticmethod
     def query_by_player(players):
-        # Retorna todas as partidas que incluem os jogadores especificados
-        return Match.objects.filter(players__in=players)
+        # Retorna todas as partidas que incluem os jogadores especificados (exceto partidas canceladas)
+        return Match.objects.filter(players__in=players).exclude(status=Match.Status.CANCELLED)
 
     @staticmethod
     def query_by_awaiting():
