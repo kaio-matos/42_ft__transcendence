@@ -50,8 +50,8 @@ class MatchCommunicationConsumer(JsonWebsocketConsumer):
                     return
 
                 def on_game_end():
-                    # TODO:
-                    # del games[self.match_group_id]
+                    global games
+                    del games[self.match_group_id]
 
                     tournament = Tournament.query_by_match(
                         self.match.get_root()
