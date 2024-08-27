@@ -76,13 +76,7 @@ def matchmaking(request: HttpRequest) -> HttpResponse:
     )
     active_match = Match.query_by_active_match_from([player, challenged_player])
     if active_tournament.exists() or active_match.exists():
-        raise ValidationError(
-            {
-                "players_id": [
-                    _(f"Os jogadores selecionados já estão em partidas ativas")
-                ]
-            }
-        )
+        raise ValueError(_(f"Os jogadores selecionados já estão em partidas ativas"))
 
     match = Match(name="Partida de Pong")
     match.save()
