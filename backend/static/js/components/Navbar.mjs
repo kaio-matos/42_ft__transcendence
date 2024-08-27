@@ -3,77 +3,70 @@ import { router } from "../index.mjs";
 import { session } from "../state/session.mjs";
 
 export class Navbar extends HTMLElement {
+  constructor() {
+    super();
+    this.container = new Component("nav", {
+      class: "container mx-auto",
+    });
 
-    constructor() {
-        super();
-        this.container = new Component("nav", {
-            class: "container mx-auto",
-        });
+    this.renderNavbar();
+  }
 
-        this.renderNavbar();
-    }
-
-    renderNavbar() {
-        const isAuthenticated = !!session.player;
-        const navbarContent = `
+  renderNavbar() {
+    const isAuthenticated = !!session.player;
+    const navbarContent = `
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark border border-secondary rounded rounded-3">
                 <div class="container">
-                    <t-button to="${isAuthenticated ? "/auth/" :"/"}" theme="dark" btn-class="navbar-brand">Transcendence</t-button>
+                    <t-button to="${isAuthenticated ? "/auth/" : "/"}" theme="dark" btn-class="navbar-brand">Transcendence</t-button>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarNav">
                         <ul class="navbar-nav ms-auto">
-                            ${isAuthenticated ? `
+                            ${
+                              isAuthenticated
+                                ? `
                                 <li class="nav-item">
                                     <t-button to="/auth/profile" theme="dark" btn-class="nav-link px-3">Perfil</t-button>
                                 </li>
-                            ` : `
+                            `
+                                : `
                                 <li class="nav-item">
                                     <t-button to="/login" theme="dark" btn-class="nav-link px-3">Login</t-button>
                                 </li>
                                 <li class="nav-item">
                                     <t-button to="/register" theme="dark" btn-class="nav-link px-3">Registrar</t-button>
                                 </li>
-                            `}
+                            `
+                            }
                         </ul>
                     </div>
                 </div>
             </nav>
         `;
 
-        this.container.element.innerHTML = navbarContent;
+    this.container.element.innerHTML = navbarContent;
+  }
+
+  connectedCallback() {
+    const shadow = this.shadowRoot || this.attachShadow({ mode: "open" });
+    shadow.innerHTML = "<style>:host { display: block; }</style>";
+    attachBootstrap(shadow);
+
+    shadow.appendChild(this.container.element);
+
+    this.setupButtonEvents(shadow);
+  }
+
+  setupButtonEvents(shadow) {
+    const toggler = shadow.querySelector(".navbar-toggler");
+    const collapse = shadow.querySelector("#navbarNav");
+
+    if (toggler && collapse) {
+      toggler.addEventListener("click", () => {
+        collapse.classList.toggle("show");
+      });
     }
-
-    connectedCallback() {
-        const shadow = this.shadowRoot || this.attachShadow({ mode: "open" });
-        shadow.innerHTML = "<style>:host { display: block; }</style>";
-        attachBootstrap(shadow);
-
-        shadow.appendChild(this.container.element);
- 
-        this.setupButtonEvents(shadow);
-    }
-
-    setupButtonEvents(shadow) {
-        const buttons = shadow.querySelectorAll('t-button');
-        buttons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                event.preventDefault();
-                const route = button.getAttribute('to');
-                if (route && window.location.pathname !== route) {
-                    router.navigate(route);
-                }
-            });
-        });
-
-        const toggler = shadow.querySelector('.navbar-toggler');
-        const collapse = shadow.querySelector('#navbarNav');
-
-        if (toggler && collapse) {
-            toggler.addEventListener('click', () => {
-                collapse.classList.toggle('show');
-            });
-        }
-    }
+  }
 }
+

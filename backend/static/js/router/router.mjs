@@ -63,7 +63,6 @@ export class Router extends EventBus {
   navigate(path, state) {
     if (window.location.pathname !== path) {
       history.pushState(state, "", path);
-      this.render();
     }
   }
 
