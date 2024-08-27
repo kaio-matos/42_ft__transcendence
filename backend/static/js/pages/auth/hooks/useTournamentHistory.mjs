@@ -19,7 +19,6 @@ export function useTournamentHistory(page, { from_player }) {
       container.clear();
       const tournaments_components = tournaments.map((tournament) => {
         const hasWonTournament = from_player.id === tournament.champion?.id;
-        if (tournament.status !== "CANCELLED") {
           return new Component("div").class("card p-3").children([
             new Component("card-body").children([
               new Component("h5", { textContent: tournament.name })
@@ -49,7 +48,6 @@ export function useTournamentHistory(page, { from_player }) {
                 ]),
             ]),
           ]);
-        }
       });
       container.children(tournaments_components);
     },

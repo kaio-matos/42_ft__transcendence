@@ -49,7 +49,7 @@ class Tournament(PlayersAcceptRejectMixin, TimestampMixin):
 
     @staticmethod
     def query_by_player(players):
-        return Tournament.objects.filter(players__in=players)
+        return Tournament.objects.filter(players__in=players).exclude(status=Tournament.Status.CANCELLED)
 
     @staticmethod
     def query_by_match(match: Match):

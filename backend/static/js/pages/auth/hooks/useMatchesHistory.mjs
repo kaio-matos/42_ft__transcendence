@@ -17,7 +17,6 @@ export function useMatchesHistory(page, { from_player }) {
       container.clear();
       const matches_components = matches.map((match) => {
         const hasWonMatch = from_player.id === match.winner?.id;
-        if (match.status !== "CANCELLED") {
           return new Component("div").class("card p-3").children([
             new Component("card-body").children([
               new Component("h5", { textContent: match.name })
@@ -48,7 +47,6 @@ export function useMatchesHistory(page, { from_player }) {
                 ]),
             ]),
           ]);
-        }
       });
       
       container.children(matches_components);
