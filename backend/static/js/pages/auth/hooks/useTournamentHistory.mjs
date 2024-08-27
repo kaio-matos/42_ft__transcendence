@@ -19,35 +19,35 @@ export function useTournamentHistory(page, { from_player }) {
       container.clear();
       const tournaments_components = tournaments.map((tournament) => {
         const hasWonTournament = from_player.id === tournament.champion?.id;
-          return new Component("div").class("card p-3").children([
-            new Component("card-body").children([
-              new Component("h5", { textContent: tournament.name })
-                .class("card-title d-flex justify-content-between")
-                .children([
-                  tournament.champion
-                    ? new Component("span", {
-                        textContent: hasWonTournament ? "Vitória" : "Derrota",
-                      })
-                        .class("p-2 rounded fs-6 text-center")
-                        .styles({ width: "5rem" })
-                        .class(
-                          hasWonTournament ? "text-bg-success" : "text-bg-danger",
-                        )
-                    : undefined,
-                ]),
-              new Component("h6", {
-                textContent: `Vencedor: ${tournament.champion?.name ?? ""}`,
-              }).class("card-subtitle mb-2 text-body-secondary"),
+        return new Component("div").class("card p-3").children([
+          new Component("card-body").children([
+            new Component("h5", { textContent: tournament.name })
+              .class("card-title d-flex justify-content-between text-break")
+              .children([
+                tournament.champion
+                  ? new Component("span", {
+                      textContent: hasWonTournament ? "Vitória" : "Derrota",
+                    })
+                      .class("p-2 rounded fs-6 text-center")
+                      .styles({ width: "5rem" })
+                      .class(
+                        hasWonTournament ? "text-bg-success" : "text-bg-danger",
+                      )
+                  : undefined,
+              ]),
+            new Component("h6", {
+              textContent: `Vencedor: ${tournament.champion?.name ?? ""}`,
+            }).class("card-subtitle mb-2 text-body-secondary"),
 
-              new Component("div")
-                .class("card-text d-flex flex-column")
-                .children([
-                  new Component("span", {
-                    textContent: `Data: ${new Date(tournament.created_at).toLocaleString("pt-br")}`,
-                  }),
-                ]),
-            ]),
-          ]);
+            new Component("div")
+              .class("card-text d-flex flex-column")
+              .children([
+                new Component("span", {
+                  textContent: `Data: ${new Date(tournament.created_at).toLocaleString("pt-br")}`,
+                }),
+              ]),
+          ]),
+        ]);
       });
       container.children(tournaments_components);
     },

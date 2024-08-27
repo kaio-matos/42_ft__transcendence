@@ -82,6 +82,12 @@ export class Button extends HTMLElement {
       );
       this.listeners.delete("click_submit");
 
+      this.button.removeEventListener(
+        "click",
+        this.listeners.get("click_navigate"),
+      );
+      this.listeners.delete("click_navigate");
+
       this.listeners.set("click_navigate", () => {
         router.navigate(newValue);
       });
