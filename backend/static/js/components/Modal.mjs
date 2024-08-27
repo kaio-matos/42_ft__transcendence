@@ -7,15 +7,17 @@ export class Modal extends HTMLElement {
   constructor() {
     super();
     this.container = new Component("div")
-      .class("d-flex bg-secondary p-4 rounded flex-column")
+      .class("d-flex p-4 rounded flex-column")
       .styles({
         position: "fixed",
+        background: "#212529",
         top: "50%",
         left: "50%",
         transform: "translate(-50%, -50%)",
         width: "50vw",
         zIndex: 1000,
       });
+
     this.container.element.innerHTML = `
       <div>
         <slot name="header"></slot>
@@ -25,7 +27,7 @@ export class Modal extends HTMLElement {
         <slot name="body"></slot>
       </div>
 
-      <div>
+      <div class="mt-3">
         <slot name="footer"></slot>
       </div>
     `;
@@ -34,11 +36,13 @@ export class Modal extends HTMLElement {
   show() {
     this.classList.add("d-block");
     this.classList.remove("d-none");
+    document.querySelector("#modal-background").style.display = "block";
   }
 
   hide() {
     this.classList.add("d-none");
     this.classList.remove("d-block");
+    document.querySelector("#modal-background").style.display = "none";
   }
 
   connectedCallback() {
