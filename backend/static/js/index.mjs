@@ -39,7 +39,12 @@ async function render() {
 }
 
 function validateRoute() {
-  if (!router.current?.path?.includes?.("auth")) return;
+  if (!router.current?.path?.includes?.("auth")) {
+    if (session.player) {
+      router.navigate("/auth");
+    }
+    return;
+  }
 
   if (!session.player) {
     router.navigate("/not-found");
