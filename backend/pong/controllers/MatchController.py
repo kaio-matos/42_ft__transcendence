@@ -71,6 +71,19 @@ def matchmaking(request: HttpRequest) -> HttpResponse:
                 {"message": _("Não há nenhum jogador disponível para a partida")}
             )
 
+    active_tournament = Tournament.query_by_active_tournament_from(
+        [player, challenged_player]
+    )
+    active_match = Match.query_by_active_match_from([player, challenged_player])
+    if active_tournament.exists() or active_match.exists():
+        raise ValidationError(
+            {
+                "players_id": [
+                    _(f"Os jogadores selecionados já estão em partidas ativas")
+                ]
+            }
+        )
+
     match = Match(name="Partida de Pong")
     match.save()
     match.players.add(player)
