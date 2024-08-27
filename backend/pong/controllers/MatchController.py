@@ -97,12 +97,13 @@ def create(request: HttpRequest) -> HttpResponse:
     if not players:
         return http.NotFound({"message": _("Jogadores não encontrados")})
 
-    for player in players:
-        active_match = Match.query_by_active_match_from([player]).first()
-        if active_match:
-            raise ValidationError(
-                {"players_id": [_(f"O jogador {player.name} já está em uma partida")]}
-            )
+    active_match = Match.query_by_active_match_from(players)
+    if active_match.exists():
+        players_in_matches = active_match.values_list('players__name', flat=True).distinct()
+        players_str = ", ".join(players_in_matches)
+        raise ValidationError(
+        {"players_id": [_(f"Os seguintes jogadores já estão em partidas ativas: {players_str}")]}
+    )
 
     if form.data.get("type") == Match.Type.MULTIPLAYER_LOCAL.value:
         match = Match(name="Partida de Pong", max=1)
