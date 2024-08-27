@@ -65,12 +65,13 @@ function onKeysPressed(options) {
       options.onKeyPressRight();
     }
 
-    window.requestAnimationFrame(onKeyPress);
+    return window.requestAnimationFrame(onKeyPress);
   };
-  onKeyPress();
+  const animationFrame = onKeyPress();
   return () => {
     document.removeEventListener("keyup", handleKeyUp);
     document.removeEventListener("keydown", handleKeyDown);
+    window.cancelAnimationFrame(animationFrame);
   };
 }
 
