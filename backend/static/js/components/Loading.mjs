@@ -6,7 +6,7 @@ export class Loading extends HTMLElement {
   constructor() {
     super();
     this.container = new Component("div", {
-      textContent: "Carregando...", // TODO: do a better loading feedback
+      textContent: "Carregando...",
     });
   }
 

@@ -27,7 +27,6 @@ export const router = new Router(
 );
 
 async function render() {
-  // TODO: Show some type of loading for this update
   if (session.player) {
     try {
       session.player = await PlayerService.getPlayer({

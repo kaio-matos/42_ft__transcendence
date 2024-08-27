@@ -26,3 +26,24 @@
 	margin-bottom: 20px;
 }
 
+
+.info-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.avatar-container {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.avatar {
+	max-height: 200px;
+	max-width: 200px;
+	object-fit: cover;
+	border-radius: 50%;
+	overflow: hidden;
+	aspect-ratio: 1 / 1;
+}

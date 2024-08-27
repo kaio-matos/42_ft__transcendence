@@ -6,9 +6,9 @@ import { useFriendsList } from "./hooks/useFriendsList.mjs";
 import { useAddFriend } from "./hooks/useAddFriend.mjs";
 import { useCreateTournament } from "./hooks/useCreateTournament.mjs";
 import { useFindMatch } from "./hooks/useFindMatch.mjs";
-import { useMatchListeners } from "./hooks/useMatchListeners.mjs";
-import { useTournamentListeners } from "./hooks/useTournamentListeners.mjs";
 import { useCreateMatch } from "./hooks/useCreateMatch.mjs";
+import { useMatchListeners } from "../hooks/useMatchListeners.mjs";
+import { useTournamentListeners } from "../hooks/useTournamentListeners.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Home = () => {
@@ -82,88 +82,6 @@ export const Home = () => {
         </div>
       </div>
 
-      <div id="match-confirmation-modal" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Partida</h5>
-            </div>
-            <div class="modal-body">
-              <p>Você aceita a partida?</p>
-
-              <span class="d-block">Jogadores:</span>
-              <div id="match-confirmation-modal-players"></div>
-            </div>
-            <div class="modal-footer">
-              <t-button id="match-confirmation-modal-reject-button" theme="danger">Rejeitar</t-button>
-              <t-button id="match-confirmation-modal-accept-button">Aceitar</t-button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="tournament-in-progress-modal" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Torneio</h5>
-            </div>
-            <div class="modal-body">
-              <p>Por favor aguarde pelo término das outras partidas.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      <div id="match-awaiting-modal" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Partida</h5>
-            </div>
-            <div class="modal-body">
-              <p>Por favor aguarde pela confirmação dos outros participantes</p>
-              <p>Você será redirecionado automaticamente assim que todos os participantes aceitarem</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="tournament-confirmation-modal" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Torneio</h5>
-            </div>
-            <div class="modal-body">
-              <p>Você aceita o torneio?</p>
-
-              <span class="d-block">Jogadores:</span>
-              <div id="tournament-confirmation-modal-players"></div>
-            </div>
-            <div class="modal-footer">
-              <t-button id="tournament-confirmation-modal-reject-button" theme="danger">Rejeitar</t-button>
-              <t-button id="tournament-confirmation-modal-accept-button">Aceitar</t-button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="tournament-awaiting-modal" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Torneio</h5>
-            </div>
-            <div class="modal-body">
-              <p>Por favor aguarde pela confirmação dos outros participantes</p>
-              <p>Você será redirecionado automaticamente assim que todos os participantes aceitarem</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div class="border border-secondary p-2 mt-auto rounded">
         <t-button id="local-match-create-button" class="d-block" btn-class="w-100">Criar Partida Local</t-button>
       </div>
@@ -183,7 +101,7 @@ export const Home = () => {
         <t-errors id="find-match-errors" class="mt-2"></t-errors>
       </div>
     </div>
-    </div>
+  </div>
   `;
 
   const { updateFriendsList } = useFriendsList(page);
@@ -191,8 +109,8 @@ export const Home = () => {
   useCreateMatch(page);
   useCreateTournament(page);
   useFindMatch(page);
-  useMatchListeners(page);
-  useTournamentListeners(page);
+  useMatchListeners();
+  useTournamentListeners();
 
   const t_logout_button = page.element.querySelector("#logout-button");
 

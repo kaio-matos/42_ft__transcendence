@@ -13,7 +13,6 @@ export class PongCanvas extends HTMLElement {
 
   constructor() {
     super();
-    // TODO: Create dynamically sized canvas for better small screen support
     this.#canvas = new Component("canvas");
     this.#canvas.attributes({ width: this.width, height: this.height });
     this.#ctx = this.#canvas.element.getContext("2d");

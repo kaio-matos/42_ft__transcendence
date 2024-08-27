@@ -2,7 +2,9 @@ import { Component } from "../../../../components/component.mjs";
 import { PlayerService } from "../../../../services/player.mjs";
 import { NotFound } from "../../../not-found/index.mjs";
 import { useMatchesHistory } from "../../hooks/useMatchesHistory.mjs";
+import { useMatchListeners } from "../../hooks/useMatchListeners.mjs";
 import { useTournamentHistory } from "../../hooks/useTournamentHistory.mjs";
+import { useTournamentListeners } from "../../hooks/useTournamentListeners.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const PlayerProfile = ({ params }) => {
@@ -52,31 +54,8 @@ export const PlayerProfile = ({ params }) => {
   </div>
 `;
 
-const style = document.createElement('style');
-style.innerHTML = `
-  .info-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .avatar-container {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  }
-
-  .avatar {
-    max-height: 200px;
-    max-width: 200px;
-    object-fit: cover;
-    border-radius: 50%;
-    overflow: hidden;
-    aspect-ratio: 1 / 1;
-  }
-`;
-
-document.head.appendChild(style);
+  useMatchListeners();
+  useTournamentListeners();
 
   const t_loading = page.element.querySelector("t-loading");
   const name_placeholder = page.element.querySelector("#name-placeholder");

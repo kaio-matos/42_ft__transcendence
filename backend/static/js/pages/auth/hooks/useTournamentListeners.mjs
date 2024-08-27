@@ -1,13 +1,10 @@
-import { PlayerCommunication } from "../../../../communication/player.mjs";
-import { Component } from "../../../../components/component.mjs";
-import { router } from "../../../../index.mjs";
-import { TournamentService } from "../../../../services/tournament.mjs";
-import { session } from "../../../../state/session.mjs";
+import { PlayerCommunication } from "../../../communication/player.mjs";
+import { Component } from "../../../components/component.mjs";
+import { router } from "../../../index.mjs";
+import { TournamentService } from "../../../services/tournament.mjs";
+import { session } from "../../../state/session.mjs";
 
-/**
- * @param {Component} page
- */
-export function useTournamentListeners(page) {
+export function useTournamentListeners() {
   function removeModalBackdrop() {
     const backdrops = document.querySelectorAll(".modal-backdrop");
     backdrops.forEach((backdrop) => {
@@ -19,7 +16,7 @@ export function useTournamentListeners(page) {
     containerSelector,
     options = { backdrop: "static", focus: false },
   ) {
-    const container = page.element.querySelector(containerSelector);
+    const container = document.querySelector(containerSelector);
     if (!container) {
       return null;
     }
@@ -41,7 +38,7 @@ export function useTournamentListeners(page) {
       "#tournament-in-progress-modal",
     );
 
-    const modal_container = page.element.querySelector(
+    const modal_container = document.querySelector(
       "#tournament-in-progress-modal",
     );
     modal_container.style.display = "none";
@@ -72,9 +69,7 @@ export function useTournamentListeners(page) {
       return;
     }
 
-    const container = page.element.querySelector(
-      "#tournament-confirmation-modal",
-    );
+    const container = document.querySelector("#tournament-confirmation-modal");
 
     const reject = container.querySelector(
       "#tournament-confirmation-modal-reject-button",
@@ -155,7 +150,6 @@ export function useTournamentListeners(page) {
   );
 
   try {
-    // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
     if (session.player.pendencies) {
       if (session.player.pendencies.tournament_to_accept) {
         TournamentService.getTournament().then(onTournamentConfirmation);

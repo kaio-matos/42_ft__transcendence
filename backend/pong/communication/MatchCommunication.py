@@ -6,7 +6,6 @@ from ft_transcendence.http import ws
 from pong.game.game import Game, GameDirection
 from pong.models import Player, Match, Tournament
 
-# TODO: We MUST find some way to do this without creating this variable, and probably without saving into the postgresql
 games: dict[str, Game] = {}
 
 

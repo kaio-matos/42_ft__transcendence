@@ -6,7 +6,9 @@ import {
 import { PlayerService } from "../../../services/player.mjs";
 import { session } from "../../../state/session.mjs";
 import { useMatchesHistory } from "../hooks/useMatchesHistory.mjs";
+import { useMatchListeners } from "../hooks/useMatchListeners.mjs";
 import { useTournamentHistory } from "../hooks/useTournamentHistory.mjs";
+import { useTournamentListeners } from "../hooks/useTournamentListeners.mjs";
 
 /** @type {import("../../router/router.mjs").Page} */
 export const Profile = () => {
@@ -79,26 +81,8 @@ export const Profile = () => {
   </div>
 `;
 
-const style = document.createElement('style');
-style.innerHTML = `
-  .avatar-container {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  }
-
-  .avatar {
-    max-height: 200px;
-    max-width: 200px;
-    object-fit: cover;
-    border-radius: 50%;
-    overflow: hidden;
-    aspect-ratio: 1 / 1;
-  }
-`;
-
-document.head.appendChild(style);
-
+  useMatchListeners();
+  useTournamentListeners();
 
   useTournamentHistory(page, { from_player: session.player });
   useMatchesHistory(page, { from_player: session.player });

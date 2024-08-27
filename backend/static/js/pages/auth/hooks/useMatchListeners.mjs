@@ -1,13 +1,10 @@
-import { PlayerCommunication } from "../../../../communication/player.mjs";
-import { Component } from "../../../../components/component.mjs";
-import { router } from "../../../../index.mjs";
-import { MatchService } from "../../../../services/match.mjs";
-import { session } from "../../../../state/session.mjs";
+import { PlayerCommunication } from "../../../communication/player.mjs";
+import { Component } from "../../../components/component.mjs";
+import { router } from "../../../index.mjs";
+import { MatchService } from "../../../services/match.mjs";
+import { session } from "../../../state/session.mjs";
 
-/**
- * @param {Component} page
- */
-export function useMatchListeners(page) {
+export function useMatchListeners() {
   function removeModalBackdrop() {
     const backdrops = document.querySelectorAll(".modal-backdrop");
     backdrops.forEach((backdrop) => {
@@ -148,10 +145,8 @@ export function useMatchListeners(page) {
   );
 
   try {
-    // TODO: If we keep this way if the user is on the profile page he cant be redirected from there
     if (session.player.pendencies) {
       if (session.player.pendencies.match_to_play) {
-        // TODO: Handle loading and move it to a proper place
         MatchService.getMatch().then(onMatchStart);
       }
 

@@ -65,7 +65,6 @@ def matchmaking(request: HttpRequest) -> HttpResponse:
             .filter(activity_status=Player.ActivityStatus.ONLINE)
             .first()
         )
-        # TODO: If currently there is no one to accept the match, should we wait for someone to show up or just return that there is no player?
         if not challenged_player:
             return http.NotFound(
                 {"message": _("Não há nenhum jogador disponível para a partida")}
