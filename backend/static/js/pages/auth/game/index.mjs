@@ -5,7 +5,6 @@ import { CanvasBall } from "../../../components/PongCanvas/canvas-components/Can
 import { CanvasPaddle } from "../../../components/PongCanvas/canvas-components/CanvasPaddle.mjs";
 import { PongCanvas } from "../../../components/PongCanvas/PongCanvas.mjs";
 import { router } from "../../../index.mjs";
-import { MatchType } from "../../../services/match.mjs";
 import { session } from "../../../state/session.mjs";
 import { NotFound } from "../../not-found/index.mjs";
 
@@ -35,17 +34,17 @@ import { NotFound } from "../../not-found/index.mjs";
  * @param {PlayerControlKeys & { onKeyPressUp: () => void, onKeyPressDown: () => void, onKeyPressLeft: () => void, onKeyPressRight: () => void }} options
  */
 function onKeysPressed(options) {
-  let pressedKey = "";
+  let pressedKeys = {};
   const keys = [options.up, options.down, options.left, options.right];
 
   function handleKeyDown(event) {
     if (keys.includes(event.key)) {
-      pressedKey = event.key;
+      pressedKeys[event.key] = true;
     }
   }
   function handleKeyUp(event) {
     if (keys.includes(event.key)) {
-      pressedKey = "";
+      delete pressedKeys[event.key];
     }
   }
 
@@ -53,15 +52,19 @@ function onKeysPressed(options) {
   document.addEventListener("keyup", handleKeyUp);
 
   const onKeyPress = () => {
-    if (pressedKey == options.up) {
-      options?.onKeyPressUp();
-    } else if (pressedKey == options.down) {
-      options?.onKeyPressDown();
-    } else if (pressedKey == options.left) {
-      options?.onKeyPressLeft();
-    } else if (pressedKey == options.right) {
-      options?.onKeyPressRight();
+    if (pressedKeys[options.up]) {
+      options.onKeyPressUp();
     }
+    if (pressedKeys[options.down]) {
+      options.onKeyPressDown();
+    }
+    if (pressedKeys[options.left]) {
+      options.onKeyPressLeft();
+    }
+    if (pressedKeys[options.right]) {
+      options.onKeyPressRight();
+    }
+
     window.requestAnimationFrame(onKeyPress);
   };
   onKeyPress();
@@ -145,7 +148,7 @@ export const Game = ({ params }) => {
   MatchCommunication.Communication.setPath("/ws/match/" + match_id);
   MatchCommunication.Communication.connect(() => {
     MatchCommunication.Communication.send(
-      MatchCommunication.Commands.MATCH_JOIN, // We tell the server that we want to begin the match
+      MatchCommunication.Commands.MATCH_JOIN,
       undefined,
     );
   });
@@ -154,7 +157,7 @@ export const Game = ({ params }) => {
   };
 
   MatchCommunication.Communication.addEventListener(
-    MatchCommunication.Events.MATCH_START, // and then as soon as the server tell us that we can start we setup the canvas and stop loading
+    MatchCommunication.Events.MATCH_START,
     onMatchStart,
   );
 
@@ -239,7 +242,7 @@ export const Game = ({ params }) => {
           left: "a",
           right: "d",
         });
-      else if ((p.id = session.player.id))
+      else if (p.id === session.player.id)
         setupKeyboardListenersFor(p, {
           up: "ArrowUp",
           down: "ArrowDown",
