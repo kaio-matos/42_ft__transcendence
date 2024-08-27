@@ -8,6 +8,7 @@ from ft_transcendence.http import http
 from ft_transcendence.http import ws
 from pong.forms.MatchForms import MatchGetFilterForm, MatchRegistrationForm
 from pong.models import Player, Match
+from pong.models.Tournament import Tournament
 from pong.resources.MatchResource import MatchResource
 
 
@@ -96,13 +97,16 @@ def create(request: HttpRequest) -> HttpResponse:
     if not players:
         return http.NotFound({"message": _("Jogadores não encontrados")})
 
+    active_tournament = Tournament.query_by_active_tournament_from(players)
     active_match = Match.query_by_active_match_from(players)
-    if active_match.exists():
-        players_in_matches = active_match.values_list('players__name', flat=True).distinct()
-        players_str = ", ".join(players_in_matches)
+    if active_tournament.exists() or active_match.exists():
         raise ValidationError(
-        {"players_id": [_(f"Os seguintes jogadores já estão em partidas ativas: {players_str}")]}
-    )
+            {
+                "players_id": [
+                    _(f"Os jogadores selecionados já estão em partidas ativas")
+                ]
+            }
+        )
 
     if form.data.get("type") == Match.Type.MULTIPLAYER_LOCAL.value:
         match = Match(name="Partida de Pong", max=1)
