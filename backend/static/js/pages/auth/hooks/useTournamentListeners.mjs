@@ -20,7 +20,7 @@ export function useTournamentListeners() {
     if (!container) {
       return null;
     }
-    return bootstrap.Modal.getOrCreateInstance(container, options);
+    return container;
   }
 
   function onTournamentAwaiting() {

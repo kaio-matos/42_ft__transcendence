@@ -51,38 +51,46 @@ def matchmaking(request: HttpRequest) -> HttpResponse:
 
     player = typing.cast(Player, request.user)
 
-    # first we try to find someone that its not his friend
-    challenged_player = (
-        player.query_by_not_friends()
-        .filter(activity_status=Player.ActivityStatus.ONLINE)
-        .order_by("?")
-        .first()
-    )
+    # MODIFICAÇÃO: Buscar todos os jogadores online, excluindo o jogador atual
+    all_online_players = Player.objects.filter(
+        activity_status=Player.ActivityStatus.ONLINE
+    ).exclude(id=player.id)
 
-    if not challenged_player:
-        # if there is no one available we try to match him with some friend that is online
-        challenged_player = (
-            player.friends.order_by("?")
-            .filter(activity_status=Player.ActivityStatus.ONLINE)
-            .first()
+    # MODIFICAÇÃO: Filtrar jogadores que não estão em partidas ou torneios ativos
+    available_players = []
+    for potential_opponent in all_online_players:
+        active_tournament = Tournament.query_by_active_tournament_from([player, potential_opponent])
+        active_match = Match.query_by_active_match_from([player, potential_opponent])
+        
+        if not active_tournament.exists() and not active_match.exists():
+            available_players.append(potential_opponent)
+
+    # Se não houver jogadores disponíveis, retornar NotFound
+    if not available_players:
+        return http.NotFound(
+            {"message": _("Não há nenhum jogador disponível para a partida")}
         )
-        if not challenged_player:
-            return http.NotFound(
-                {"message": _("Não há nenhum jogador disponível para a partida")}
-            )
 
-    active_tournament = Tournament.query_by_active_tournament_from(
-        [player, challenged_player]
-    )
-    active_match = Match.query_by_active_match_from([player, challenged_player])
-    if active_tournament.exists() or active_match.exists():
-        raise ValueError(_(f"Os jogadores selecionados já estão em partidas ativas"))
+    # MODIFICAÇÃO: Se houver apenas um jogador disponível, escolhê-lo diretamente
+    if len(available_players) == 1:
+        challenged_player = available_players[0]
+    else:
+        # MODIFICAÇÃO: Separar jogadores em não amigos e amigos
+        non_friend_players = [p for p in available_players if p not in player.friends.all()]
+        friend_players = [p for p in available_players if p in player.friends.all()]
 
+        # Combinar as duas listas, priorizando não amigos
+        potential_opponents = non_friend_players + friend_players
+
+        # Escolher um oponente aleatório
+        import random
+        challenged_player = random.choice(potential_opponents)
+
+    # Criar e iniciar a partida com o oponente escolhido
     match = Match(name="Partida de Pong")
     match.save()
     match.players.add(player)
     match.players.add(challenged_player)
-
     match.begin()
 
     return http.Created(MatchResource(match, player))

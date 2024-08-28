@@ -13,9 +13,9 @@ export function useMatchListeners() {
   }
 
   function closeAllModals() {
-    const openModals = document.querySelectorAll(".modal.show");
+    const openModals = document.querySelectorAll("t-modal");
     openModals.forEach((modalElement) => {
-      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      const modalInstance = modalElement;
       if (modalInstance) {
         modalInstance.hide();
       }
@@ -31,7 +31,7 @@ export function useMatchListeners() {
     if (!container) {
       return null;
     }
-    return bootstrap.Modal.getOrCreateInstance(container, options);
+    return container;
   }
 
   function onMatchStart(match) {

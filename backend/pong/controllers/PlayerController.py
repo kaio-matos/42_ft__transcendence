@@ -125,6 +125,9 @@ def update(request: HttpRequest) -> HttpResponse:
     if not form.is_valid():
         raise ValidationError(form.errors.as_data())
 
+    if Player.objects.filter(name=form.data.get("name")).exists():
+        raise ValidationError({"name": _("Um jogador já possui esse nome")})
+
     player.name = form.data.get("name")
     player.save()
 
