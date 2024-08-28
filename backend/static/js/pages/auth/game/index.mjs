@@ -36,6 +36,7 @@ import { NotFound } from "../../not-found/index.mjs";
 function onKeysPressed(options) {
   let pressedKeys = {};
   const keys = [options.up, options.down, options.left, options.right];
+  let running = true;
 
   function handleKeyDown(event) {
     if (keys.includes(event.key)) {
@@ -52,6 +53,7 @@ function onKeysPressed(options) {
   document.addEventListener("keyup", handleKeyUp);
 
   const onKeyPress = () => {
+    if (!running) return;
     if (pressedKeys[options.up]) {
       options.onKeyPressUp();
     }
@@ -69,6 +71,7 @@ function onKeysPressed(options) {
   };
   const animationFrame = onKeyPress();
   return () => {
+    running = false;
     document.removeEventListener("keyup", handleKeyUp);
     document.removeEventListener("keydown", handleKeyDown);
     window.cancelAnimationFrame(animationFrame);
