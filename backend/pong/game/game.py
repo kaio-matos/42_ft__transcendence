@@ -19,7 +19,7 @@ class Game:
     ball_speed = 1.3
     vertical_paddle_size = {"width": 1, "height": 20}
     horizontal_paddle_size = {"width": 20, "height": 1}
-    max_score = 3
+    max_score = 5
 
     def __init__(self, match: Match, on_game_end: Callable):
         self.cache = (
