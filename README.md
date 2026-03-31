@@ -8,11 +8,11 @@ This is a [42 School](https://42.fr/) project.
 
 | Member   | GitHub                                   |
 | -------- | ---------------------------------------- |
-| jramondo | [@jramondo](https://github.com/jramondo) |
-| kmatos-s | [@kmatos-s](https://github.com/kmatos-s) |
-| macarval | [@macarval](https://github.com/macarval) |
-| matcardo | [@matcardo](https://github.com/matcardo) |
-| thabeck- | [@thabeck-](https://github.com/thabeck-) |
+| jramondo | [@jramondo](https://github.com/JacquesNethow) |
+| kmatos-s | [@kmatos-s](https://github.com/kaio-matos) |
+| macarval | [@macarval](https://github.com/MayaraMCarvalho) |
+| matcardo | [@matcardo](https://github.com/EngMateusCardoso) |
+| thabeck- | [@thabeck-](https://github.com/Thayhabeck) |
 
 ## Tech Stack
 
